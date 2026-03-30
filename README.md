@@ -1,4 +1,4 @@
-# Controle De Medicamentos
+# 💊 Controle De Medicamentos 
 - Software de controle de medicamentos e horários para idosos ou pessoas que necessitam de apoio para rotina de medicação; 
 
 ## 📖 Sobre o projeto
@@ -15,8 +15,9 @@ Este projeto foi desenvolvido como desafio para matéria de Bootcamp da minha fa
 2. **Interface:** CLI; 
 3. **Armazenamento:** SQLite; 
 4. **Testes:** Pytest; 
-5. **Linting:**Flake8 
+5. **Linting:** Flake8 
 
+## 📁 Estrutura do Projeto 
 
 ## 📦 Instalação e Dependências 
 Certifique-se de ter o Python instalado em sua máquina; 
