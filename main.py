@@ -1,10 +1,10 @@
-from database import inicializar_banco 
+from database import inicializar_banco
 
-from medicamentos import ( 
+from medicamentos import (
     cadastrar_medicamento,
-    listar_medicamento_do_dia, 
-    marcar_como_tomado, 
-    listar_todos_medicamentos, 
+    listar_medicamento_do_dia,
+    marcar_como_tomado,
+    listar_todos_medicamentos,
     remover_medicamento
 )
 
@@ -29,53 +29,55 @@ MENU = """
 └──────────────────────────────────────────────────┘
 """
 
-def exibir_banner (): 
+
+def exibir_banner():
     print(BANNER)
 
 
-def exibir_menu(): 
+def exibir_menu():
     print(MENU)
 
-    opcao = input("Escolha uma opção: ").strip() 
-    
-    return opcao 
+    opcao = input("Escolha uma opção: ").strip()
 
-def executar_opcao(opcao: str) -> bool: 
-    if opcao == "1": 
+    return opcao
+
+
+def executar_opcao(opcao: str) -> bool:
+    if opcao == "1":
         print("\n── Cadastrar Medicamento ──")
-    
-    elif opcao == "2": 
+
+    elif opcao == "2":
         print("\n── Medicamentos do Dia ──")
-        listar_medicamento_do_dia() 
+        listar_medicamento_do_dia()
 
-    elif opcao == "4": 
+    elif opcao == "4":
         print("\n── Todos os Medicamentos ──")
-        listar_todos_medicamentos() 
+        listar_todos_medicamentos()
 
-    elif opcao == "5": 
+    elif opcao == "5":
         print("\n── Remover Medicamento ──")
-        remover_medicamento() 
+        remover_medicamento()
 
-    elif opcao == "0": 
+    elif opcao == "0":
         print("\n Encerrando o sistema.")
 
-        return False 
+        return False
 
-    else: 
+    else:
         print("\n Opção inválida! Por favor, escolha uma opção disponível no menu")
 
-    return True 
+    return True
 
 
+def main():
+    inicializar_banco()
+    exibir_banner()
 
-def main(): 
-    inicializar_banco() 
-    exibir_banner() 
-
-    continuar = True 
-    while continuar: 
+    continuar = True
+    while continuar:
         opcao = exibir_menu()
         continuar = executar_opcao(opcao)
 
-if __name__ == "__main__": 
-    main() 
+
+if __name__ == "__main__":
+    main()
