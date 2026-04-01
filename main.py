@@ -2,7 +2,7 @@ from database import inicializar_banco
 
 from medicamentos import (
     cadastrar_medicamento,
-    listar_medicamento_do_dia,
+    listar_medicamentos_do_dia,
     marcar_como_tomado,
     listar_todos_medicamentos,
     remover_medicamento
@@ -45,10 +45,15 @@ def exibir_menu():
 def executar_opcao(opcao: str) -> bool:
     if opcao == "1":
         print("\n── Cadastrar Medicamento ──")
+        cadastrar_medicamento()
 
     elif opcao == "2":
         print("\n── Medicamentos do Dia ──")
-        listar_medicamento_do_dia()
+        listar_medicamentos_do_dia()
+
+    elif opcao == "3":
+        print("\n── Marcar Medicamento como Tomado ──")
+        marcar_como_tomado()
 
     elif opcao == "4":
         print("\n── Todos os Medicamentos ──")
