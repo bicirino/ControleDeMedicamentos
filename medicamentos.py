@@ -32,7 +32,7 @@ def cadastrar_medicamento() -> None:
         return 
     
     conexao = get_conexao() 
-    cursos = conexao.cursor() 
+    cursor = conexao.cursor() 
 
     cursor.execute( 
         "INSERT INTO medicamento (nome, dosagem, horario) VALUES (?, ?, ?)", 

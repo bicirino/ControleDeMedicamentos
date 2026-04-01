@@ -9,7 +9,7 @@ def get_conexao() -> sqlite3.Connection:
 
 def inicializar_banco() -> None: 
     conexao = get_conexao() 
-    cursos = conexao.cursor() 
+    cursor = conexao.cursor() 
 
     cursor.execute ("""
         CREATE TABLE IF NOT EXISTS medicamentos (
