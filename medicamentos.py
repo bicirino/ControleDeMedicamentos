@@ -57,7 +57,6 @@ def cadastrar_medicamento() -> None:
     )
 
     conexao.commit()
-    conexao.close()
 
     print(f"\n✅ Medicamento '{nome}' cadastrado com sucesso!\n")
 
@@ -77,7 +76,6 @@ def listar_medicamentos_do_dia() -> None:
 
     if not medicamentos:
         print("\n📭 Nenhum medicamento cadastrado.\n")
-        conexao.close()
         return
 
     cursor.execute(
@@ -85,7 +83,6 @@ def listar_medicamentos_do_dia() -> None:
         (hoje,),
     )
     ids_tomados = {row["medicamento_id"] for row in cursor.fetchall()}
-    conexao.close()
 
     print(f"\n📅 Medicamentos para hoje ({hoje}):\n")
     print(f"  {'ID':<5} {'Horario':<10} {'Medicamento':<25} "
@@ -114,7 +111,6 @@ def marcar_como_tomado() -> None:
         med_id = int(input("🔢 Informe o ID do medicamento tomado: ").strip())
     except ValueError:
         print("⚠️  ID invalido. Digite apenas numeros.\n")
-        conexao.close()
         return
 
     cursor.execute(
@@ -125,7 +121,6 @@ def marcar_como_tomado() -> None:
 
     if not medicamento:
         print("⚠️  Medicamento nao encontrado ou inativo.\n")
-        conexao.close()
         return
 
     cursor.execute(
@@ -134,8 +129,8 @@ def marcar_como_tomado() -> None:
         (med_id, hoje),
     )
     if cursor.fetchone():
-        print(f"ℹ️  '{medicamento['nome']}' ja foi marcado como tomado hoje.\n")
-        conexao.close()
+        msg = f"ℹ️  '{medicamento['nome']}' ja foi marcado como tomado hoje.\n"
+        print(msg)
         return
 
     cursor.execute(
@@ -145,7 +140,6 @@ def marcar_como_tomado() -> None:
     )
 
     conexao.commit()
-    conexao.close()
 
     print(f"\n✅ '{medicamento['nome']}' marcado como tomado!\n")
 
@@ -160,7 +154,6 @@ def listar_todos_medicamentos() -> None:
         "FROM medicamentos ORDER BY horario"
     )
     medicamentos = cursor.fetchall()
-    conexao.close()
 
     if not medicamentos:
         print("\n📭 Nenhum medicamento cadastrado.\n")
@@ -197,7 +190,6 @@ def remover_medicamento() -> None:
         )
     except ValueError:
         print("⚠️  ID invalido. Digite apenas numeros.\n")
-        conexao.close()
         return
 
     cursor.execute(
@@ -208,7 +200,6 @@ def remover_medicamento() -> None:
 
     if not medicamento:
         print("⚠️  Medicamento nao encontrado ou ja esta inativo.\n")
-        conexao.close()
         return
 
     confirmacao = input(
@@ -217,7 +208,6 @@ def remover_medicamento() -> None:
 
     if confirmacao != "s":
         print("❌ Remocao cancelada.\n")
-        conexao.close()
         return
 
     cursor.execute(
@@ -226,6 +216,5 @@ def remover_medicamento() -> None:
     )
 
     conexao.commit()
-    conexao.close()
 
     print(f"\n✅ '{medicamento['nome']}' removido com sucesso!\n")

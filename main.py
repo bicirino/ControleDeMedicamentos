@@ -69,7 +69,8 @@ def executar_opcao(opcao: str) -> bool:
         return False
 
     else:
-        print("\n Opção inválida! Por favor, escolha uma opção disponível no menu")
+        print("\n Opção inválida! Por favor, escolha uma opção")
+        print(" disponível no menu")
 
     return True
 

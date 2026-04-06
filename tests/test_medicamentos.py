@@ -179,7 +179,7 @@ class TestMarcarComoTomado:
         assert "marcado como tomado" in saida
 
     def test_marcar_medicamento_duplicado(self, db_mock, capsys):
-        """Marcar o mesmo medicamento duas vezes no dia nao duplica registro."""
+        """Marcar medicamento duplicado nao duplica registro no dia."""
         hoje = datetime.now().strftime("%Y-%m-%d")
 
         db_mock.execute(
