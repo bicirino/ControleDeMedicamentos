@@ -267,41 +267,8 @@ Este projeto está licenciado sob a **MIT License**. Consulte o arquivo [LICENSE
 - GitHub: [@bicirino](https://github.com/bicirino)
 - Projeto: [ControleDeMedicamentos](https://github.com/bicirino/ControleDeMedicamentos)
 
----
 
-## 🔗 Links Úteis
 
-- 📦 Repositório: [github.com/bicirino/ControleDeMedicamentos](https://github.com/bicirino/ControleDeMedicamentos)
-- 📝 Issues: [Reportar problemas](https://github.com/bicirino/ControleDeMedicamentos/issues)
-- 📌 Releases: [Versões do projeto](https://github.com/bicirino/ControleDeMedicamentos/releases)
 
----
 
-## 💡 Contribuições
 
-Sugestões e melhorias são bem-vindas! Se você tiver ideias para melhorar este projeto:
-
-1. Faça um fork
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
-
----
-
-## ❓ FAQ
-
-**P: Meus dados estão salvos?**
-R: Sim! Os medicamentos são salvos em um banco SQLite local (`medicamentos.db`).
-
-**P: Posso usar em múltiplos dispositivos?**
-R: Atualmente, o banco é local. Para múltiplos dispositivos, seria necessário integração com um servidor.
-
-**P: Como removo um medicamento sem perder o histórico?**
-R: O sistema usa "soft delete" - medicamentos removidos são marcados como inativos mas permanecem no banco.
-
----
-
-## 📞 Suporte
-
-Se tiver dúvidas ou encontrar problemas, abra uma [issue no GitHub](https://github.com/bicirino/ControleDeMedicamentos/issues).
