@@ -47,6 +47,7 @@ Uma aplicação CLI acessível e direta que permite:
 | **Flake8** | 7.2.0 | Linting e qualidade de código |
 | **Requests** | 2.31.0 | Consumo de APIs REST |
 | **python-dotenv** | 1.0.0 | Gerenciamento de variáveis de ambiente |
+| **Groq** | 0.4.1+ | IA para informações sobre medicamentos |
 
 ### API Integrada 🔗
 
@@ -144,9 +145,9 @@ source .venv/bin/activate  # macOS/Linux
 # 3. Instalar dependências
 pip install -r requirements.txt
 
-# 4. Configurar variáveis de ambiente (opcional)
+# 4. Configurar variáveis de ambiente (necessário para opção 6)
 cp .env.example .env
-# Nota: BrasilAPI é pública e não requer configuração
+# Adicione sua chave Groq (gratuita em: https://console.groq.com/)
 
 # 5. Executar aplicação
 python main.py
@@ -326,29 +327,33 @@ Opção: 5
 
 ---
 
-#### 6️⃣ Consultar Informações de Medicamento (API) ⭐ NOVO!
+#### 6️⃣ Consultar Informações de Medicamento com IA ⭐ NOVO!
 
-**O que faz:** Busca informações detalhadas sobre um medicamento na **BrasilAPI** (banco de medicamentos ANVISA).
+**O que faz:** Busca informações detalhadas sobre um medicamento usando **Groq AI** (Inteligência Artificial).
 
 **Como usar:**
 ```
 Opção: 6
 📋 Digite o nome do medicamento: Paracetamol
 
-🔍 Buscando informações do medicamento na BrasilAPI...
+🤖 Consultando Groq AI para informações do medicamento...
 
 ✅ Informações encontradas:
 
-  📋 Nome: Paracetamol 500mg
-  🧪 Princípio Ativo: Paracetamol monoidratado
-  🏢 Laboratório: Laboratório XYZ Ltda
-  📍 CNPJ: 12.345.678/0001-23
+  📋 Medicamento: Paracetamol
+
+  📝 Informações:
+     Paracetamol é um analgésico e antipirético usado para aliviar dor
+     e reduzir febre. Princípio ativo: Paracetamol. Contraindicações:
+     hipersensibilidade ao paracetamol, insuficiência hepática grave.
+
+  🔗 Fonte: Groq AI
 ```
 
 **Funcionalidade Nova - Etapa 2:**
-- ✅ Integração com **BrasilAPI** (pública, sem autenticação)
-- ✅ Acesso a dados oficiais da ANVISA
-- ✅ Tratamento de erros (medicamento não encontrado, falha de conexão)
+- ✅ Integração com **Groq AI** (IA rápida e gratuita)
+- ✅ Respostas inteligentes sobre medicamentos
+- ✅ Tratamento de erros (API key não configurada, medicamento não encontrado)
 - ✅ 5 testes de integração específicos para essa funcionalidade
 
 ---
@@ -367,15 +372,27 @@ Opção: 6
 
 ## 🔐 Configuração de Variáveis de Ambiente
 
-A aplicação funciona **100% sem configuração**! BrasilAPI é uma API pública e não requer autenticação.
+### Funcionalidade Básica (Sem API)
+A aplicação funciona **100% sem configuração** para as opções 1-5 (cadastro, listagem, remoção).
 
-Você pode copiar o arquivo de exemplo se desejar:
+### Funcionalidade de IA (Opção 6)
+Para usar a consulta de medicamentos com IA, você precisa de uma chave Groq (gratuita):
 
-```bash
-cp .env.example .env
-```
+1. **Obtenha uma chave gratuita:**
+   - Acesse: https://console.groq.com/
+   - Crie uma conta
+   - Copie sua chave de API
 
-Pronto! ✅ 
+2. **Configure no seu ambiente:**
+   ```bash
+   cp .env.example .env
+   # Edite .env e adicione:
+   # GROQ_API_KEY=sua_chave_aqui
+   ```
+
+3. **Pronto!** ✅ Opção 6 funcionará normalmente
+
+> **Nota:** A chave Groq é **gratuita** e vem com um limite generoso de requisições (suficiente para uso pessoal) 
 
 ---
 
@@ -391,29 +408,32 @@ Os testes garantem que a aplicação:
 
 ### Como Executar Testes
 
-#### 1. Todos os Testes (23 total)
+#### 1. Todos os Testes (16 total)
 
 ```bash
 python -m pytest tests/ -v
 
 # Saída esperada:
 # ============================= test session starts =============================
-# collected 23 items
-# tests/test_api_integration.py::TestBrasilAPI::test_buscar_medicamento_sucesso PASSED
+# collected 16 items
+# tests/test_api_integration.py::TestGroqAPI::test_buscar_medicamento_sucesso PASSED
 # tests/test_medicamentos.py::TestCadastrarMedicamento::test_cadastro_valido PASSED
 # ...
-# ============================= 23 passed in 0.56s ==============================
+# ============================= 16 passed in 0.59s ================================
 ```
 
-#### 2. Apenas Testes de Integração com APIs (12 testes)
+#### 2. Apenas Testes de Integração com IA (5 testes)
 
 ```bash
 python -m pytest tests/test_api_integration.py -v
 
 # Valida:
-# ✅ Busca na BrasilAPI (5 testes)
-# ✅ Busca de clima OpenWeather (4 testes)
-# ✅ Validação de conexão (3 testes)
+# ✅ Busca com Groq AI (5 testes):
+#    - Busca bem-sucedida
+#    - Medicamento não encontrado
+#    - Sem API key configurada
+#    - Erro de conexão
+#    - Timeout
 ```
 
 #### 3. Apenas Testes Unitários (11 testes)

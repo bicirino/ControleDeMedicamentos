@@ -6,7 +6,7 @@ Logica de negocio para cadastro, listagem, registro e remocao de medicamentos.
 from datetime import datetime
 
 from database import get_conexao
-from api_integration import buscar_medicamento_brasalapi, APIError
+from api_integration import buscar_medicamento_groq, APIError
 
 
 def _data_hoje() -> str:
@@ -223,24 +223,27 @@ def remover_medicamento() -> None:
 
 def buscar_info_medicamento_api(nome_medicamento: str) -> None:
     """
-    Busca informações adicionais sobre um medicamento na BrasilAPI.
+    Busca informações adicionais sobre um medicamento usando Groq AI.
 
     Args:
         nome_medicamento: Nome do medicamento a buscar.
     """
     try:
-        print("\n🔍 Buscando informações do medicamento na BrasilAPI...\n")
-        info = buscar_medicamento_brasalapi(nome_medicamento)
+        print("\n🤖 Consultando Groq AI para informações do medicamento...\n")
+        info = buscar_medicamento_groq(nome_medicamento)
 
         if info:
             print("✅ Informações encontradas:\n")
-            print(f"  📋 Nome: {info.get('nome', 'N/A')}")
-            print(f"  🧪 Princípio Ativo: {info.get('princpio_ativo', 'N/A')}")
-            print(f"  🏢 Laboratório: {info.get('laboratorio', 'N/A')}")
-            print(f"  📍 CNPJ: {info.get('cnpj', 'N/A')}\n")
+            print(f"  📋 Medicamento: {info.get('nome', 'N/A')}\n")
+            print("  📝 Informações:\n")
+            informacoes = info.get('informacoes', 'N/A')
+            for linha in informacoes.split('\n'):
+                if linha.strip():
+                    print(f"     {linha}")
+            print(f"\n  🔗 Fonte: {info.get('source', 'N/A')}\n")
         else:
             print(f"❌ Medicamento '{nome_medicamento}' não encontrado "
-                  "na BrasilAPI.\n")
+                  "ou informação indisponível.\n")
 
     except APIError as e:
         print(f"⚠️  Erro ao buscar informações: {str(e)}\n")

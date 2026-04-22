@@ -1,17 +1,12 @@
 """
 api_integration.py
 Módulo para integração com APIs públicas.
-Fornece funções para buscar informações sobre medicamentos.
+Fornece funções para buscar informações sobre medicamentos usando Groq AI.
 """
 
-import requests
+import os
 from typing import Dict, Optional, Any
-
-# Configurações da API
-BRASIL_API_URL = "https://brasilapi.com.br/api/cnes/v1/medicamentos"
-
-# Timeouts para requisições (em segundos)
-REQUEST_TIMEOUT = 5
+from groq import Groq
 
 
 class APIError(Exception):
@@ -19,70 +14,66 @@ class APIError(Exception):
     pass
 
 
-def buscar_medicamento_brasalapi(
+def buscar_medicamento_groq(
     nome_medicamento: str
 ) -> Optional[Dict[str, Any]]:
     """
-    Busca informações sobre um medicamento na BrasilAPI.
+    Busca informações sobre um medicamento usando Groq AI.
 
     Args:
         nome_medicamento: Nome do medicamento a buscar.
 
     Returns:
-        Dicionário com informações do medicamento ou None se não encontrado.
+        Dicionário com informações do medicamento ou None se erro.
 
     Raises:
-        APIError: Se houver erro na comunicação com a API.
+        APIError: Se houver erro na comunicação com Groq.
     """
     try:
-        params = {"q": nome_medicamento}
-        response = requests.get(
-            BRASIL_API_URL,
-            params=params,
-            timeout=REQUEST_TIMEOUT
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise APIError(
+                "GROQ_API_KEY não configurada. "
+                "Configure em .env (copie .env.example)"
+            )
+
+        client = Groq(api_key=api_key)
+
+        prompt = (
+            f"Forneça informações sobre o medicamento '{nome_medicamento}' "
+            "em português, incluindo:\n"
+            "1. Nome do medicamento\n"
+            "2. Princípio ativo (ingrediente principal)\n"
+            "3. Usos comuns\n"
+            "4. Contraindicações principais\n\n"
+            "Responda de forma concisa. Se o medicamento não for "
+            "encontrado, responda com 'Medicamento não encontrado'."
         )
-        response.raise_for_status()
 
-        data = response.json()
+        message = client.messages.create(
+            model="mixtral-8x7b-32768",
+            max_tokens=500,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
 
-        # BrasilAPI retorna uma lista de resultados
-        if isinstance(data, list) and len(data) > 0:
-            return {
-                "nome": data[0].get("nome", nome_medicamento),
-                "principio_ativo": data[0].get("principio_ativo", "N/A"),
-                "cnpj": data[0].get("cnpj", "N/A"),
-                "laboratorio": data[0].get("laboratorio", "N/A"),
-                "source": "BrasilAPI"
-            }
+        resposta = message.content[0].text
 
-        return None
-
-    except requests.exceptions.Timeout:
-        raise APIError("Timeout ao conectar com BrasilAPI")
-    except requests.exceptions.ConnectionError:
-        raise APIError("Erro de conexão com BrasilAPI")
-    except requests.exceptions.HTTPError as e:
-        if response.status_code == 404:
+        if "não encontrado" in resposta.lower():
             return None
-        msg = f"Erro HTTP da BrasilAPI: {e}"
+
+        return {
+            "nome": nome_medicamento,
+            "informacoes": resposta,
+            "source": "Groq AI"
+        }
+
+    except Exception as e:
+        if "GROQ_API_KEY" in str(e):
+            raise APIError(str(e))
+        msg = f"Erro ao consultar Groq AI: {str(e)}"
         raise APIError(msg)
-    except requests.exceptions.RequestException as e:
-        msg = f"Erro ao chamar BrasilAPI: {str(e)}"
-        raise APIError(msg)
-
-
-def validar_conexao_api(url: str) -> bool:
-    """
-    Valida se uma API está acessível.
-
-    Args:
-        url: URL da API a validar.
-
-    Returns:
-        True se acessível, False caso contrário.
-    """
-    try:
-        response = requests.head(url, timeout=3)
-        return response.status_code < 500
-    except requests.exceptions.RequestException:
-        return False
