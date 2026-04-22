@@ -6,6 +6,7 @@ Logica de negocio para cadastro, listagem, registro e remocao de medicamentos.
 from datetime import datetime
 
 from database import get_conexao
+from api_integration import buscar_medicamento_brasalapi, APIError
 
 
 def _data_hoje() -> str:
@@ -218,3 +219,41 @@ def remover_medicamento() -> None:
     conexao.commit()
 
     print(f"\n✅ '{medicamento['nome']}' removido com sucesso!\n")
+
+
+def buscar_info_medicamento_api(nome_medicamento: str) -> None:
+    """
+    Busca informações adicionais sobre um medicamento na BrasilAPI.
+
+    Args:
+        nome_medicamento: Nome do medicamento a buscar.
+    """
+    try:
+        print("\n🔍 Buscando informações do medicamento na BrasilAPI...\n")
+        info = buscar_medicamento_brasalapi(nome_medicamento)
+
+        if info:
+            print("✅ Informações encontradas:\n")
+            print(f"  📋 Nome: {info.get('nome', 'N/A')}")
+            print(f"  🧪 Princípio Ativo: {info.get('princpio_ativo', 'N/A')}")
+            print(f"  🏢 Laboratório: {info.get('laboratorio', 'N/A')}")
+            print(f"  📍 CNPJ: {info.get('cnpj', 'N/A')}\n")
+        else:
+            print(f"❌ Medicamento '{nome_medicamento}' não encontrado "
+                  "na BrasilAPI.\n")
+
+    except APIError as e:
+        print(f"⚠️  Erro ao buscar informações: {str(e)}\n")
+
+
+def consultar_medicamento_com_api() -> None:
+    """Menu para consultar informações detalhadas de um medicamento via API."""
+    print()
+    nome = input("📋 Digite o nome do medicamento: ").strip()
+
+    if not nome:
+        print("⚠️  O nome não pode ser vazio.\n")
+        return
+
+    buscar_info_medicamento_api(nome)
+
