@@ -54,7 +54,7 @@ def buscar_medicamento_groq(
             "encontrado, responda com 'Medicamento não encontrado'."
         )
 
-        message = client.messages.create(
+        message = client.chat.completions.create(
             model="mixtral-8x7b-32768",
             max_tokens=500,
             messages=[
@@ -65,7 +65,7 @@ def buscar_medicamento_groq(
             ]
         )
 
-        resposta = message.content[0].text
+        resposta = message.choices[0].message.content
 
         if "não encontrado" in resposta.lower():
             return None
