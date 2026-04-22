@@ -55,7 +55,7 @@ def buscar_medicamento_groq(
         )
 
         message = client.chat.completions.create(
-            model="llama-3.1-70b-versatile",
+            model="llama-3.1-8b-instant",
             max_tokens=500,
             messages=[
                 {
