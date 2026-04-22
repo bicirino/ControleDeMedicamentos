@@ -20,15 +20,17 @@ class TestGroqAPI:
         # Mock das configurações
         mock_getenv.return_value = "test_api_key"
 
-        # Mock da resposta do Groq
+        # Mock da resposta do Groq (nova API)
         mock_client = MagicMock()
-        mock_message = MagicMock()
-        mock_message.content = [
-            MagicMock(text="Paracetamol é usado para dor e febre. "
-                          "Princípio ativo: Paracetamol. "
-                          "Contraindicações: hipersensibilidade.")
+        mock_choice = MagicMock()
+        mock_choice.message.content = (
+            "Paracetamol é usado para dor e febre. "
+            "Princípio ativo: Paracetamol. "
+            "Contraindicações: hipersensibilidade."
+        )
+        mock_client.chat.completions.create.return_value.choices = [
+            mock_choice
         ]
-        mock_client.messages.create.return_value = mock_message
         mock_groq_class.return_value = mock_client
 
         # Executa a função
@@ -43,7 +45,7 @@ class TestGroqAPI:
 
         # Valida que Groq foi chamado
         mock_groq_class.assert_called_once_with(api_key="test_api_key")
-        mock_client.messages.create.assert_called_once()
+        mock_client.chat.completions.create.assert_called_once()
 
     @patch('api_integration.os.getenv')
     @patch('api_integration.Groq')
@@ -53,11 +55,13 @@ class TestGroqAPI:
         mock_getenv.return_value = "test_api_key"
 
         mock_client = MagicMock()
-        mock_message = MagicMock()
-        mock_message.content = [
-            MagicMock(text="Medicamento não encontrado no banco de dados.")
+        mock_choice = MagicMock()
+        mock_choice.message.content = (
+            "Medicamento não encontrado no banco de dados."
+        )
+        mock_client.chat.completions.create.return_value.choices = [
+            mock_choice
         ]
-        mock_client.messages.create.return_value = mock_message
         mock_groq_class.return_value = mock_client
 
         resultado = buscar_medicamento_groq("MedicamentoInexistente")
@@ -80,7 +84,7 @@ class TestGroqAPI:
         mock_getenv.return_value = "test_api_key"
 
         mock_client = MagicMock()
-        mock_client.messages.create.side_effect = \
+        mock_client.chat.completions.create.side_effect = \
             Exception("Erro na conexão com Groq")
         mock_groq_class.return_value = mock_client
 
@@ -94,7 +98,7 @@ class TestGroqAPI:
         mock_getenv.return_value = "test_api_key"
 
         mock_client = MagicMock()
-        mock_client.messages.create.side_effect = \
+        mock_client.chat.completions.create.side_effect = \
             TimeoutError("Timeout na requisição")
         mock_groq_class.return_value = mock_client
 
