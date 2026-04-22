@@ -256,4 +256,3 @@ def consultar_medicamento_com_api() -> None:
         return
 
     buscar_info_medicamento_api(nome)
-

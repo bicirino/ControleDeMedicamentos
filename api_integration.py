@@ -25,7 +25,9 @@ class APIError(Exception):
     pass
 
 
-def buscar_medicamento_brasalapi(nome_medicamento: str) -> Optional[Dict[str, Any]]:
+def buscar_medicamento_brasalapi(
+    nome_medicamento: str
+) -> Optional[Dict[str, Any]]:
     """
     Busca informações sobre um medicamento na BrasilAPI.
 
@@ -68,12 +70,16 @@ def buscar_medicamento_brasalapi(nome_medicamento: str) -> Optional[Dict[str, An
     except requests.exceptions.HTTPError as e:
         if response.status_code == 404:
             return None
-        raise APIError(f"Erro HTTP da BrasilAPI: {e}")
+        msg = f"Erro HTTP da BrasilAPI: {e}"
+        raise APIError(msg)
     except requests.exceptions.RequestException as e:
-        raise APIError(f"Erro ao chamar BrasilAPI: {str(e)}")
+        msg = f"Erro ao chamar BrasilAPI: {str(e)}"
+        raise APIError(msg)
 
 
-def buscar_clima(cidade: str, pais_codigo: str = "BR") -> Optional[Dict[str, Any]]:
+def buscar_clima(cidade: str, pais_codigo: str = "BR") -> Optional[
+    Dict[str, Any]
+]:
     """
     Busca informações de clima da OpenWeather API.
 
@@ -111,7 +117,9 @@ def buscar_clima(cidade: str, pais_codigo: str = "BR") -> Optional[Dict[str, Any
             "cidade": data.get("name", cidade),
             "pais": data.get("sys", {}).get("country", pais_codigo),
             "temperatura": data.get("main", {}).get("temp", "N/A"),
-            "descricao": data.get("weather", [{}])[0].get("description", "N/A"),
+            "descricao": data.get("weather", [{}])[0].get(
+                "description", "N/A"
+            ),
             "umidade": data.get("main", {}).get("humidity", "N/A"),
             "velocidade_vento": data.get("wind", {}).get("speed", "N/A"),
             "source": "OpenWeather"
