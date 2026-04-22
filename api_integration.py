@@ -6,7 +6,11 @@ Fornece funções para buscar informações sobre medicamentos usando Groq AI.
 
 import os
 from typing import Dict, Optional, Any
+from dotenv import load_dotenv
 from groq import Groq
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 
 class APIError(Exception):
