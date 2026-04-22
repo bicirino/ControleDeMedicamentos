@@ -26,7 +26,7 @@ MENU = """
 │  3. Marcar Medicamento como Tomado               │
 │  4. Ver Todos os Medicamentos Cadastrados        │
 │  5. Remover Medicamento                          │
-│  6. Consultar Informações de Medicamento (API)   │
+│  6. Consultar Informações de Medicamento         │
 │  0. Sair                                         │
 └──────────────────────────────────────────────────┘
 """
