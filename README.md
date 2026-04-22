@@ -2,6 +2,8 @@
 
 **Um aplicativo CLI para auxiliar idosos e cuidadores no controle de medicamentos e horários.**
 
+> **🌐 Deploy ao Vivo:** [Disponível em breve - link será adicionado após publicação]
+
 ---
 
 ## 🎯 Sobre o Projeto
@@ -43,6 +45,13 @@ Uma aplicação CLI acessível e direta que permite:
 | **SQLite** | 3 | Banco de dados |
 | **Pytest** | 9.0.2 | Testes automatizados |
 | **Flake8** | 7.2.0 | Linting e qualidade de código |
+| **Requests** | 2.31.0 | Consumo de APIs REST |
+| **python-dotenv** | 1.0.0 | Gerenciamento de variáveis de ambiente |
+
+### APIs Integradas 🔗
+
+- **BrasilAPI** - Busca de dados sobre medicamentos registrados na ANVISA
+- **OpenWeather** - Informações de clima para contexto de saúde do usuário
 
 ---
 
@@ -53,7 +62,9 @@ ControleDeMedicamentos/
 ├── main.py                          # Ponto de entrada e interface CLI
 ├── medicamentos.py                  # Lógica de negócio
 ├── database.py                      # Gerenciamento de banco de dados
+├── api_integration.py               # Integração com APIs externas (BrasilAPI, OpenWeather)
 ├── requirements.txt                 # Dependências do projeto
+├── .env.example                     # Exemplo de variáveis de ambiente
 ├── README.md                        # Este arquivo
 ├── LICENSE                          # Licença MIT
 ├── CHANGELOG.md                     # Histórico de versões
@@ -62,7 +73,8 @@ ControleDeMedicamentos/
 │       └── ci.yml                   # Pipeline de CI/CD
 ├── tests/
 │   ├── __init__.py
-│   └── test_medicamentos.py         # Testes automatizados (11 testes)
+│   ├── test_medicamentos.py         # Testes unitários (11 testes)
+│   └── test_api_integration.py      # Testes de integração com APIs (12 testes)
 └── .gitignore
 ```
 
@@ -129,6 +141,7 @@ Ao iniciar, você verá este menu:
 │  3. Marcar Medicamento como Tomado               │
 │  4. Ver Todos os Medicamentos Cadastrados        │
 │  5. Remover Medicamento                          │
+│  6. Consultar Informações de Medicamento (API)   │
 │  0. Sair                                         │
 └──────────────────────────────────────────────────┘
 ```
@@ -165,6 +178,46 @@ Ao iniciar, você verá este menu:
 - Sistema lista todos os medicamentos
 - Digite o ID e confirme (s/n)
 
+#### 6️⃣ Consultar Informações de Medicamento (BrasilAPI)
+
+- Escolha a opção **6**
+- Digite o nome do medicamento (ex: "Paracetamol")
+- Sistema busca informações na BrasilAPI e exibe:
+  - 📋 Nome completo
+  - 🧪 Princípio ativo
+  - 🏢 Laboratório fabricante
+  - 📍 CNPJ do medicamento
+
+---
+
+## 🔐 Configuração de Variáveis de Ambiente
+
+### Passo 1: Copiar o arquivo de exemplo
+
+```bash
+cp .env.example .env
+```
+
+### Passo 2: Configurar chaves de API (opcional)
+
+O arquivo `.env` contém:
+
+```env
+# OpenWeather API Key (obtenha em: https://openweathermap.org/api)
+OPENWEATHER_API_KEY=sua_chave_aqui
+
+DEBUG=False
+```
+
+**Para usar a busca de clima:**
+
+1. Acesse [openweathermap.org/api](https://openweathermap.org/api)
+2. Crie uma conta (plano free disponível)
+3. Gere uma API Key
+4. Adicione no arquivo `.env`
+
+> **Nota:** A BrasilAPI é pública e não requer chave de autenticação.
+
 ---
 
 ## 🧪 Testes Automatizados
@@ -175,20 +228,28 @@ Ao iniciar, você verá este menu:
 python -m pytest tests/ -v
 ```
 
+### Executar Apenas Testes de Integração
+
+```bash
+python -m pytest tests/test_api_integration.py -v
+```
+
+### Executar Apenas Testes Unitários
+
+```bash
+python -m pytest tests/test_medicamentos.py -v
+```
+
 ### Resultado Esperado
 
 ```
-11 passed in 0.23s
-✅ Todos os testes cobrem:
-- Cadastro válido e inválido
-- Listagem de medicamentos
-- Marcação como tomado (incluindo duplicatas)
-- Remoção com confirmação
+23 passed in 0.75s
+✅ 11 testes unitários + 12 testes de integração
 ```
 
 ### Cobertura de Testes
 
-Os **11 testes** cobrem:
+**Testes Unitários (11):**
 
 | Categoria | Testes | Descrição |
 |-----------|--------|-----------|
@@ -196,6 +257,16 @@ Os **11 testes** cobrem:
 | **Listagem Diária** | 3 | Banco vazio, pendentes, tomados |
 | **Marcar Tomado** | 3 | Válido, duplicado, ID inválido |
 | **Remoção** | 2 | Com confirmação, sem confirmação |
+
+**Testes de Integração (12):**
+
+| API | Testes | Descrição |
+|-----|--------|-----------|
+| **BrasilAPI** | 5 | Sucesso, não encontrado, timeout, conexão, HTTP error |
+| **OpenWeather** | 4 | Sucesso, sem chave, timeout, conexão |
+| **Validação** | 3 | Conexão sucesso, servidor indisponível, erro conexão |
+
+> **Note:** Os testes de integração usam `unittest.mock` para simular requisições HTTP sem depender da disponibilidade das APIs.
 
 ---
 
@@ -243,18 +314,71 @@ Para histórico de versões, consulte [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## 📄 Dependências
+## � Dependências
 
 Todas as dependências estão explicitamente declaradas em `requirements.txt`:
 
 ```
-pytest==9.0.2
-flake8==7.2.0
+pytest>=9.0.2
+flake8>=7.2.0
+requests>=2.31.0
+python-dotenv>=1.0.0
 ```
+
+### Descrição das Dependências
+
+| Pacote | Versão | Razão |
+|--------|--------|-------|
+| **pytest** | >=9.0.2 | Framework de testes automatizados |
+| **flake8** | >=7.2.0 | Linter para validação de código Python |
+| **requests** | >=2.31.0 | Consumo de APIs HTTP (BrasilAPI, OpenWeather) |
+| **python-dotenv** | >=1.0.0 | Carregamento de variáveis de ambiente do arquivo .env |
 
 ---
 
-## 🔒 Licença
+## � Dependências
+
+Todas as dependências estão explicitamente declaradas em `requirements.txt`:
+
+```
+pytest>=9.0.2
+flake8>=7.2.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+```
+
+### Descrição das Dependências
+
+| Pacote | Versão | Razão |
+|--------|--------|-------|
+| **pytest** | >=9.0.2 | Framework de testes automatizados |
+| **flake8** | >=7.2.0 | Linter para validação de código Python |
+| **requests** | >=2.31.0 | Consumo de APIs HTTP (BrasilAPI, OpenWeather) |
+| **python-dotenv** | >=1.0.0 | Carregamento de variáveis de ambiente do arquivo .env |
+
+---
+
+## 🚀 Deploy
+
+### Plataforma de Deploy
+
+Este projeto será hospedado em **Render.com** (gratuito para aplicações Python).
+
+**Link do Deploy:** [Será adicionado após publicação]
+
+### Instruções para Deploy
+
+1. Faça o push da branch `entrega-intermediaria` para o GitHub
+2. Acesse [render.com](https://render.com)
+3. Conecte sua conta GitHub
+4. Crie um novo "Web Service"
+5. Selecione este repositório
+6. Configure as variáveis de ambiente (.env)
+7. Deploy será automático a cada push
+
+---
+
+## �🔒 Licença
 
 Este projeto está licenciado sob a **MIT License**. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
 
