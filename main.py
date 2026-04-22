@@ -66,7 +66,7 @@ def executar_opcao(opcao: str) -> bool:
         remover_medicamento()
 
     elif opcao == "6":
-        print("\n── Consultar Medicamento via BrasilAPI ──")
+        print("\n── Consultar Medicamento via Groq API ──")
         consultar_medicamento_com_api()
 
     elif opcao == "0":
