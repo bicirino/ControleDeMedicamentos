@@ -59,24 +59,71 @@ Uma aplicação CLI acessível e direta que permite:
 
 ```
 ControleDeMedicamentos/
-├── main.py                          # Ponto de entrada e interface CLI
-├── medicamentos.py                  # Lógica de negócio
-├── database.py                      # Gerenciamento de banco de dados
-├── api_integration.py               # Integração com APIs externas (BrasilAPI, OpenWeather)
-├── requirements.txt                 # Dependências do projeto
-├── .env.example                     # Exemplo de variáveis de ambiente
-├── README.md                        # Este arquivo
-├── LICENSE                          # Licença MIT
-├── CHANGELOG.md                     # Histórico de versões
-├── .github/
-│   └── workflows/
-│       └── ci.yml                   # Pipeline de CI/CD
+│
+├── 📄 ARQUIVOS PRINCIPAIS
+├── main.py                              # Ponto de entrada e interface CLI
+├── medicamentos.py                      # Lógica de negócio (cadastro, listagem, etc)
+├── database.py                          # Gerenciamento de banco de dados SQLite
+├── api_integration.py                   # ⭐ NOVO: Integração com APIs (BrasilAPI, OpenWeather)
+│
+├── 📦 DEPENDÊNCIAS E CONFIGURAÇÃO
+├── requirements.txt                     # Lista de dependências Python
+├── .env.example                         # ⭐ NOVO: Exemplo de variáveis de ambiente
+├── render.yaml                          # ⭐ NOVO: Configuração para Deploy Render.com
+│
+├── 📚 DOCUMENTAÇÃO
+├── README.md                            # Este arquivo
+├── LICENSE                              # Licença MIT
+├── CHANGELOG.md                         # Histórico de versões
+├── DEPLOY.md                            # ⭐ NOVO: Guia de Deploy
+│
+├── 🧪 TESTES
 ├── tests/
 │   ├── __init__.py
-│   ├── test_medicamentos.py         # Testes unitários (11 testes)
-│   └── test_api_integration.py      # Testes de integração com APIs (12 testes)
-└── .gitignore
+│   ├── test_medicamentos.py             # 11 testes unitários
+│   └── test_api_integration.py          # ⭐ NOVO: 12 testes de integração com APIs
+│
+├── 🔧 CONFIGURAÇÃO GIT
+├── .github/
+│   └── workflows/
+│       └── ci.yml                       # Pipeline CI/CD (testes automáticos)
+├── .gitignore                           # Arquivos ignorados pelo Git
+│
+└── 📊 DADOS E CACHE
+    ├── medicamentos.db                  # Banco de dados SQLite (gerado na primeira execução)
+    └── .pytest_cache/                   # Cache de testes (gerado automaticamente)
 ```
+
+### O Que Mudou na Etapa 2 (Intermediária)?
+
+#### ✨ Novos Arquivos
+
+| Arquivo | Tipo | Descrição |
+|---------|------|-----------|
+| `api_integration.py` | Módulo | Integração com BrasilAPI e OpenWeather |
+| `tests/test_api_integration.py` | Testes | 12 testes de integração com APIs |
+| `.env.example` | Configuração | Exemplo de variáveis de ambiente |
+| `DEPLOY.md` | Documentação | Guia completo de deployment |
+| `render.yaml` | Configuração | Setup para Render.com |
+
+#### 📝 Arquivos Modificados
+
+| Arquivo | Mudanças |
+|---------|----------|
+| `medicamentos.py` | + 2 novas funções para consumir API |
+| `main.py` | + Opção 6 no menu (Consultar Medicamento) |
+| `requirements.txt` | + `requests` e `python-dotenv` |
+| `README.md` | + Documentação completa de uso e teste |
+
+#### 📊 Estatísticas
+
+| Métrica | Valor |
+|---------|-------|
+| **Linhas de código novo** | ~400 |
+| **Testes implementados** | +12 (total: 23) |
+| **Cobertura de APIs** | 2 (BrasilAPI + OpenWeather) |
+| **Commits na branch** | 4 commits bem documentados |
+| **Status Flake8** | ✅ 0 warnings/errors |
 
 ---
 
@@ -113,19 +160,89 @@ ControleDeMedicamentos/
 
 ## 🚀 Como Executar
 
-Execute o aplicativo no terminal:
+### Início Rápido
+
+```bash
+# 1. Clonar repositório
+git clone https://github.com/bicirino/ControleDeMedicamentos.git
+cd ControleDeMedicamentos
+
+# 2. Criar ambiente virtual
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+# ou
+source .venv/bin/activate  # macOS/Linux
+
+# 3. Instalar dependências
+pip install -r requirements.txt
+
+# 4. Configurar variáveis de ambiente (opcional)
+cp .env.example .env
+# Editar .env se quiser usar OpenWeather API
+
+# 5. Executar aplicação
+python main.py
+```
+
+### Testando as Funcionalidades
+
+#### ✅ Teste 1: Funcionalidades Básicas
 
 ```bash
 python main.py
+# Menu aparece automaticamente
+# Escolha opção 1: Cadastrar Medicamento
+# - Nome: Paracetamol
+# - Dosagem: 500mg
+# - Horário: 08:00
+# ✅ Confirmação de cadastro
+```
+
+#### ✅ Teste 2: Integração com BrasilAPI (NOVO!)
+
+```bash
+python main.py
+# Escolha opção 6: Consultar Informações de Medicamento (API)
+# - Digite: Paracetamol
+# ✅ Sistema busca na BrasilAPI e exibe:
+#   - Nome completo
+#   - Princípio ativo
+#   - Laboratório
+#   - CNPJ
+```
+
+#### ✅ Teste 3: Testes Automatizados
+
+```bash
+# Executar todos os testes (23 total)
+python -m pytest tests/ -v
+
+# Apenas testes de integração com APIs (12 testes)
+python -m pytest tests/test_api_integration.py -v
+
+# Apenas testes unitários (11 testes)
+python -m pytest tests/test_medicamentos.py -v
+
+# Com relatório de cobertura
+python -m pytest tests/ -v --cov=. --cov-report=html
+```
+
+#### ✅ Teste 4: Validação de Código
+
+```bash
+# Verificar estilo de código (Flake8)
+python -m flake8 main.py medicamentos.py database.py api_integration.py --max-line-length=79
+
+# ✅ Esperado: Sem erros ou warnings
 ```
 
 ---
 
 ## 📖 Como Usar
 
-### Menu Principal
+### Menu Principal Interativo
 
-Ao iniciar, você verá este menu:
+A aplicação possui um menu interativo no terminal com 7 opções:
 
 ```
 ╔══════════════════════════════════════════════════╗
@@ -146,61 +263,160 @@ Ao iniciar, você verá este menu:
 └──────────────────────────────────────────────────┘
 ```
 
-### Exemplos de Uso
+### Guia Detalhado das Funcionalidades
 
 #### 1️⃣ Cadastrar Medicamento
 
-- Escolha a opção **1**
-- Digite o nome: `Paracetamol`
-- Digite a dosagem: `500mg`
-- Digite o horário (HH:MM): `08:00`
+**O que faz:** Adiciona um novo medicamento ao sistema com horário de administração.
+
+**Como usar:**
+```
+Opção: 1
+📋 Nome do medicamento: Paracetamol
+💊 Dosagem (ex: 500mg, 1 comprimido): 500mg
+🕐 Horario de tomar (HH:MM): 08:00
+✅ Medicamento 'Paracetamol' cadastrado com sucesso!
+```
+
+**Validações:**
+- ✅ Nome obrigatório (não pode ficar vazio)
+- ✅ Dosagem obrigatória
+- ✅ Horário no formato HH:MM (08:00, 14:30, etc)
+
+---
 
 #### 2️⃣ Ver Medicamentos do Dia
 
-- Escolha a opção **2**
-- Visualize todos os medicamentos para hoje com status (Pendente/Tomado)
+**O que faz:** Lista todos os medicamentos a tomar hoje com status (Pendente/Tomado).
+
+**Como usar:**
+```
+Opção: 2
+
+📅 Medicamentos para hoje (2026-04-22):
+
+  ID   Horario   Medicamento           Dosagem              Status
+  ──────────────────────────────────────────────────────────────────
+  1    08:00     Paracetamol           500mg                ⏳ Pendente
+  2    14:00     Antibiótico           1 comprimido         ✅ Tomado
+```
+
+---
 
 #### 3️⃣ Marcar Medicamento como Tomado
 
-- Escolha a opção **3**
-- Verá a lista de medicamentos do dia
-- Digite o ID do medicamento tomado
-- Sistema registra a tomada
+**O que faz:** Registra que um medicamento foi tomado hoje.
 
-#### 4️⃣ Ver Todos os Medicamentos
+**Como usar:**
+```
+Opção: 3
+[Lista de medicamentos do dia é exibida]
+🔢 Informe o ID do medicamento tomado: 1
+✅ 'Paracetamol' marcado como tomado!
+```
 
-- Escolha a opção **4**
-- Visualize todos os medicamentos cadastrados (Ativos/Inativos)
+**Proteções:**
+- ✅ Não permite marcar o mesmo medicamento 2x no mesmo dia
+- ✅ Valida se o ID existe
+
+---
+
+#### 4️⃣ Ver Todos os Medicamentos Cadastrados
+
+**O que faz:** Lista todos os medicamentos cadastrados (Ativos e Inativos).
+
+**Como usar:**
+```
+Opção: 4
+
+📋 Todos os medicamentos cadastrados:
+
+  ID   Horario   Medicamento           Dosagem              Situacao
+  ──────────────────────────────────────────────────────────────────
+  1    08:00     Paracetamol           500mg                🟢 Ativo
+  2    14:00     Antibiótico           1 comprimido         🔴 Inativo
+```
+
+---
 
 #### 5️⃣ Remover Medicamento
 
-- Escolha a opção **5**
-- Sistema lista todos os medicamentos
-- Digite o ID e confirme (s/n)
+**O que faz:** Desativa um medicamento (soft delete - dados permanecem para histórico).
 
-#### 6️⃣ Consultar Informações de Medicamento (BrasilAPI)
+**Como usar:**
+```
+Opção: 5
+[Lista de medicamentos é exibida]
+🔢 Informe o ID do medicamento a remover: 1
+⚠️  Deseja remover 'Paracetamol'? (s/n): s
+✅ 'Paracetamol' removido com sucesso!
+```
 
-- Escolha a opção **6**
-- Digite o nome do medicamento (ex: "Paracetamol")
-- Sistema busca informações na BrasilAPI e exibe:
-  - 📋 Nome completo
-  - 🧪 Princípio ativo
-  - 🏢 Laboratório fabricante
-  - 📍 CNPJ do medicamento
+**Segurança:**
+- ✅ Pede confirmação antes de remover
+- ✅ Dados históricos preservados no banco
+
+---
+
+#### 6️⃣ Consultar Informações de Medicamento (API) ⭐ NOVO!
+
+**O que faz:** Busca informações detalhadas sobre um medicamento na **BrasilAPI** (banco de medicamentos ANVISA).
+
+**Como usar:**
+```
+Opção: 6
+📋 Digite o nome do medicamento: Paracetamol
+
+🔍 Buscando informações do medicamento na BrasilAPI...
+
+✅ Informações encontradas:
+
+  📋 Nome: Paracetamol 500mg
+  🧪 Princípio Ativo: Paracetamol monoidratado
+  🏢 Laboratório: Laboratório XYZ Ltda
+  📍 CNPJ: 12.345.678/0001-23
+```
+
+**Funcionalidade Nova - Etapa 2:**
+- ✅ Integração com **BrasilAPI** (pública, sem autenticação)
+- ✅ Acesso a dados oficiais da ANVISA
+- ✅ Tratamento de erros (medicamento não encontrado, falha de conexão)
+- ✅ 5 testes de integração específicos para essa funcionalidade
+
+---
+
+### Fluxo Completo de Uso
+
+1. **Executar**: `python main.py`
+2. **Cadastrar**: Opção 1 - Adicionar novo medicamento
+3. **Consultar API**: Opção 6 - Verificar informações na BrasilAPI
+4. **Ver Hoje**: Opção 2 - Visualizar medicamentos do dia
+5. **Marcar**: Opção 3 - Registrar medicamentos tomados
+6. **Listar Todos**: Opção 4 - Ver histórico completo
+7. **Sair**: Opção 0 - Encerrar aplicação
 
 ---
 
 ## 🔐 Configuração de Variáveis de Ambiente
 
-### Passo 1: Copiar o arquivo de exemplo
+### Por Que Preciso Configurar?
+
+A aplicação usa 2 APIs externas:
+
+| API | Requerida | Autenticação | Necessária Para |
+|-----|-----------|--------------|-----------------|
+| **BrasilAPI** | ✅ Sim | ❌ Não (Pública) | Opção 6 (Consultar Medicamento) |
+| **OpenWeather** | ❌ Não | ✅ Sim (Chave) | Futuras funcionalidades de clima |
+
+### Configuração Passo-a-Passo
+
+#### Passo 1: Copiar arquivo de exemplo
 
 ```bash
 cp .env.example .env
 ```
 
-### Passo 2: Configurar chaves de API (opcional)
-
-O arquivo `.env` contém:
+O arquivo `.env.example` contém:
 
 ```env
 # OpenWeather API Key (obtenha em: https://openweathermap.org/api)
@@ -209,108 +425,235 @@ OPENWEATHER_API_KEY=sua_chave_aqui
 DEBUG=False
 ```
 
-**Para usar a busca de clima:**
+#### Passo 2: Configurar OpenWeather (Opcional)
+
+A aplicação funciona sem isso, mas se quiser usar clima no futuro:
 
 1. Acesse [openweathermap.org/api](https://openweathermap.org/api)
-2. Crie uma conta (plano free disponível)
-3. Gere uma API Key
-4. Adicione no arquivo `.env`
+2. Clique em **"Sign Up"** (criar conta free)
+3. Confirme email
+4. No dashboard, clique em **"Generate"** para gerar uma chave
+5. Copie a chave e adicione no `.env`:
 
-> **Nota:** A BrasilAPI é pública e não requer chave de autenticação.
+```env
+OPENWEATHER_API_KEY=sua_chave_gerada_aqui
+```
+
+6. Aguarde 10 minutos (a chave leva tempo para ativar)
+
+#### Passo 3: Adicionar ao .gitignore
+
+O arquivo `.env` **NUNCA** deve ser commitado (contém chaves sensíveis).
+
+Verifique se `.gitignore` contém:
+
+```bash
+.env
+.env.local
+```
+
+> **Nota:** BrasilAPI é totalmente pública e não requer nenhuma configuração!
 
 ---
 
 ## 🧪 Testes Automatizados
 
-### Executar Todos os Testes
+### Por Que Testes?
+
+Os testes garantem que a aplicação:
+- ✅ Funciona corretamente em todos os cenários
+- ✅ Integra com APIs sem quebrar
+- ✅ Segue padrões de qualidade
+- ✅ Pode ser alterada com segurança no futuro
+
+### Como Executar Testes
+
+#### 1. Todos os Testes (23 total)
 
 ```bash
 python -m pytest tests/ -v
+
+# Saída esperada:
+# ============================= test session starts =============================
+# collected 23 items
+# tests/test_api_integration.py::TestBrasilAPI::test_buscar_medicamento_sucesso PASSED
+# tests/test_medicamentos.py::TestCadastrarMedicamento::test_cadastro_valido PASSED
+# ...
+# ============================= 23 passed in 0.56s ==============================
 ```
 
-### Executar Apenas Testes de Integração
+#### 2. Apenas Testes de Integração com APIs (12 testes)
 
 ```bash
 python -m pytest tests/test_api_integration.py -v
+
+# Valida:
+# ✅ Busca na BrasilAPI (5 testes)
+# ✅ Busca de clima OpenWeather (4 testes)
+# ✅ Validação de conexão (3 testes)
 ```
 
-### Executar Apenas Testes Unitários
+#### 3. Apenas Testes Unitários (11 testes)
 
 ```bash
 python -m pytest tests/test_medicamentos.py -v
+
+# Valida:
+# ✅ Cadastro de medicamentos (3 testes)
+# ✅ Listagem (3 testes)
+# ✅ Marcar como tomado (3 testes)
+# ✅ Remoção (2 testes)
 ```
 
-### Resultado Esperado
+#### 4. Com Relatório de Cobertura
 
+```bash
+python -m pytest tests/ -v --cov=. --cov-report=html
+
+# Gera arquivo: htmlcov/index.html
+# Abre no navegador para ver cobertura detalhada
 ```
-23 passed in 0.75s
-✅ 11 testes unitários + 12 testes de integração
-```
 
-### Cobertura de Testes
+### Detalhes dos Testes
 
-**Testes Unitários (11):**
+#### 🧪 Testes Unitários (11)
+
+Testam funcionalidades individuais da aplicação:
 
 | Categoria | Testes | Descrição |
 |-----------|--------|-----------|
 | **Cadastro** | 3 | Dados válidos, nome vazio, horário inválido |
-| **Listagem Diária** | 3 | Banco vazio, pendentes, tomados |
+| **Listagem Diária** | 3 | Sem medicamentos, pendentes, tomados |
 | **Marcar Tomado** | 3 | Válido, duplicado, ID inválido |
 | **Remoção** | 2 | Com confirmação, sem confirmação |
 
-**Testes de Integração (12):**
+#### 🌐 Testes de Integração (12) ⭐ NOVO
+
+Testam comunicação com APIs externas:
 
 | API | Testes | Descrição |
 |-----|--------|-----------|
-| **BrasilAPI** | 5 | Sucesso, não encontrado, timeout, conexão, HTTP error |
-| **OpenWeather** | 4 | Sucesso, sem chave, timeout, conexão |
-| **Validação** | 3 | Conexão sucesso, servidor indisponível, erro conexão |
+| **BrasilAPI** | 5 | Sucesso, não encontrado, timeout, conexão, erro HTTP |
+| **OpenWeather** | 4 | Sucesso, sem chave, timeout, erro conexão |
+| **Validação** | 3 | Conexão ok, servidor indisponível, erro |
 
-> **Note:** Os testes de integração usam `unittest.mock` para simular requisições HTTP sem depender da disponibilidade das APIs.
+> **Nota:** Os testes de integração usam `unittest.mock` para simular requisições HTTP, então funcionam sem depender das APIs estarem online.
 
 ---
 
-## 🔍 Linting e Qualidade de Código
+## 🌿 Branches do Projeto
+
+Este projeto segue **Git Flow** com branches especializadas:
+
+| Branch | Status | Descrição |
+|--------|--------|-----------|
+| **main** | ✅ Estável | Código produção (v1.0.0) - Etapa 1 concluída |
+| **entrega-intermediaria** | 🚀 Ativa | Etapa 2 - Integração de APIs + Testes (Você está aqui!) |
+| **issue_01** | 📋 Planejada | Próxima: Interface Gráfica (GUI com Tkinter/PyQt) |
+
+### Fluxo de Trabalho
+
+```
+main (v1.0.0 - CLI básica)
+  ├── entrega-intermediaria (Etapa 2 - APIs públicas)
+  │   └── [Testes: 23/23 ✅, Flake8: ✅, Deploy: ⏳]
+  │
+  └── issue_01 (Etapa 3 - Interface Gráfica)
+      └── [Planejada para próxima entrega]
+```
+
+### Como Trocar de Branch
+
+```bash
+# Ver branches disponíveis
+git branch -a
+
+# Trabalhar na branch de APIs (atual)
+git checkout entrega-intermediaria
+
+# Trabalhar na branch de GUI (quando pronto)
+git checkout issue_01
+
+# Voltar para main
+git checkout main
+```
+
+---
+
+## 🔍 Linting e Qualidade de Código (Flake8)
+
+### Por Que Flake8?
+
+Garante que o código segue padrões Python reconhecidos internacionalmente (PEP 8).
 
 ### Executar Flake8
 
 ```bash
-python -m flake8 tests/ main.py database.py medicamentos.py --max-line-length=79
+python -m flake8 main.py medicamentos.py database.py api_integration.py --max-line-length=79
+
+# Saída esperada (NENHUMA):
+# (sem erros ou warnings = ✅ sucesso)
 ```
 
-**Status:** ✅ Sem erros
+### Status Atual
+
+✅ **Código 100% compatível com Flake8**
+
+```bash
+Status: PASS
+Warnings: 0
+Errors: 0
+Max line length: 79 caracteres ✅
+```
 
 ---
 
-## 📋 CI/CD com GitHub Actions
+## 📊 CI/CD com GitHub Actions
 
 Este projeto utiliza **GitHub Actions** para automação contínua:
 
-### Pipeline Automática
+### O Que Acontece a Cada Push?
 
-A cada `push` ou `pull request` na branch `main`, o workflow executa:
+```
+1. GitHub detecta novo push
+   ↓
+2. Workflow `.github/workflows/ci.yml` inicia
+   ├── Instala Python 3.12
+   ├── Instala dependências
+   ├── Executa Flake8 (validação de código)
+   ├── Executa Pytest (23 testes)
+   └── Exibe resultado (✅ ou ❌)
+   ↓
+3. Resultado aparece no Pull Request
+```
 
-1. **Instalação de dependências**
-2. **Linting com Flake8** (garantindo padrão de código)
-3. **Testes com Pytest** (validando funcionamento)
+### Ver Status do CI
 
-### Arquivo de Configuração
-
-Consulte [.github/workflows/ci.yml](.github/workflows/ci.yml) para detalhes.
+1. Acesse [GitHub Actions](https://github.com/bicirino/ControleDeMedicamentos/actions)
+2. Clique no workflow mais recente
+3. Veja detalhes de cada etapa
 
 ---
 
-## 📝 Controle de Versão
+## 📝 Versionamento
 
 Este projeto segue **Versionamento Semântico** (SemVer):
 
-- **MAJOR**: Mudanças grandes ou incompatíveis
-- **MINOR**: Novas funcionalidades compatíveis
-- **PATCH**: Correções menores
+### Versão Atual
 
-**Versão Atual:** `1.0.0`
+| Versão | Data | Status | Etapa |
+|--------|------|--------|-------|
+| **1.0.0** | 2026-04-15 | ✅ Completa | 1 - CLI Básica |
+| **1.1.0** | 2026-04-22 | 🚀 Em Progresso | 2 - APIs + Testes |
+| **2.0.0** | 📅 Próxima | 📋 Planejada | 3 - Interface Gráfica |
 
-Para histórico de versões, consulte [CHANGELOG.md](CHANGELOG.md).
+### Formato SemVer
+
+- **MAJOR** (1.0.0 → 2.0.0): Mudanças grandes/incompatíveis (GUI será MAJOR)
+- **MINOR** (1.0.0 → 1.1.0): Novas funcionalidades (APIs são MINOR)
+- **PATCH** (1.1.0 → 1.1.1): Correções menores
+
+Para histórico completo, veja [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
