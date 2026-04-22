@@ -1,0 +1,15 @@
+# Render.com Deploy Configuration
+# Arquivo de configuração para deploy automático no Render.com
+
+services:
+  - type: web
+    name: controle-medicamentos
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python main.py"
+    envVars:
+      - key: OPENWEATHER_API_KEY
+        value: ""  # Será configurado nas variáveis de ambiente do Render
+      - key: DEBUG
+        value: "False"
