@@ -48,10 +48,9 @@ Uma aplicação CLI acessível e direta que permite:
 | **Requests** | 2.31.0 | Consumo de APIs REST |
 | **python-dotenv** | 1.0.0 | Gerenciamento de variáveis de ambiente |
 
-### APIs Integradas 🔗
+### API Integrada 🔗
 
 - **BrasilAPI** - Busca de dados sobre medicamentos registrados na ANVISA
-- **OpenWeather** - Informações de clima para contexto de saúde do usuário
 
 ---
 
@@ -64,7 +63,7 @@ ControleDeMedicamentos/
 ├── main.py                              # Ponto de entrada e interface CLI
 ├── medicamentos.py                      # Lógica de negócio (cadastro, listagem, etc)
 ├── database.py                          # Gerenciamento de banco de dados SQLite
-├── api_integration.py                   # ⭐ NOVO: Integração com APIs (BrasilAPI, OpenWeather)
+├── api_integration.py                   # ⭐ NOVO: Integração com BrasilAPI
 │
 ├── 📦 DEPENDÊNCIAS E CONFIGURAÇÃO
 ├── requirements.txt                     # Lista de dependências Python
@@ -81,7 +80,7 @@ ControleDeMedicamentos/
 ├── tests/
 │   ├── __init__.py
 │   ├── test_medicamentos.py             # 11 testes unitários
-│   └── test_api_integration.py          # ⭐ NOVO: 12 testes de integração com APIs
+│   └── test_api_integration.py          # ⭐ NOVO: 5 testes de integração com BrasilAPI
 │
 ├── 🔧 CONFIGURAÇÃO GIT
 ├── .github/
@@ -94,38 +93,7 @@ ControleDeMedicamentos/
     └── .pytest_cache/                   # Cache de testes (gerado automaticamente)
 ```
 
-### O Que Mudou na Etapa 2 (Intermediária)?
 
-#### ✨ Novos Arquivos
-
-| Arquivo | Tipo | Descrição |
-|---------|------|-----------|
-| `api_integration.py` | Módulo | Integração com BrasilAPI e OpenWeather |
-| `tests/test_api_integration.py` | Testes | 12 testes de integração com APIs |
-| `.env.example` | Configuração | Exemplo de variáveis de ambiente |
-| `DEPLOY.md` | Documentação | Guia completo de deployment |
-| `render.yaml` | Configuração | Setup para Render.com |
-
-#### 📝 Arquivos Modificados
-
-| Arquivo | Mudanças |
-|---------|----------|
-| `medicamentos.py` | + 2 novas funções para consumir API |
-| `main.py` | + Opção 6 no menu (Consultar Medicamento) |
-| `requirements.txt` | + `requests` e `python-dotenv` |
-| `README.md` | + Documentação completa de uso e teste |
-
-#### 📊 Estatísticas
-
-| Métrica | Valor |
-|---------|-------|
-| **Linhas de código novo** | ~400 |
-| **Testes implementados** | +12 (total: 23) |
-| **Cobertura de APIs** | 2 (BrasilAPI + OpenWeather) |
-| **Commits na branch** | 4 commits bem documentados |
-| **Status Flake8** | ✅ 0 warnings/errors |
-
----
 
 ## 📦 Instalação
 
@@ -178,7 +146,7 @@ pip install -r requirements.txt
 
 # 4. Configurar variáveis de ambiente (opcional)
 cp .env.example .env
-# Editar .env se quiser usar OpenWeather API
+# Nota: BrasilAPI é pública e não requer configuração
 
 # 5. Executar aplicação
 python main.py
@@ -214,10 +182,10 @@ python main.py
 #### ✅ Teste 3: Testes Automatizados
 
 ```bash
-# Executar todos os testes (23 total)
+# Executar todos os testes (19 total)
 python -m pytest tests/ -v
 
-# Apenas testes de integração com APIs (12 testes)
+# Apenas testes de integração com BrasilAPI (8 testes)
 python -m pytest tests/test_api_integration.py -v
 
 # Apenas testes unitários (11 testes)
@@ -399,60 +367,15 @@ Opção: 6
 
 ## 🔐 Configuração de Variáveis de Ambiente
 
-### Por Que Preciso Configurar?
+A aplicação funciona **100% sem configuração**! BrasilAPI é uma API pública e não requer autenticação.
 
-A aplicação usa 2 APIs externas:
-
-| API | Requerida | Autenticação | Necessária Para |
-|-----|-----------|--------------|-----------------|
-| **BrasilAPI** | ✅ Sim | ❌ Não (Pública) | Opção 6 (Consultar Medicamento) |
-| **OpenWeather** | ❌ Não | ✅ Sim (Chave) | Futuras funcionalidades de clima |
-
-### Configuração Passo-a-Passo
-
-#### Passo 1: Copiar arquivo de exemplo
+Você pode copiar o arquivo de exemplo se desejar:
 
 ```bash
 cp .env.example .env
 ```
 
-O arquivo `.env.example` contém:
-
-```env
-# OpenWeather API Key (obtenha em: https://openweathermap.org/api)
-OPENWEATHER_API_KEY=sua_chave_aqui
-
-DEBUG=False
-```
-
-#### Passo 2: Configurar OpenWeather (Opcional)
-
-A aplicação funciona sem isso, mas se quiser usar clima no futuro:
-
-1. Acesse [openweathermap.org/api](https://openweathermap.org/api)
-2. Clique em **"Sign Up"** (criar conta free)
-3. Confirme email
-4. No dashboard, clique em **"Generate"** para gerar uma chave
-5. Copie a chave e adicione no `.env`:
-
-```env
-OPENWEATHER_API_KEY=sua_chave_gerada_aqui
-```
-
-6. Aguarde 10 minutos (a chave leva tempo para ativar)
-
-#### Passo 3: Adicionar ao .gitignore
-
-O arquivo `.env` **NUNCA** deve ser commitado (contém chaves sensíveis).
-
-Verifique se `.gitignore` contém:
-
-```bash
-.env
-.env.local
-```
-
-> **Nota:** BrasilAPI é totalmente pública e não requer nenhuma configuração!
+Pronto! ✅ 
 
 ---
 
@@ -527,58 +450,18 @@ Testam funcionalidades individuais da aplicação:
 | **Marcar Tomado** | 3 | Válido, duplicado, ID inválido |
 | **Remoção** | 2 | Com confirmação, sem confirmação |
 
-#### 🌐 Testes de Integração (12) ⭐ NOVO
+#### 🌐 Testes de Integração (5) ⭐ NOVO
 
-Testam comunicação com APIs externas:
+Testam comunicação com BrasilAPI:
 
 | API | Testes | Descrição |
 |-----|--------|-----------|
 | **BrasilAPI** | 5 | Sucesso, não encontrado, timeout, conexão, erro HTTP |
-| **OpenWeather** | 4 | Sucesso, sem chave, timeout, erro conexão |
-| **Validação** | 3 | Conexão ok, servidor indisponível, erro |
 
-> **Nota:** Os testes de integração usam `unittest.mock` para simular requisições HTTP, então funcionam sem depender das APIs estarem online.
+> **Nota:** Os testes de integração usam `unittest.mock` para simular requisições HTTP, então funcionam sem depender da API estar online.
 
 ---
 
-## 🌿 Branches do Projeto
-
-Este projeto segue **Git Flow** com branches especializadas:
-
-| Branch | Status | Descrição |
-|--------|--------|-----------|
-| **main** | ✅ Estável | Código produção (v1.0.0) - Etapa 1 concluída |
-| **entrega-intermediaria** | 🚀 Ativa | Etapa 2 - Integração de APIs + Testes (Você está aqui!) |
-| **issue_01** | 📋 Planejada | Próxima: Interface Gráfica (GUI com Tkinter/PyQt) |
-
-### Fluxo de Trabalho
-
-```
-main (v1.0.0 - CLI básica)
-  ├── entrega-intermediaria (Etapa 2 - APIs públicas)
-  │   └── [Testes: 23/23 ✅, Flake8: ✅, Deploy: ⏳]
-  │
-  └── issue_01 (Etapa 3 - Interface Gráfica)
-      └── [Planejada para próxima entrega]
-```
-
-### Como Trocar de Branch
-
-```bash
-# Ver branches disponíveis
-git branch -a
-
-# Trabalhar na branch de APIs (atual)
-git checkout entrega-intermediaria
-
-# Trabalhar na branch de GUI (quando pronto)
-git checkout issue_01
-
-# Voltar para main
-git checkout main
-```
-
----
 
 ## 🔍 Linting e Qualidade de Código (Flake8)
 
@@ -621,7 +504,7 @@ Este projeto utiliza **GitHub Actions** para automação contínua:
    ├── Instala Python 3.12
    ├── Instala dependências
    ├── Executa Flake8 (validação de código)
-   ├── Executa Pytest (23 testes)
+   ├── Executa Pytest (16 testes)
    └── Exibe resultado (✅ ou ❌)
    ↓
 3. Resultado aparece no Pull Request

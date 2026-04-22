@@ -1,7 +1,7 @@
 """
 tests/test_api_integration.py
 Testes de integração para consumo de APIs externas.
-Valida a comunicação com BrasilAPI e OpenWeather.
+Valida a comunicação com BrasilAPI.
 """
 
 import pytest
@@ -10,7 +10,6 @@ import requests
 
 from api_integration import (
     buscar_medicamento_brasalapi,
-    buscar_clima,
     validar_conexao_api,
     APIError
 )
@@ -88,59 +87,6 @@ class TestBrasilAPI:
         with pytest.raises(APIError, match="HTTP"):
             buscar_medicamento_brasalapi("Dipirona")
 
-
-class TestOpenWeather:
-    """Testes para integração com OpenWeather API."""
-
-    @patch('api_integration.OPENWEATHER_API_KEY', 'test_key_123')
-    @patch('api_integration.requests.get')
-    def test_buscar_clima_sucesso(self, mock_get):
-        """Testa busca bem-sucedida de informações de clima."""
-        mock_response = MagicMock()
-        mock_response.json.return_value = {
-            "name": "São Paulo",
-            "sys": {"country": "BR"},
-            "main": {
-                "temp": 25.5,
-                "humidity": 65
-            },
-            "weather": [{"description": "céu limpo"}],
-            "wind": {"speed": 3.2}
-        }
-        mock_response.status_code = 200
-        mock_get.return_value = mock_response
-
-        resultado = buscar_clima("São Paulo", "BR")
-
-        assert resultado is not None
-        assert resultado["cidade"] == "São Paulo"
-        assert resultado["temperatura"] == 25.5
-        assert resultado["source"] == "OpenWeather"
-        assert "umidade" in resultado
-
-    @patch('api_integration.OPENWEATHER_API_KEY', '')
-    def test_buscar_clima_sem_chave_api(self):
-        """Testa erro quando chave de API não está configurada."""
-        with pytest.raises(APIError, match="OPENWEATHER_API_KEY"):
-            buscar_clima("São Paulo")
-
-    @patch('api_integration.OPENWEATHER_API_KEY', 'test_key_123')
-    @patch('api_integration.requests.get')
-    def test_buscar_clima_timeout(self, mock_get):
-        """Testa timeout na busca de clima."""
-        mock_get.side_effect = requests.exceptions.Timeout("Timeout")
-
-        with pytest.raises(APIError, match="Timeout"):
-            buscar_clima("São Paulo")
-
-    @patch('api_integration.OPENWEATHER_API_KEY', 'test_key_123')
-    @patch('api_integration.requests.get')
-    def test_buscar_clima_erro_conexao(self, mock_get):
-        """Testa erro de conexão."""
-        mock_get.side_effect = requests.exceptions.ConnectionError("Sem conexão")
-
-        with pytest.raises(APIError, match="conexão"):
-            buscar_clima("São Paulo")
 
 
 class TestValidacaoConexao:
