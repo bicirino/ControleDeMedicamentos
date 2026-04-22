@@ -47,14 +47,15 @@ Preencha os campos conforme abaixo:
 1. Na seção **"Environment"**, adicione as variáveis:
 
 ```
-OPENWEATHER_API_KEY=sua_chave_aqui
+GROQ_API_KEY=sua_chave_groq_aqui
 DEBUG=False
 PYTHON_VERSION=3.12
 ```
 
-2. **Para `OPENWEATHER_API_KEY`:**
-   - Se não tiver, deixe vazia (BrasilAPI funcionará)
-   - Caso queira usar: obtenha em [openweathermap.org/api](https://openweathermap.org/api)
+2. **Para `GROQ_API_KEY`:**
+   - Obtenha uma chave gratuita em [console.groq.com](https://console.groq.com/)
+   - A aplicação usa o modelo `mixtral-8x7b-32768` para consultas de medicamentos
+   - Copie sua chave API e cole no campo acima
 
 ### Etapa 5: Deploy
 
@@ -96,7 +97,7 @@ Após configurar, qualquer `push` na branch escolhida acionará um novo deploy a
 
 ## 🔧 Troubleshooting
 
-### Erro: "ModuleNotFoundError: No module named 'requests'"
+### Erro: "ModuleNotFoundError: No module named 'groq'"
 
 **Solução:** Verifique se `requirements.txt` está correto:
 ```bash
@@ -104,14 +105,23 @@ pytest>=9.0.2
 flake8>=7.2.0
 requests>=2.31.0
 python-dotenv>=1.0.0
+groq>=0.4.1
 ```
 
-### Erro: "OPENWEATHER_API_KEY não configurada"
+### Erro: "GROQ_API_KEY não configurada"
 
-**Solução:** Se quiser usar OpenWeather:
-1. Crie conta em [openweathermap.org](https://openweathermap.org)
-2. Gere API Key no dashboard
-3. Adicione em variáveis de ambiente no Render.com
+**Solução:**
+1. Acesse [console.groq.com](https://console.groq.com/)
+2. Crie uma conta gratuita
+3. Gere uma API Key no dashboard
+4. Adicione em variáveis de ambiente no Render.com (seção "Environment")
+
+### Erro: "Medicamento não encontrado" na busca
+
+**Possíveis causas:**
+- GROQ_API_KEY expirada ou inválida
+- API Groq fora do ar (consulte [status.groq.com](https://status.groq.com))
+- Timeout na requisição (tente novamente)
 
 ### Serviço desceu após 15 minutos de inatividade
 

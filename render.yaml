@@ -9,7 +9,9 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python main.py"
     envVars:
-      - key: OPENWEATHER_API_KEY
+      - key: GROQ_API_KEY
         value: ""  # Será configurado nas variáveis de ambiente do Render
       - key: DEBUG
         value: "False"
+      - key: PYTHON_VERSION
+        value: "3.12"
