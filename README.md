@@ -42,7 +42,11 @@ Uma aplicação CLI acessível e direta que permite:
 | Tecnologia | Versão | Uso |
 |----------|--------|-----|
 | **Python** | 3.12 | Linguagem principal |
+| **Flask** | 3.0.0+ | Framework web para interface gráfica |
 | **SQLite** | 3 | Banco de dados |
+| **HTML5** | - | Markup semântico |
+| **CSS3** | - | Estilos acessíveis e responsivos |
+| **JavaScript** | - | Interatividade da interface |
 | **Pytest** | 9.0.2 | Testes automatizados |
 | **Flake8** | 7.2.0 | Linting e qualidade de código |
 | **Requests** | 2.31.0 | Consumo de APIs REST |
@@ -51,7 +55,12 @@ Uma aplicação CLI acessível e direta que permite:
 
 ### API Integrada 🔗
 
-- **Groq AI** - Busca de dados com Inteligência Artificial sobre medicamentos 
+- **Groq AI** - Busca de dados com Inteligência Artificial sobre medicamentos
+
+### Interfaces Disponíveis
+
+- **CLI (Command Line Interface)** - `main.py` - Terminal/Console
+- **Web Interface** - `app.py` - Browser - **[NOVA!]** 
 
 ---
 
@@ -60,16 +69,26 @@ Uma aplicação CLI acessível e direta que permite:
 ```
 ControleDeMedicamentos/
 │
+├── 📄 INTERFACES
+├── main.py                              # Interface CLI (Terminal)
+├── app.py                               # Interface Web (Flask) [NOVA]
+│
 ├── 📄 ARQUIVOS PRINCIPAIS
-├── main.py                              # Ponto de entrada e interface CLI
 ├── medicamentos.py                      # Lógica de negócio (cadastro, listagem, etc)
 ├── database.py                          # Gerenciamento de banco de dados SQLite
 ├── api_integration.py                   # Integração com Groq AI 
 │
+├── 🌐 INTERFACE WEB [NOVA!]
+├── templates/
+│   └── index.html                       # Página HTML da interface web
+├── static/
+│   ├── style.css                        # Estilos com foco em acessibilidade
+│   └── script.js                        # Lógica JavaScript e chamadas à API
+│
 ├── 📦 DEPENDÊNCIAS E CONFIGURAÇÃO
 ├── requirements.txt                     # Lista de dependências Python
-├── .env.example                         #  Exemplo de variáveis de ambiente
-├── render.yaml                          #  Configuração para Deploy Render.com
+├── .env.example                         # Exemplo de variáveis de ambiente
+├── render.yaml                          # Configuração para Deploy Render.com
 │
 ├── 📚 DOCUMENTAÇÃO
 ├── README.md                            # Este arquivo
@@ -129,7 +148,9 @@ ControleDeMedicamentos/
 
 ## 🚀 Como Executar
 
-### Início Rápido
+### 🌐 Interface Web [RECOMENDADA PARA IDOSOS]
+
+A interface web é a forma mais amigável de usar o sistema, com uma interface gráfica intuitiva e acessível.
 
 ```bash
 # 1. Clonar repositório
@@ -145,11 +166,32 @@ source .venv/bin/activate  # macOS/Linux
 # 3. Instalar dependências
 pip install -r requirements.txt
 
-# 4. Configurar variáveis de ambiente (necessário para opção 6)
+# 4. Configurar variáveis de ambiente (necessário para consultas com IA)
 cp .env.example .env
 # Adicione sua chave Groq (gratuita em: https://console.groq.com/)
 
-# 5. Executar aplicação
+# 5. Executar aplicação web
+python app.py
+
+# 6. Abrir no navegador
+# Acesse: http://localhost:5000
+```
+
+**Características da Interface Web:**
+- ✅ Design moderno e responsivo
+- ✅ Otimizado para idosos (letras grandes, botões grandes)
+- ✅ Alto contraste e cores acessíveis
+- ✅ Funciona em desktop, tablet e smartphone
+- ✅ Sem necessidade de conhecimento técnico
+
+---
+
+### 💻 Interface CLI (Command Line)
+
+Versão original em linha de comando.
+
+```bash
+# Assumindo que já tem ambiente virtual criado e dependências instaladas
 python main.py
 ```
 

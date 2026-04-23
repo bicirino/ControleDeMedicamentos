@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Controle de Medicamentos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header" role="banner">
+            <div class="header-content">
+                <h1 class="logo"> Controle de Medicamentos</h1>
+                <p class="tagline">Sua rotina de saúde em dia!</p>
+            </div>
+        </header>
+
+        <!-- Main Navigation -->
+        <nav class="main-nav" role="navigation" aria-label="Navegação Principal">
+            <button class="nav-btn active" data-tab="dia" aria-selected="true">
+                📅 Hoje
+            </button>
+            <button class="nav-btn" data-tab="todos" aria-selected="false">
+                📋 Todos
+            </button>
+            <button class="nav-btn" data-tab="cadastrar" aria-selected="false">
+                ➕ Novo
+            </button>
+            <button class="nav-btn" data-tab="consultar" aria-selected="false">
+                ℹ️ Consultar
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tab: Medicamentos do Dia -->
+            <section id="tab-dia" class="tab-content active" role="tabpanel" aria-labelledby="tab-label-dia">
+                <div class="section-header">
+                    <h2 id="tab-label-dia">Medicamentos para Hoje</h2>
+                    <p class="date-display" id="dataHoje"></p>
+                </div>
+
+                <div class="loading" id="loadingDia" style="display:none;">
+                    <p>Carregando medicamentos...</p>
+                </div>
+
+                <div id="medicamentosDiaContainer" class="medicamentos-grid">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+
+                <div class="no-data" id="noDadosDia" style="display:none;">
+                    <p>📭 Nenhum medicamento cadastrado para hoje.</p>
+                </div>
+            </section>
+
+            <!-- Tab: Todos os Medicamentos -->
+            <section id="tab-todos" class="tab-content" role="tabpanel" aria-labelledby="tab-label-todos">
+                <div class="section-header">
+                    <h2 id="tab-label-todos">Todos os Medicamentos</h2>
+                </div>
+
+                <div class="loading" id="loadingTodos" style="display:none;">
+                    <p>Carregando medicamentos...</p>
+                </div>
+
+                <div id="medicamentosTodosContainer" class="medicamentos-table">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+
+                <div class="no-data" id="noDadosTodos" style="display:none;">
+                    <p>📭 Nenhum medicamento cadastrado.</p>
+                </div>
+            </section>
+
+            <!-- Tab: Cadastrar Medicamento -->
+            <section id="tab-cadastrar" class="tab-content" role="tabpanel" aria-labelledby="tab-label-cadastrar">
+                <div class="section-header">
+                    <h2 id="tab-label-cadastrar">Cadastrar Novo Medicamento</h2>
+                </div>
+
+                <form id="formCadastrar" class="form-cadastro" aria-label="Formulário de cadastro de medicamento">
+                    <div class="form-group">
+                        <label for="inputNome">
+                            📋 Nome do Medicamento
+                            <span class="required" aria-label="campo obrigatório">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="inputNome"
+                            name="nome"
+                            placeholder="Ex: Dipirona"
+                            required
+                            aria-required="true"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputDosagem">
+                            💊 Dosagem
+                            <span class="required" aria-label="campo obrigatório">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="inputDosagem"
+                            name="dosagem"
+                            placeholder="Ex: 500mg ou 1 comprimido"
+                            required
+                            aria-required="true"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputHorario">
+                            🕐 Horário de Tomar
+                            <span class="required" aria-label="campo obrigatório">*</span>
+                        </label>
+                        <input
+                            type="time"
+                            id="inputHorario"
+                            name="horario"
+                            required
+                            aria-required="true"
+                        >
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" aria-label="Cadastrar medicamento">
+                            ✅ Cadastrar
+                        </button>
+                        <button type="reset" class="btn btn-secondary" aria-label="Limpar formulário">
+                            🔄 Limpar
+                        </button>
+                    </div>
+
+                    <div class="form-message" id="formMessage"></div>
+                </form>
+            </section>
+
+            <!-- Tab: Consultar Medicamento -->
+            <section id="tab-consultar" class="tab-content" role="tabpanel" aria-labelledby="tab-label-consultar">
+                <div class="section-header">
+                    <h2 id="tab-label-consultar">Consultar Informações de Medicamento</h2>
+                    <p class="subtitle">Busque informações detalhadas sobre seus medicamentos</p>
+                </div>
+
+                <form id="formConsultar" class="form-consulta" aria-label="Formulário de consulta de medicamento">
+                    <div class="form-group">
+                        <label for="inputConsultaNome">
+                            🔍 Nome do Medicamento
+                            <span class="required" aria-label="campo obrigatório">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="inputConsultaNome"
+                            name="nome"
+                            placeholder="Ex: Dipirona"
+                            required
+                            aria-required="true"
+                        >
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" aria-label="Consultar medicamento">
+                            🔍 Consultar
+                        </button>
+                    </div>
+
+                    <div class="form-message" id="consultaMessage"></div>
+                </form>
+
+                <div class="loading" id="loadingConsulta" style="display:none;">
+                    <p>Buscando informações...</p>
+                </div>
+
+                <div id="consultaResultado" class="consulta-resultado" style="display:none;">
+                    <h3 id="consultaMedicamento"></h3>
+                    <div id="consultaInfo" class="consulta-info"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Alert Container -->
+        <div class="alert-container" id="alertContainer" role="alert" aria-live="polite" aria-atomic="true">
+            <!-- Alertas aparecem aqui -->
+        </div>
+    </div>
+
+    <!-- Modal para Marcar como Tomado -->
+    <dialog id="modalMarcado" class="modal" aria-labelledby="modalTitulo">
+        <div class="modal-content">
+            <h3 id="modalTitulo">Confirmar Ação</h3>
+            <p id="modalMensagem"></p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" id="btnConfirmar" aria-label="Confirmar">
+                    ✅ Confirmar
+                </button>
+                <button class="btn btn-secondary" id="btnCancelar" aria-label="Cancelar">
+                    ❌ Cancelar
+                </button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Modal para Remover -->
+    <dialog id="modalRemover" class="modal" aria-labelledby="modalRemoverTitulo">
+        <div class="modal-content modal-danger">
+            <h3 id="modalRemoverTitulo">Remover Medicamento?</h3>
+            <p id="modalRemoverMensagem"></p>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" id="btnConfirmarRemover" aria-label="Remover medicamento">
+                    🗑️ Remover
+                </button>
+                <button class="btn btn-secondary" id="btnCancelarRemover" aria-label="Cancelar">
+                    ❌ Cancelar
+                </button>
+            </div>
+        </div>
+    </dialog>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

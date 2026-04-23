@@ -1,0 +1,242 @@
+"""
+app.py
+Aplicação Flask para interface web do Controle de Medicamentos.
+Expõe endpoints REST que integram com a lógica de negócio existente.
+"""
+
+from flask import Flask, render_template, request, jsonify
+from datetime import datetime
+from database import get_conexao, inicializar_banco
+from medicamentos import (
+    _data_hoje,
+    _validar_horario,
+)
+from api_integration import buscar_medicamento_groq, APIError
+
+app = Flask(__name__)
+
+# Inicializar banco ao iniciar a aplicação
+inicializar_banco()
+
+
+@app.route("/")
+def index():
+    """Renderiza a página principal."""
+    return render_template("index.html")
+
+
+@app.route("/api/medicamentos/dia", methods=["GET"])
+def get_medicamentos_dia():
+    """Retorna medicamentos do dia com status de tomado."""
+    try:
+        hoje = _data_hoje()
+        conexao = get_conexao()
+        cursor = conexao.cursor()
+
+        cursor.execute(
+            "SELECT id, nome, dosagem, horario "
+            "FROM medicamentos WHERE ativo = 1 ORDER BY horario"
+        )
+        medicamentos = cursor.fetchall()
+
+        cursor.execute(
+            "SELECT medicamento_id FROM registros_tomados WHERE data_tomado = ?",
+            (hoje,),
+        )
+        ids_tomados = {row["medicamento_id"] for row in cursor.fetchall()}
+
+        resultado = []
+        for med in medicamentos:
+            resultado.append({
+                "id": med["id"],
+                "nome": med["nome"],
+                "dosagem": med["dosagem"],
+                "horario": med["horario"],
+                "tomado": med["id"] in ids_tomados
+            })
+
+        return jsonify({
+            "sucesso": True,
+            "data": hoje,
+            "medicamentos": resultado
+        })
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+
+@app.route("/api/medicamentos/todos", methods=["GET"])
+def get_todos_medicamentos():
+    """Retorna todos os medicamentos cadastrados (ativos e inativos)."""
+    try:
+        conexao = get_conexao()
+        cursor = conexao.cursor()
+
+        cursor.execute(
+            "SELECT id, nome, dosagem, horario, ativo FROM medicamentos ORDER BY horario"
+        )
+        medicamentos = cursor.fetchall()
+
+        resultado = []
+        for med in medicamentos:
+            resultado.append({
+                "id": med["id"],
+                "nome": med["nome"],
+                "dosagem": med["dosagem"],
+                "horario": med["horario"],
+                "ativo": med["ativo"] == 1
+            })
+
+        return jsonify({
+            "sucesso": True,
+            "medicamentos": resultado
+        })
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+
+@app.route("/api/medicamentos/cadastrar", methods=["POST"])
+def cadastrar_medicamento():
+    """Cadastra um novo medicamento."""
+    try:
+        dados = request.get_json()
+
+        nome = dados.get("nome", "").strip()
+        if not nome:
+            return jsonify({"sucesso": False, "erro": "Nome não pode ser vazio"}), 400
+
+        dosagem = dados.get("dosagem", "").strip()
+        if not dosagem:
+            return jsonify({"sucesso": False, "erro": "Dosagem não pode ser vazia"}), 400
+
+        horario = dados.get("horario", "").strip()
+        if not _validar_horario(horario):
+            return jsonify({
+                "sucesso": False,
+                "erro": "Horário inválido. Use o formato HH:MM"
+            }), 400
+
+        conexao = get_conexao()
+        cursor = conexao.cursor()
+
+        cursor.execute(
+            "INSERT INTO medicamentos (nome, dosagem, horario) VALUES (?, ?, ?)",
+            (nome, dosagem, horario),
+        )
+
+        conexao.commit()
+        novo_id = cursor.lastrowid
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": f"Medicamento '{nome}' cadastrado com sucesso!",
+            "id": novo_id
+        })
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+
+@app.route("/api/medicamentos/<int:med_id>/marcar-tomado", methods=["POST"])
+def marcar_como_tomado(med_id):
+    """Marca um medicamento como tomado hoje."""
+    try:
+        hoje = _data_hoje()
+        conexao = get_conexao()
+        cursor = conexao.cursor()
+
+        cursor.execute(
+            "SELECT nome FROM medicamentos WHERE id = ? AND ativo = 1",
+            (med_id,),
+        )
+        medicamento = cursor.fetchone()
+
+        if not medicamento:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Medicamento não encontrado ou inativo"
+            }), 404
+
+        cursor.execute(
+            "SELECT id FROM registros_tomados "
+            "WHERE medicamento_id = ? AND data_tomado = ?",
+            (med_id, hoje),
+        )
+        if cursor.fetchone():
+            return jsonify({
+                "sucesso": False,
+                "erro": f"'{medicamento['nome']}' já foi marcado como tomado hoje"
+            }), 400
+
+        cursor.execute(
+            "INSERT INTO registros_tomados (medicamento_id, data_tomado) "
+            "VALUES (?, ?)",
+            (med_id, hoje),
+        )
+
+        conexao.commit()
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": f"'{medicamento['nome']}' marcado como tomado!"
+        })
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+
+@app.route("/api/medicamentos/<int:med_id>/remover", methods=["DELETE"])
+def remover_medicamento(med_id):
+    """Remove (desativa) um medicamento."""
+    try:
+        conexao = get_conexao()
+        cursor = conexao.cursor()
+
+        cursor.execute(
+            "SELECT nome FROM medicamentos WHERE id = ?",
+            (med_id,),
+        )
+        medicamento = cursor.fetchone()
+
+        if not medicamento:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Medicamento não encontrado"
+            }), 404
+
+        cursor.execute(
+            "UPDATE medicamentos SET ativo = 0 WHERE id = ?",
+            (med_id,),
+        )
+
+        conexao.commit()
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": f"Medicamento '{medicamento['nome']}' removido!"
+        })
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+
+@app.route("/api/medicamentos/<nome>/consultar", methods=["GET"])
+def consultar_medicamento(nome):
+    """Consulta informações sobre um medicamento via Groq API."""
+    try:
+        informacoes = buscar_medicamento_groq(nome)
+        return jsonify({
+            "sucesso": True,
+            "medicamento": nome,
+            "informacoes": informacoes
+        })
+    except APIError as e:
+        return jsonify({
+            "sucesso": False,
+            "erro": str(e)
+        }), 400
+    except Exception as e:
+        return jsonify({
+            "sucesso": False,
+            "erro": "Erro ao consultar informações do medicamento"
+        }), 500
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)

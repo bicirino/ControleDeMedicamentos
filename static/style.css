@@ -1,0 +1,847 @@
+/* ==============================
+   ESTILO GLOBAL E RESET
+   ============================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #F9FAFB 0%, #2563EB 100%);
+    color: #6B7280;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 0;
+}
+
+/* ==============================
+   ACESSIBILIDADE
+   ============================== */
+
+/* Foco visível para navegação por teclado */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+    outline: 3px solid #ffd700;
+    outline-offset: 2px;
+}
+
+/* Reduzir movimento para usuários sensíveis */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==============================
+   CONTAINER PRINCIPAL
+   ============================== */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ==============================
+   HEADER
+   ============================== */
+
+.header {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.header-content {
+    margin: 0 auto;
+}
+
+.logo {
+    font-size: 42px;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.tagline {
+    font-size: 24px;
+    color: #666;
+}
+
+/* ==============================
+   NAVEGAÇÃO
+   ============================== */
+
+.main-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.nav-btn {
+    padding: 20px 25px;
+    font-size: 20px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.nav-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    background: #f8f9fa;
+}
+
+.nav-btn:active {
+    transform: translateY(-1px);
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* ==============================
+   CONTEÚDO PRINCIPAL
+   ============================== */
+
+.main-content {
+    background: white;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    min-height: 400px;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.section-header {
+    margin-bottom: 40px;
+}
+
+.section-header h2 {
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.date-display {
+    font-size: 18px;
+    color: #666;
+}
+
+.subtitle {
+    font-size: 18px;
+    color: #666;
+    margin-top: 10px;
+}
+
+/* ==============================
+   MEDICAMENTOS - GRADE
+   ============================== */
+
+.medicamentos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.medicamento-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #f0f3f7 100%);
+    border: 2px solid #e0e7ff;
+    border-radius: 12px;
+    padding: 25px;
+    transition: all 0.3s ease;
+}
+
+.medicamento-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+    border-color: #667eea;
+}
+
+.medicamento-card.tomado {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-color: #28a745;
+}
+
+.medicamento-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.medicamento-icon {
+    font-size: 40px;
+}
+
+.medicamento-nome {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    flex-grow: 1;
+}
+
+.medicamento-dosagem {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.medicamento-horario {
+    font-size: 20px;
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.medicamento-status {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.medicamento-status.pendente {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.medicamento-status.tomado {
+    background: #d4edda;
+    color: #155724;
+}
+
+.medicamento-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-acao {
+    flex: 1;
+    padding: 12px 15px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 50px;
+}
+
+/* ==============================
+   MEDICAMENTOS - TABELA
+   ============================== */
+
+.medicamentos-table {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 18px;
+}
+
+thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+th {
+    padding: 20px;
+    text-align: left;
+    font-weight: 700;
+    border: none;
+}
+
+td {
+    padding: 20px;
+    border-bottom: 1px solid #e0e7ff;
+}
+
+tbody tr {
+    transition: background 0.3s ease;
+}
+
+tbody tr:hover {
+    background: #f5f7fa;
+}
+
+tbody tr.inativo {
+    opacity: 0.6;
+}
+
+td.status-ativo {
+    color: #28a745;
+    font-weight: 600;
+}
+
+td.status-inativo {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* ==============================
+   FORMULÁRIO
+   ============================== */
+
+.form-cadastro,
+.form-consulta {
+    max-width: 500px;
+}
+
+.form-group {
+    margin-bottom: 30px;
+}
+
+label {
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #333;
+}
+
+.required {
+    color: #dc3545;
+    font-size: 24px;
+}
+
+input[type="text"],
+input[type="time"],
+select,
+textarea {
+    width: 100%;
+    padding: 18px;
+    font-size: 18px;
+    border: 2px solid #e0e7ff;
+    border-radius: 8px;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="time"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+input::placeholder {
+    color: #999;
+}
+
+/* ==============================
+   BOTÕES
+   ============================== */
+
+.btn {
+    padding: 18px 30px;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 60px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: #e0e7ff;
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary:hover {
+    background: #d0dff8;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.form-actions .btn {
+    flex: 1;
+}
+
+/* ==============================
+   MENSAGENS
+   ============================== */
+
+.alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+}
+
+.alert {
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    animation: slideIn 0.3s ease;
+}
+
+.alert.success {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #28a745;
+}
+
+.alert.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 2px solid #dc3545;
+}
+
+.alert.warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 2px solid #ffc107;
+}
+
+.alert.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 2px solid #17a2b8;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+.alert.removing {
+    animation: slideOut 0.3s ease forwards;
+}
+
+.form-message {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    display: none;
+}
+
+.form-message.success {
+    display: block;
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #28a745;
+}
+
+.form-message.error {
+    display: block;
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #dc3545;
+}
+
+/* ==============================
+   CARREGAMENTO
+   ============================== */
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    font-size: 20px;
+    color: #666;
+}
+
+.loading p {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* ==============================
+   SEM DADOS
+   ============================== */
+
+.no-data {
+    text-align: center;
+    padding: 60px 30px;
+    background: #f5f7fa;
+    border-radius: 12px;
+}
+
+.no-data p {
+    font-size: 24px;
+    color: #666;
+}
+
+/* ==============================
+   MODAL
+   ============================== */
+
+.modal {
+    border: none;
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal[open] {
+    animation: modalOpen 0.3s ease;
+}
+
+@keyframes modalOpen {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    padding: 40px;
+    background: white;
+}
+
+.modal-content.modal-danger {
+    border-top: 4px solid #dc3545;
+}
+
+.modal-content h3 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.modal-content p {
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.modal-buttons .btn {
+    flex: 1;
+}
+
+/* ==============================
+   CONSULTA
+   ============================== */
+
+.consulta-resultado {
+    margin-top: 30px;
+    padding: 30px;
+    background: #f5f7fa;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.consulta-resultado h3 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.consulta-info {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #555;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* ==============================
+   RESPONSIVIDADE
+   ============================== */
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .header {
+        padding: 30px 20px;
+    }
+
+    .logo {
+        font-size: 32px;
+    }
+
+    .tagline {
+        font-size: 18px;
+    }
+
+    .main-nav {
+        grid-template-columns: 1fr;
+    }
+
+    .main-content {
+        padding: 25px;
+    }
+
+    .section-header h2 {
+        font-size: 26px;
+    }
+
+    .medicamentos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .medicamento-card {
+        padding: 20px;
+    }
+
+    .medicamento-nome {
+        font-size: 22px;
+    }
+
+    .alert-container {
+        left: 15px;
+        right: 15px;
+        max-width: none;
+    }
+
+    .modal {
+        width: 90vw;
+        margin: auto;
+    }
+
+    .modal-content {
+        padding: 30px;
+    }
+
+    .modal-content h3 {
+        font-size: 24px;
+    }
+
+    .modal-content p {
+        font-size: 18px;
+    }
+
+    table {
+        font-size: 16px;
+    }
+
+    th, td {
+        padding: 15px 10px;
+    }
+
+    .btn {
+        padding: 15px 20px;
+        font-size: 16px;
+        min-height: 50px;
+    }
+
+    .nav-btn {
+        padding: 18px 20px;
+        font-size: 18px;
+        min-height: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 28px;
+    }
+
+    .tagline {
+        font-size: 16px;
+    }
+
+    .section-header h2 {
+        font-size: 22px;
+    }
+
+    .medicamento-card {
+        padding: 15px;
+    }
+
+    .medicamento-nome {
+        font-size: 20px;
+    }
+
+    .medicamento-icon {
+        font-size: 32px;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+
+    .modal-content h3 {
+        font-size: 20px;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+    }
+
+    input[type="text"],
+    input[type="time"],
+    select {
+        padding: 15px;
+        font-size: 16px;
+    }
+
+    label {
+        font-size: 18px;
+    }
+}
+
+/* ==============================
+   IMPRESSÃO
+   ============================== */
+
+@media print {
+    body {
+        background: white;
+    }
+
+    .main-nav {
+        display: none;
+    }
+
+    .alert-container {
+        display: none;
+    }
+
+    .medicamento-actions {
+        display: none;
+    }
+
+    .form-cadastro,
+    .form-consulta {
+        display: none;
+    }
+}
