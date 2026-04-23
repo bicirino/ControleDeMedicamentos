@@ -66,13 +66,13 @@ def get_medicamentos_dia():
 
 @app.route("/api/medicamentos/todos", methods=["GET"])
 def get_todos_medicamentos():
-    """Retorna todos os medicamentos cadastrados (ativos e inativos)."""
+    """Retorna todos os medicamentos cadastrados (apenas ativos)."""
     try:
         conexao = get_conexao()
         cursor = conexao.cursor()
 
         cursor.execute(
-            "SELECT id, nome, dosagem, horario, ativo FROM medicamentos ORDER BY horario"
+            "SELECT id, nome, dosagem, horario, ativo FROM medicamentos WHERE ativo = 1 ORDER BY horario"
         )
         medicamentos = cursor.fetchall()
 

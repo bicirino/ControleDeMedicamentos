@@ -62,16 +62,14 @@ function configurarTema() {
 
 function aplicarTema(isDarkMode) {
     const htmlElement = document.documentElement;
-    const themeToggle = document.getElementById('themeToggle');
+    const themeToggle = document.querySelector('.toggle-label');
     
     if (isDarkMode) {
         htmlElement.setAttribute('data-theme', 'dark');
-        themeToggle.textContent = '☀️';
-        themeToggle.setAttribute('aria-label', 'Alternar para modo claro');
+        if (themeToggle) themeToggle.textContent = '☀️';
     } else {
         htmlElement.setAttribute('data-theme', 'light');
-        themeToggle.textContent = '🌙';
-        themeToggle.setAttribute('aria-label', 'Alternar para modo escuro');
+        if (themeToggle) themeToggle.textContent = '🌙';
     }
 }
 

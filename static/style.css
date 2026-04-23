@@ -6,8 +6,8 @@
     /* MODO CLARO (Padrão) - Paleta 60/30/10 */
     /* 60%: Background neutro */
     --bg-primary: #FFFFFF;
-    --bg-secondary: #F9FAFB;
-    --bg-tertiary: #F3F4F6;
+    --bg-secondary: #F0F1F3;
+    --bg-tertiary: #E8EAED;
     
     /* 60%: Texto */
     --text-primary: #1F2937;
@@ -120,15 +120,15 @@ html[data-theme="dark"] {
 html[data-theme="light"] {
     color-scheme: light;
     --bg-primary: #FFFFFF;
-    --bg-secondary: #F9FAFB;
-    --bg-tertiary: #F3F4F6;
+    --bg-secondary: #F0F1F3;
+    --bg-tertiary: #E8EAED;
     
     --text-primary: #1F2937;
     --text-secondary: #6B7280;
     --text-tertiary: #9CA3AF;
     
-    --border-color: #E5E7EB;
-    --border-subtle: #F3F4F6;
+    --border-color: #D4D7DB;
+    --border-subtle: #E8EAED;
     
     --color-primary: #1E40AF;
     --color-primary-light: #DBEAFE;
@@ -182,7 +182,7 @@ html[data-theme="dark"] {
 
 html {
     scroll-behavior: smooth;
-    font-size: 16px;
+    font-size: 18px;
 }
 
 body {
@@ -247,33 +247,72 @@ textarea:focus-visible {
 }
 
 /* Theme Toggle Button */
+.theme-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
 .theme-toggle {
     background: none;
     border: none;
-    font-size: 1.5rem;
     cursor: pointer;
-    padding: var(--space-md);
-    border-radius: var(--radius-md);
-    transition: all 0.3s ease;
+    padding: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    min-height: 44px;
-    color: var(--text-primary);
+    gap: var(--space-md);
+    transition: all 0.3s ease;
 }
 
-.theme-toggle:hover {
+.toggle-track {
+    width: 56px;
+    height: 32px;
+    background-color: var(--border-color);
+    border-radius: 16px;
+    position: relative;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.toggle-thumb {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    background-color: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle:hover .toggle-track {
     background-color: var(--color-primary-light);
-    transform: scale(1.1);
 }
 
-.theme-toggle:active {
-    transform: scale(0.95);
+html[data-theme="dark"] .toggle-track {
+    background-color: var(--color-primary);
+}
+
+html[data-theme="dark"] .toggle-thumb {
+    left: 26px;
+    background-color: #F3F4F6;
+}
+
+.toggle-label {
+    font-size: 1.3rem;
+    min-width: 24px;
+    text-align: center;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:active .toggle-label {
+    transform: scale(0.9);
 }
 
 .logo {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
@@ -300,7 +339,7 @@ textarea:focus-visible {
 
 .nav-btn {
     padding: var(--space-lg) var(--space-md);
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: var(--font-weight-semibold);
     border: 1px solid transparent;
     border-radius: var(--radius-md);
@@ -371,7 +410,7 @@ textarea:focus-visible {
 }
 
 .section-header h2 {
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
     margin-bottom: var(--space-md);
@@ -379,7 +418,7 @@ textarea:focus-visible {
 }
 
 .date-display {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: var(--text-secondary);
     font-weight: var(--font-weight-medium);
 }
@@ -461,7 +500,7 @@ textarea:focus-visible {
 }
 
 .medicamento-status {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: var(--font-weight-semibold);
     padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-sm);
@@ -553,7 +592,7 @@ td.status-inativo {
 
 label {
     display: block;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: var(--font-weight-semibold);
     margin-bottom: var(--space-md);
     color: var(--text-primary);
@@ -569,7 +608,7 @@ select,
 textarea {
     width: 100%;
     padding: var(--space-md) var(--space-lg);
-    font-size: 1rem;
+    font-size: 1.05rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     background-color: var(--bg-primary);
@@ -598,7 +637,7 @@ input::placeholder {
 
 .btn {
     padding: var(--space-md) var(--space-lg);
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: var(--font-weight-semibold);
     border: none;
     border-radius: var(--radius-md);
@@ -662,13 +701,13 @@ input::placeholder {
 
 /* BOTÃO PERIGO - Destaque mas com cor de aviso */
 .btn-danger {
-    background-color: var(--color-danger);
+    background-color: #DC2626;
     color: #FFFFFF;
     box-shadow: var(--shadow-md);
 }
 
 .btn-danger:hover {
-    background-color: #651414;
+    background-color: #B91C1C;
     box-shadow: var(--shadow-lg);
     transform: translateY(-1px);
 }
