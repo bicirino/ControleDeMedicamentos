@@ -5,7 +5,8 @@ from medicamentos import (
     listar_medicamentos_do_dia,
     marcar_como_tomado,
     listar_todos_medicamentos,
-    remover_medicamento
+    remover_medicamento,
+    consultar_medicamento_com_api
 )
 
 BANNER = """
@@ -25,6 +26,7 @@ MENU = """
 │  3. Marcar Medicamento como Tomado               │
 │  4. Ver Todos os Medicamentos Cadastrados        │
 │  5. Remover Medicamento                          │
+│  6. Consultar Informações de Medicamento         │
 │  0. Sair                                         │
 └──────────────────────────────────────────────────┘
 """
@@ -62,6 +64,10 @@ def executar_opcao(opcao: str) -> bool:
     elif opcao == "5":
         print("\n── Remover Medicamento ──")
         remover_medicamento()
+
+    elif opcao == "6":
+        print("\n── Consultar Medicamento via Groq API ──")
+        consultar_medicamento_com_api()
 
     elif opcao == "0":
         print("\n Encerrando o sistema.")
