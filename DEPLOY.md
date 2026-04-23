@@ -39,7 +39,7 @@ Preencha os campos conforme abaixo:
 | **Name** | `controle-medicamentos` | Nome único do serviço |
 | **Runtime** | `Python 3` | Selecione Python 3 |
 | **Build Command** | `pip install -r requirements.txt` | Instala dependências |
-| **Start Command** | `python main.py` | Comando para iniciar a app |
+| **Start Command** | `python app.py` | Comando para iniciar o servidor Flask |
 | **Plan** | `Free` | Plano gratuito (dormência após 15min inatividade) |
 
 ### Etapa 4: Adicionar Variáveis de Ambiente
@@ -161,13 +161,14 @@ Após deploy:
 
 ```bash
 # Copiar o link do Render (ex: https://seu-app.onrender.com)
-# Acessar a API ou CLI da sua aplicação
+# Abrir no navegador para acessar a interface web da aplicação
 
-# Se usar CLI, clone e execute localmente
+# Para executar localmente
 git clone https://github.com/seu-usuario/ControleDeMedicamentos
 cd ControleDeMedicamentos
 pip install -r requirements.txt
-python main.py
+python app.py
+# Acesse http://127.0.0.1:5000 no navegador
 ```
 
 ---

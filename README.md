@@ -1,6 +1,6 @@
 # 💊 Controle De Medicamentos
 
-**Um aplicativo CLI para auxiliar idosos e cuidadores no controle de medicamentos e horários.**
+**Uma aplicação web moderna para auxiliar idosos e cuidadores no controle de medicamentos e horários.**
 
 > **🌐 Deploy ao Vivo:** [Disponível em breve - link será adicionado após publicação]
 
@@ -20,12 +20,13 @@ Idosos frequentemente enfrentam rotinas complexas de medicação:
 
 ### ✨ A Solução
 
-Uma aplicação CLI acessível e direta que permite:
+Uma aplicação web moderna e intuitiva que permite:
 - ✅ Cadastro organizado de medicamentos com horários
 - ✅ Visualização clara do que deve ser tomado hoje
 - ✅ Registro de medicamentos já tomados
-- ✅ Listagem completa de medicamentos
-- ✅ Remoção (desativação) de medicamentos
+- ✅ Interface gráfica profissional e acessível
+- ✅ Modo claro e escuro automático
+- ✅ Totalmente responsivo (desktop, tablet, smartphone)
 
 ---
 
@@ -57,11 +58,6 @@ Uma aplicação CLI acessível e direta que permite:
 
 - **Groq AI** - Busca de dados com Inteligência Artificial sobre medicamentos
 
-### Interfaces Disponíveis
-
-- **CLI (Command Line Interface)** - `main.py` - Terminal/Console
-- **Web Interface** - `app.py` - Browser - **[NOVA!]** 
-
 ---
 
 ## 📁 Estrutura do Projeto
@@ -69,20 +65,19 @@ Uma aplicação CLI acessível e direta que permite:
 ```
 ControleDeMedicamentos/
 │
-├── 📄 INTERFACES
-├── main.py                              # Interface CLI (Terminal)
-├── app.py                               # Interface Web (Flask) [NOVA]
+├── 📄 APLICAÇÃO WEB
+├── app.py                               # Servidor Flask (Backend)
 │
-├── 📄 ARQUIVOS PRINCIPAIS
-├── medicamentos.py                      # Lógica de negócio (cadastro, listagem, etc)
+├── 📄 LÓGICA DE NEGÓCIO
+├── medicamentos.py                      # Funções de cadastro, listagem, etc
 ├── database.py                          # Gerenciamento de banco de dados SQLite
-├── api_integration.py                   # Integração com Groq AI 
+├── api_integration.py                   # Integração com Groq AI
 │
-├── 🌐 INTERFACE WEB [NOVA!]
+├── 🌐 INTERFACE WEB
 ├── templates/
 │   └── index.html                       # Página HTML da interface web
 ├── static/
-│   ├── style.css                        # Estilos com foco em acessibilidade
+│   ├── style.css                        # Estilos responsivos e acessíveis
 │   └── script.js                        # Lógica JavaScript e chamadas à API
 │
 ├── 📦 DEPENDÊNCIAS E CONFIGURAÇÃO
@@ -99,8 +94,8 @@ ControleDeMedicamentos/
 ├── 🧪 TESTES
 ├── tests/
 │   ├── __init__.py
-│   ├── test_medicamentos.py             # testes unitários
-│   └── test_api_integration.py          # testes de integração com Groq AI 
+│   ├── test_medicamentos.py             # Testes unitários
+│   └── test_api_integration.py          # Testes de integração com Groq AI
 │
 ├── 🔧 CONFIGURAÇÃO GIT
 ├── .github/
@@ -109,8 +104,8 @@ ControleDeMedicamentos/
 ├── .gitignore                           # Arquivos ignorados pelo Git
 │
 └── 📊 DADOS E CACHE
-    ├── medicamentos.db                  # Banco de dados SQLite (gerado na primeira execução)
-    └── .pytest_cache/                   # Cache de testes (gerado automaticamente)
+    ├── medicamentos.db                  # Banco de dados SQLite
+    └── .pytest_cache/                   # Cache de testes
 ```
 
 
@@ -186,237 +181,83 @@ python app.py
 
 ---
 
-### 💻 Interface CLI (Command Line)
-
-Versão original em linha de comando.
-
-```bash
-# Assumindo que já tem ambiente virtual criado e dependências instaladas
-python main.py
-```
-
-### Testando as Funcionalidades
-
-#### ✅ Teste 1: Funcionalidades Básicas
-
-```bash
-python main.py
-# Menu aparece automaticamente
-# Escolha opção 1: Cadastrar Medicamento
-# - Nome: Paracetamol
-# - Dosagem: 500mg
-# - Horário: 08:00
-# ✅ Confirmação de cadastro
-```
-
-#### ✅ Teste 2: Consulta com Groq AI (NOVO)
-
-```bash
-python main.py
-# Escolha opção 6: Consultar Informações de Medicamento (IA)
-# - Digite: Paracetamol
-# ✅ Sistema consulta a Groq AI e exibe informações como:
-#   - Nome do medicamento
-#   - Uso geral
-#   - Cuidados importantes
-#   - Observações relevantes
-
-#### ✅ Teste 3: Testes Automatizados
-
-```bash
-# Executar todos os testes (19 total)
-python -m pytest tests/ -v
-
-# Apenas testes de integração com BrasilAPI (8 testes)
-python -m pytest tests/test_api_integration.py -v
-
-# Apenas testes unitários (11 testes)
-python -m pytest tests/test_medicamentos.py -v
-
-# Com relatório de cobertura
-python -m pytest tests/ -v --cov=. --cov-report=html
-```
-
-#### ✅ Teste 4: Validação de Código
-
-```bash
-# Verificar estilo de código (Flake8)
-python -m flake8 main.py medicamentos.py database.py api_integration.py --max-line-length=79
-
-# ✅ Esperado: Sem erros ou warnings
-```
-
----
-
 ## 📖 Como Usar
 
-### Menu Principal Interativo
+### Interface Web - Guia de Funcionalidades
 
-A aplicação possui um menu interativo no terminal com 7 opções:
+A aplicação web possui 4 abas principais para gerenciar seus medicamentos:
 
-```
-╔══════════════════════════════════════════════════╗
-║         💊 CONTROLE DE MEDICAMENTOS              ║
-║         Sua rotina de saúde em dia!              ║
-╚══════════════════════════════════════════════════╝
+#### 📆 Aba 1: Hoje
 
-┌──────────────────────────────────────────────────┐
-│                   MENU PRINCIPAL                 │
-├──────────────────────────────────────────────────┤
-│  1. Cadastrar Medicamento                        │
-│  2. Ver Medicamentos do Dia                      │
-│  3. Marcar Medicamento como Tomado               │
-│  4. Ver Todos os Medicamentos Cadastrados        │
-│  5. Remover Medicamento                          │
-│  6. Consultar Informações de Medicamento (API)   │
-│  0. Sair                                         │
-└──────────────────────────────────────────────────┘
-```
-
-### Guia Detalhado das Funcionalidades
-
-#### 1️⃣ Cadastrar Medicamento
-
-**O que faz:** Adiciona um novo medicamento ao sistema com horário de administração.
+Mostra todos os medicamentos que precisam ser tomados **hoje**, com status de cada um:
+- ✔️ Verde = Já tomado
+- ⏳ Cinza = Ainda não tomado
 
 **Como usar:**
-```
-Opção: 1
-📋 Nome do medicamento: Paracetamol
-💊 Dosagem (ex: 500mg, 1 comprimido): 500mg
-🕐 Horario de tomar (HH:MM): 08:00
-✅ Medicamento 'Paracetamol' cadastrado com sucesso!
-```
-
-**Validações:**
-- ✅ Nome obrigatório (não pode ficar vazio)
-- ✅ Dosagem obrigatória
-- ✅ Horário no formato HH:MM (08:00, 14:30, etc)
+1. Clique na aba "📆 Hoje"
+2. Veja os medicamentos organizados por horário
+3. Clique no medicamento para marcar como tomado
+4. Clique no ícone 🗑️ para remover o medicamento
 
 ---
 
-#### 2️⃣ Ver Medicamentos do Dia
+#### 📝 Aba 2: Todos
 
-**O que faz:** Lista todos os medicamentos a tomar hoje com status (Pendente/Tomado).
-
-**Como usar:**
-```
-Opção: 2
-
-📅 Medicamentos para hoje (2026-04-22):
-
-  ID   Horario   Medicamento           Dosagem              Status
-  ──────────────────────────────────────────────────────────────────
-  1    08:00     Paracetamol           500mg                ⏳ Pendente
-  2    14:00     Antibiótico           1 comprimido         ✅ Tomado
-```
+Lista **todos** os medicamentos cadastrados na sua rotina. Aqui você pode:
+- Visualizar a lista completa
+- Remover medicamentos que não mais precisa tomar
+- Ver todos os horários de uma vez
 
 ---
 
-#### 3️⃣ Marcar Medicamento como Tomado
+#### ✨ Aba 3: Novo
 
-**O que faz:** Registra que um medicamento foi tomado hoje.
+Adiciona um **novo medicamento** ao seu controle:
 
-**Como usar:**
-```
-Opção: 3
-[Lista de medicamentos do dia é exibida]
-🔢 Informe o ID do medicamento tomado: 1
-✅ 'Paracetamol' marcado como tomado!
-```
-
-**Proteções:**
-- ✅ Não permite marcar o mesmo medicamento 2x no mesmo dia
-- ✅ Valida se o ID existe
+**Passos:**
+1. Clique na aba "✨ Novo"
+2. Preencha:
+   - **Nome:** Nome do medicamento (ex: Paracetamol)
+   - **Dosagem:** Quantidade (ex: 500mg, 1 comprimido)
+   - **Horário:** Hora para tomar (ex: 08:00, 14:30)
+3. Clique em "Cadastrar"
+4. ✅ Medicamento adicionado com sucesso!
 
 ---
 
-#### 4️⃣ Ver Todos os Medicamentos Cadastrados
+#### 🔍 Aba 4: Consultar
 
-**O que faz:** Lista todos os medicamentos cadastrados (Ativos e Inativos).
+Busca informações detalhadas sobre um medicamento usando **Inteligência Artificial** (Groq AI):
 
 **Como usar:**
-```
-Opção: 4
-
-📋 Todos os medicamentos cadastrados:
-
-  ID   Horario   Medicamento           Dosagem              Situacao
-  ──────────────────────────────────────────────────────────────────
-  1    08:00     Paracetamol           500mg                🟢 Ativo
-  2    14:00     Antibiótico           1 comprimido         🔴 Inativo
-```
+1. Clique na aba "🔍 Consultar"
+2. Digite o nome do medicamento (ex: Paracetamol)
+3. Clique em "Buscar"
+4. 🤖 O sistema consulta a IA e exibe:
+   - Nome do medicamento
+   - Para que serve
+   - Como usar
+   - Cuidados e contraindicações
 
 ---
 
-#### 5️⃣ Remover Medicamento
+### 🌙 Modo Claro/Escuro
 
-**O que faz:** Desativa um medicamento (soft delete - dados permanecem para histórico).
+A aplicação detecta automaticamente suas preferências:
+- **Modo Escuro:** Se seu sistema está em dark mode
+- **Modo Claro:** Se seu sistema está em light mode
 
-**Como usar:**
-```
-Opção: 5
-[Lista de medicamentos é exibida]
-🔢 Informe o ID do medicamento a remover: 1
-⚠️  Deseja remover 'Paracetamol'? (s/n): s
-✅ 'Paracetamol' removido com sucesso!
-```
-
-**Segurança:**
-- ✅ Pede confirmação antes de remover
-- ✅ Dados históricos preservados no banco
-
----
-
-#### 6️⃣ Consultar Informações de Medicamento com IA ⭐ NOVO!
-
-**O que faz:** Busca informações detalhadas sobre um medicamento usando **Groq AI** (Inteligência Artificial).
-
-**Como usar:**
-```
-Opção: 6
-📋 Digite o nome do medicamento: Paracetamol
-
-🤖 Consultando Groq AI para informações do medicamento...
-
-✅ Informações encontradas:
-
-  📋 Medicamento: Paracetamol
-
-  📝 Informações:
-     Paracetamol é um analgésico e antipirético usado para aliviar dor
-     e reduzir febre. Princípio ativo: Paracetamol. Contraindicações:
-     hipersensibilidade ao paracetamol, insuficiência hepática grave.
-
-  🔗 Fonte: Groq AI
-```
-
-**Funcionalidade Nova - Etapa 2:**
-- ✅ Integração com **Groq AI** (IA rápida e gratuita)
-- ✅ Respostas inteligentes sobre medicamentos
-- ✅ Tratamento de erros (API key não configurada, medicamento não encontrado)
-- ✅ 5 testes de integração específicos para essa funcionalidade
-
----
-
-### Fluxo Completo de Uso
-
-1. **Executar**: `python main.py`
-2. **Cadastrar**: Opção 1 - Adicionar novo medicamento
-3. **Consultar API**: Opção 6 - Verificar informações na BrasilAPI
-4. **Ver Hoje**: Opção 2 - Visualizar medicamentos do dia
-5. **Marcar**: Opção 3 - Registrar medicamentos tomados
-6. **Listar Todos**: Opção 4 - Ver histórico completo
-7. **Sair**: Opção 0 - Encerrar aplicação
+**Ou escolha manualmente:**
+- Clique no ícone ☀️/🌙 no canto superior direito para alternar entre temas
 
 ---
 
 ## 🔐 Configuração de Variáveis de Ambiente
 
-### Funcionalidade Básica (Sem API)
-A aplicação funciona **100% sem configuração** para as opções 1-5 (cadastro, listagem, remoção).
+### Funcionalidade Básica
+A aplicação funciona **100% sem configuração** para as abas 1-3 (Hoje, Todos, Novo).
 
-### Funcionalidade de IA (Opção 6)
+### Funcionalidade de IA (Aba Consultar)
 Para usar a consulta de medicamentos com IA, você precisa de uma chave Groq (gratuita):
 
 1. **Obtenha uma chave gratuita:**
@@ -431,7 +272,7 @@ Para usar a consulta de medicamentos com IA, você precisa de uma chave Groq (gr
    # GROQ_API_KEY=sua_chave_aqui
    ```
 
-3. **Pronto!** ✅ Opção 6 funcionará normalmente
+3. **Pronto!** ✅ A aba "Consultar" funcionará normalmente
 
 > **Nota:** A chave Groq é **gratuita** e vem com um limite generoso de requisições (suficiente para uso pessoal) 
 
@@ -533,7 +374,7 @@ Garante que o código segue padrões Python reconhecidos internacionalmente (PEP
 ### Executar Flake8
 
 ```bash
-python -m flake8 main.py medicamentos.py database.py api_integration.py --max-line-length=79
+python -m flake8 medicamentos.py database.py api_integration.py app.py --max-line-length=120
 
 # Saída esperada (NENHUMA):
 # (sem erros ou warnings = ✅ sucesso)

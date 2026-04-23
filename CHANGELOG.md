@@ -5,9 +5,42 @@ Todos às mudanças notáveis neste projeto terão documentação neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto respeita o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [1.0.0] - 2025-04-10
+## [2.0.0] - 2025-04-22
 
 ### ✨ Adicionado
+
+- **Interface Web moderna e responsiva** com HTML5, CSS3 e JavaScript vanilla
+- **Design profissional** com sistema de cores consistente (60-30-10 rule, Azul Profundo)
+- **Modo Claro/Escuro** com detecção automática de preferências do sistema
+- **4 abas principais:**
+  - 📆 **Hoje**: Visualização de medicamentos do dia com status
+  - 📝 **Todos**: Lista completa de medicamentos cadastrados
+  - ✨ **Novo**: Formulário para adicionar novos medicamentos
+  - 🔍 **Consultar**: Busca inteligente com IA (Groq AI)
+- **Layout totalmente responsivo** (Desktop, Tablet, Mobile)
+- **Acessibilidade melhorada** com fontes legíveis e contraste apropriado
+- **Integração com Groq AI** para consultas sobre medicamentos
+- **Backend Flask** com 7 endpoints REST
+
+### 🔄 Melhorias
+
+- Interface gráfica substitui completamente a CLI
+- Experiência de usuário otimizada para idosos
+- Navegação intuitiva e clara
+- Dados persistem automaticamente
+- Sem necessidade de conhecimento técnico
+
+### 🚀 Removido
+
+- Interface CLI (main.py)
+- Documentação relacionada a terminal/console
+- Menu interativo em linha de comando
+
+---
+
+## [1.0.0] - 2025-04-10
+
+### ✨ Adicionado (Versão Inicial)
 
 - **Interface CLI completa** com menu interativo e navegação intuitiva
 - **Sistema de cadastro de medicamentos** com validação de dados:
@@ -22,29 +55,9 @@ e este projeto respeita o [Versionamento Semântico](https://semver.org/lang/pt-
 - **Testes automatizados** (11 testes cobrindo casos válidos, inválidos e limites)
 - **Linting com Flake8** para qualidade de código
 - **GitHub Actions CI** para validação automática
+- **Integração com Groq AI** para informações sobre medicamentos
 - **Documentação completa** com README, instrções de instalação e uso
 - **Licença MIT** para uso livre
-
-### 🔄 Design da Solução
-
-O projeto resolve a dor real de idosos e cuidadores que enfrentam:
-- Esquecimento de horários de medicação
-- Confusão sobre qual medicamento tomar
-- Risco de superdosagem acidental
-- Dificuldade em acompanhar a rotina
-
-A solução oferece uma interface simples, acessível e funcional que ajuda na:
-- Organização centralizada de medicamentos
-- Consulta rápida do que deve ser tomado hoje
-- Registro confiável de medicações já realizadas
-
-### 🏛️ Estrutura Técnica
-
-- **Linguagem**: Python 3.12
-- **Banco de Dados**: SQLite 3
-- **Framework de Testes**: pytest
-- **Linting**: flake8
-- **CI/CD**: GitHub Actions
 
 ---
 
@@ -52,11 +65,10 @@ A solução oferece uma interface simples, acessível e funcional que ajuda na:
 
 ### Futuras Melhorias Planejadas
 
-- [ ] Implementação de interface gráfica 
-- [ ] Integração com servidor para múltiplos dispositivos
 - [ ] Notificações/alarmes para horários de medicação
 - [ ] Exportação de relatórios (PDF, CSV)
-- [ ] Interface gráfica (GUI) com tkinter ou PyQt
-- [ ] API REST para integração com aplicativos móveis
 - [ ] Histórico e estatísticas de aderência
 - [ ] Suporte a múltiplos usuários (idosos/cuidadores)
+- [ ] Integração com servidor para sincronização entre dispositivos
+- [ ] Aplicativo mobile nativo
+
