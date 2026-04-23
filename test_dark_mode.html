@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Dark Mode</title>
+    <style>
+        :root {
+            --bg: #FFFFFF;
+            --text: #1F2937;
+            --color-primary: #1E40AF;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #111827;
+                --text: #F3F4F6;
+                --color-primary: #3B82F6;
+            }
+        }
+
+        html[data-theme="dark"] {
+            --bg: #111827;
+            --text: #F3F4F6;
+            --color-primary: #3B82F6;
+        }
+
+        html[data-theme="light"] {
+            --bg: #FFFFFF;
+            --text: #1F2937;
+            --color-primary: #1E40AF;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 40px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.5rem;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--color-primary);
+            color: white;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Dark Mode</h1>
+    <button id="toggleBtn">🌙 Alternar Tema</button>
+    
+    <div class="status">
+        <p>Tema atual: <strong id="themeStatus">Automático (Sistema)</strong></p>
+        <p>data-theme: <strong id="dataThemeStatus">não definido</strong></p>
+        <p>localStorage.theme: <strong id="localStorageStatus">não definido</strong></p>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('toggleBtn');
+        const themeStatus = document.getElementById('themeStatus');
+        const dataThemeStatus = document.getElementById('dataThemeStatus');
+        const localStorageStatus = document.getElementById('localStorageStatus');
+
+        function atualizarStatus() {
+            const dataTheme = document.documentElement.getAttribute('data-theme');
+            const savedTheme = localStorage.getItem('theme');
+            
+            dataThemeStatus.textContent = dataTheme || 'não definido';
+            localStorageStatus.textContent = savedTheme || 'não definido';
+            
+            if (dataTheme) {
+                themeStatus.textContent = dataTheme === 'dark' ? '🌙 Escuro' : '☀️ Claro';
+                toggleBtn.textContent = dataTheme === 'dark' ? '☀️ Para Claro' : '🌙 Para Escuro';
+            }
+            
+            console.log('Status atualizado:', {
+                dataTheme,
+                savedTheme,
+                isDark: document.documentElement.getAttribute('data-theme') === 'dark'
+            });
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            console.log('Toggle clicado:', { currentTheme, newTheme });
+            
+            localStorage.setItem('theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
+            
+            atualizarStatus();
+        });
+
+        // Inicializar
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+        
+        atualizarStatus();
+    </script>
+</body>
+</html>

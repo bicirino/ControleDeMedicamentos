@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function inicializarAplicacao() {
+    configurarTema();
     configurarNavigacao();
     configurarFormularios();
     configurarModais();
@@ -20,8 +21,59 @@ function inicializarAplicacao() {
 }
 
 // ==============================
-// NAVEGAÇÃO ENTRE ABAS
+// TEMA CLARO/ESCURO
 // ==============================
+
+function configurarTema() {
+    const themeToggle = document.getElementById('themeToggle');
+    const htmlElement = document.documentElement;
+    
+    // Verificar preferência salva no localStorage
+    const savedTheme = localStorage.getItem('theme');
+    let isDarkMode = false;
+    
+    if (savedTheme) {
+        // Usar preferência salva
+        isDarkMode = savedTheme === 'dark';
+    } else {
+        // Usar preferência do sistema
+        isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    
+    // Aplicar tema inicial
+    aplicarTema(isDarkMode);
+    
+    // Listener para o botão de toggle
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = localStorage.getItem('theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        aplicarTema(newTheme === 'dark');
+    });
+    
+    // Listener para mudanças de preferência do sistema
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        // Só aplicar se não houver preferência salva
+        if (!localStorage.getItem('theme')) {
+            aplicarTema(e.matches);
+        }
+    });
+}
+
+function aplicarTema(isDarkMode) {
+    const htmlElement = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    
+    if (isDarkMode) {
+        htmlElement.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☀️';
+        themeToggle.setAttribute('aria-label', 'Alternar para modo claro');
+    } else {
+        htmlElement.setAttribute('data-theme', 'light');
+        themeToggle.textContent = '🌙';
+        themeToggle.setAttribute('aria-label', 'Alternar para modo escuro');
+    }
+}
 
 function configurarNavigacao() {
     const navBtns = document.querySelectorAll('.nav-btn');
@@ -74,7 +126,7 @@ function atualizarDataHoje() {
     const hoje = new Date();
     const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const dataFormatada = hoje.toLocaleDateString('pt-BR', opcoes);
-    dataHoje.textContent = `📅 ${dataFormatada}`;
+    dataHoje.textContent = ` ${dataFormatada}`;
 }
 
 // ==============================
@@ -182,7 +234,7 @@ function criarCardMedicamento(med) {
         <div class="medicamento-actions">
             ${botao}
             <button class="btn-acao btn btn-danger" onclick="abrirModalRemover(${med.id}, '${med.nome}')">
-                🗑️ Remover
+                 Remover
             </button>
         </div>
     `;
@@ -222,7 +274,7 @@ function criarTabelaMedicamentos(medicamentos) {
             <td class="${statusClasse}">${statusTexto}</td>
             <td>
                 <button class="btn btn-danger" onclick="abrirModalRemover(${med.id}, '${med.nome}')">
-                    🗑️ Remover
+                     Remover
                 </button>
             </td>
         `;
