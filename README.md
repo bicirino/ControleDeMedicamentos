@@ -51,7 +51,7 @@ Uma aplicação CLI acessível e direta que permite:
 
 ### API Integrada 🔗
 
-- **BrasilAPI** - Busca de dados sobre medicamentos registrados na ANVISA
+- **Groq AI** - Busca de dados com Inteligência Artificial sobre medicamentos 
 
 ---
 
@@ -64,24 +64,24 @@ ControleDeMedicamentos/
 ├── main.py                              # Ponto de entrada e interface CLI
 ├── medicamentos.py                      # Lógica de negócio (cadastro, listagem, etc)
 ├── database.py                          # Gerenciamento de banco de dados SQLite
-├── api_integration.py                   # ⭐ NOVO: Integração com BrasilAPI
+├── api_integration.py                   # Integração com Groq AI 
 │
 ├── 📦 DEPENDÊNCIAS E CONFIGURAÇÃO
 ├── requirements.txt                     # Lista de dependências Python
-├── .env.example                         # ⭐ NOVO: Exemplo de variáveis de ambiente
-├── render.yaml                          # ⭐ NOVO: Configuração para Deploy Render.com
+├── .env.example                         #  Exemplo de variáveis de ambiente
+├── render.yaml                          #  Configuração para Deploy Render.com
 │
 ├── 📚 DOCUMENTAÇÃO
 ├── README.md                            # Este arquivo
 ├── LICENSE                              # Licença MIT
 ├── CHANGELOG.md                         # Histórico de versões
-├── DEPLOY.md                            # ⭐ NOVO: Guia de Deploy
+├── DEPLOY.md                            # Guia para o Deploy
 │
 ├── 🧪 TESTES
 ├── tests/
 │   ├── __init__.py
-│   ├── test_medicamentos.py             # 11 testes unitários
-│   └── test_api_integration.py          # ⭐ NOVO: 5 testes de integração com BrasilAPI
+│   ├── test_medicamentos.py             # testes unitários
+│   └── test_api_integration.py          # testes de integração com Groq AI 
 │
 ├── 🔧 CONFIGURAÇÃO GIT
 ├── .github/
@@ -167,18 +167,17 @@ python main.py
 # ✅ Confirmação de cadastro
 ```
 
-#### ✅ Teste 2: Integração com BrasilAPI (NOVO!)
+#### ✅ Teste 2: Consulta com Groq AI (NOVO)
 
 ```bash
 python main.py
-# Escolha opção 6: Consultar Informações de Medicamento (API)
+# Escolha opção 6: Consultar Informações de Medicamento (IA)
 # - Digite: Paracetamol
-# ✅ Sistema busca na BrasilAPI e exibe:
-#   - Nome completo
-#   - Princípio ativo
-#   - Laboratório
-#   - CNPJ
-```
+# ✅ Sistema consulta a Groq AI e exibe informações como:
+#   - Nome do medicamento
+#   - Uso geral
+#   - Cuidados importantes
+#   - Observações relevantes
 
 #### ✅ Teste 3: Testes Automatizados
 
@@ -560,16 +559,6 @@ Para histórico completo, veja [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## � Dependências
-
-Todas as dependências estão explicitamente declaradas em `requirements.txt`:
-
-```
-pytest>=9.0.2
-flake8>=7.2.0
-requests>=2.31.0
-python-dotenv>=1.0.0
-```
 
 ### Descrição das Dependências
 
@@ -582,7 +571,7 @@ python-dotenv>=1.0.0
 
 ---
 
-## � Dependências
+## Dependências
 
 Todas as dependências estão explicitamente declaradas em `requirements.txt`:
 
@@ -624,7 +613,7 @@ Este projeto será hospedado em **Render.com** (gratuito para aplicações Pytho
 
 ---
 
-## �🔒 Licença
+## 🔒 Licença
 
 Este projeto está licenciado sob a **MIT License**. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
 

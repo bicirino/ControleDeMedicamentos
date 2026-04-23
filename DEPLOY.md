@@ -54,7 +54,7 @@ PYTHON_VERSION=3.12
 
 2. **Para `GROQ_API_KEY`:**
    - Obtenha uma chave gratuita em [console.groq.com](https://console.groq.com/)
-   - A aplicação usa o modelo `mixtral-8x7b-32768` para consultas de medicamentos
+   - A aplicação usa o modelo `llama-3.1-8b-instant` para consultas de medicamentos
    - Copie sua chave API e cole no campo acima
 
 ### Etapa 5: Deploy
