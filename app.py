@@ -30,20 +30,19 @@ def get_medicamentos_dia():
     try:
         hoje = _data_hoje()
         conexao = get_conexao()
-        cursor = conexao.cursor()
-
-        cursor.execute(
-            "SELECT id, nome, dosagem, horario "
-            "FROM medicamentos WHERE ativo = 1 ORDER BY horario"
-        )
-        medicamentos = cursor.fetchall()
-
-        cursor.execute(
-            "SELECT medicamento_id FROM registros_tomados "
-            "WHERE data_tomado = ?",
-            (hoje,),
-        )
-        ids_tomados = {row["medicamento_id"] for row in cursor.fetchall()}
+        
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT id, nome, dosagem, horario "
+                "FROM medicamentos WHERE ativo = 1 ORDER BY horario"
+            )
+            medicamentos = cursor.fetchall()
+            cursor.execute(
+                "SELECT medicamento_id FROM registros_tomados WHERE data_tomado = ?",
+                (hoje,),
+            )
+            ids_tomados = {row["medicamento_id"] for row in cursor.fetchall()}
 
         resultado = []
         for med in medicamentos:
@@ -99,7 +98,12 @@ def get_todos_medicamentos():
 def cadastrar_medicamento():
     """Cadastra um novo medicamento."""
     try:
-        dados = request.get_json()
+        dados = request.get_json(silent=True)
+        if dados is None: 
+            return jsonify({
+                "sucesso": False, 
+                "erro": "JSON inválido ou ausente no corpo da requisição"
+            }), 400
 
         nome = dados.get("nome", "").strip()
         if not nome:
