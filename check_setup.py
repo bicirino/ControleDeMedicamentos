@@ -45,7 +45,6 @@ print("\n📁 VERIFICANDO ARQUIVOS...")
 
 arquivos_necessarios = [
     'app.py',
-    'main.py',
     'medicamentos.py',
     'database.py',
     'api_integration.py',
@@ -68,7 +67,7 @@ for arquivo in arquivos_necessarios:
 # Verificar banco de dados
 print("\n💾 VERIFICANDO BANCO DE DADOS...")
 if Path('medicamentos.db').exists():
-    print(f"  ✅ medicamentos.db existe")
+    print("  ✅ medicamentos.db existe")
     # Verificar se as tabelas existem
     try:
         import sqlite3
@@ -83,24 +82,24 @@ if Path('medicamentos.db').exists():
     except Exception as e:
         print(f"  ⚠️  Erro ao verificar banco: {e}")
 else:
-    print(f"  ℹ️  medicamentos.db não existe (será criado ao iniciar)")
+    print("  ℹ️  medicamentos.db não existe (será criado ao iniciar)")
 
 # Verificar variáveis de ambiente
 print("\n🔐 VERIFICANDO CONFIGURAÇÕES...")
 if Path('.env').exists():
-    print(f"  ✅ Arquivo .env encontrado")
+    print("  ✅ Arquivo .env encontrado")
     try:
         from dotenv import load_dotenv
         load_dotenv()
         groq_key = os.getenv('GROQ_API_KEY')
         if groq_key and groq_key != 'your_groq_api_key_here':
-            print(f"  ✅ GROQ_API_KEY configurada")
+            print("  ✅ GROQ_API_KEY configurada")
         else:
-            print(f"  ℹ️  GROQ_API_KEY não configurada (opcional)")
+            print("  ℹ️  GROQ_API_KEY não configurada (opcional)")
     except Exception as e:
         print(f"  ⚠️  Erro ao carregar .env: {e}")
 else:
-    print(f"  ℹ️  Arquivo .env não existe (usando padrões)")
+    print("  ℹ️  Arquivo .env não existe (usando padrões)")
 
 # Resumo final
 print("\n" + "=" * 60)

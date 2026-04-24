@@ -5,7 +5,6 @@ Expõe endpoints REST que integram com a lógica de negócio existente.
 """
 
 from flask import Flask, render_template, request, jsonify
-from datetime import datetime
 from database import get_conexao, inicializar_banco
 from medicamentos import (
     _data_hoje,
@@ -40,7 +39,8 @@ def get_medicamentos_dia():
         medicamentos = cursor.fetchall()
 
         cursor.execute(
-            "SELECT medicamento_id FROM registros_tomados WHERE data_tomado = ?",
+            "SELECT medicamento_id FROM registros_tomados "
+            "WHERE data_tomado = ?",
             (hoje,),
         )
         ids_tomados = {row["medicamento_id"] for row in cursor.fetchall()}
@@ -72,7 +72,8 @@ def get_todos_medicamentos():
         cursor = conexao.cursor()
 
         cursor.execute(
-            "SELECT id, nome, dosagem, horario, ativo FROM medicamentos WHERE ativo = 1 ORDER BY horario"
+            "SELECT id, nome, dosagem, horario, ativo "
+            "FROM medicamentos WHERE ativo = 1 ORDER BY horario"
         )
         medicamentos = cursor.fetchall()
 
@@ -102,11 +103,13 @@ def cadastrar_medicamento():
 
         nome = dados.get("nome", "").strip()
         if not nome:
-            return jsonify({"sucesso": False, "erro": "Nome não pode ser vazio"}), 400
+            erro_msg = "Nome não pode ser vazio"
+            return jsonify({"sucesso": False, "erro": erro_msg}), 400
 
         dosagem = dados.get("dosagem", "").strip()
         if not dosagem:
-            return jsonify({"sucesso": False, "erro": "Dosagem não pode ser vazia"}), 400
+            erro_msg = "Dosagem não pode ser vazia"
+            return jsonify({"sucesso": False, "erro": erro_msg}), 400
 
         horario = dados.get("horario", "").strip()
         if not _validar_horario(horario):
@@ -119,7 +122,8 @@ def cadastrar_medicamento():
         cursor = conexao.cursor()
 
         cursor.execute(
-            "INSERT INTO medicamentos (nome, dosagem, horario) VALUES (?, ?, ?)",
+            "INSERT INTO medicamentos (nome, dosagem, horario) "
+            "VALUES (?, ?, ?)",
             (nome, dosagem, horario),
         )
 
@@ -161,9 +165,11 @@ def marcar_como_tomado(med_id):
             (med_id, hoje),
         )
         if cursor.fetchone():
+            med_name = medicamento['nome']
+            erro_msg = f"'{med_name}' já foi marcado como tomado"
             return jsonify({
                 "sucesso": False,
-                "erro": f"'{medicamento['nome']}' já foi marcado como tomado hoje"
+                "erro": erro_msg
             }), 400
 
         cursor.execute(
@@ -231,7 +237,7 @@ def consultar_medicamento(nome):
             "sucesso": False,
             "erro": str(e)
         }), 400
-    except Exception as e:
+    except Exception:
         return jsonify({
             "sucesso": False,
             "erro": "Erro ao consultar informações do medicamento"
