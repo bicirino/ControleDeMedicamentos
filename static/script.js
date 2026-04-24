@@ -215,7 +215,7 @@ function criarCardMedicamento(med) {
     let botao = '';
     if (!med.tomado) {
         botao = `
-            <button class="btn-acao btn btn-success" onclick="abrirModalMarcado(${med.id}, '${med.nome}')">
+            <button class="btn-acao btn btn-success btn-marcar-tomado" data-med-id="${med.id}" data-med-nome="${med.nome}">
                 ✅ Marcar como Tomado
             </button>
         `;
@@ -231,7 +231,7 @@ function criarCardMedicamento(med) {
         <div class="medicamento-status ${statusClasse}">${statusTexto}</div>
         <div class="medicamento-actions">
             ${botao}
-            <button class="btn-acao btn btn-danger" onclick="abrirModalRemover(${med.id}, '${med.nome}')">
+            <button class="btn-acao btn btn-danger btn-remover-med" data-med-id="${med.id}" data-med-nome="${med.nome}">
                  Remover
             </button>
         </div>
@@ -271,7 +271,7 @@ function criarTabelaMedicamentos(medicamentos) {
             <td>${med.horario}</td>
             <td class="${statusClasse}">${statusTexto}</td>
             <td>
-                <button class="btn btn-danger" onclick="abrirModalRemover(${med.id}, '${med.nome}')">
+                <button class="btn btn-danger btn-remover-med" data-med-id="${med.id}" data-med-nome="${med.nome}">
                      Remover
                 </button>
             </td>
@@ -439,6 +439,21 @@ function configurarModais() {
             }
         });
     }
+
+    // Listeners para botões de ação (evento delegado)
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-marcar-tomado')) {
+            const medId = e.target.dataset.medId;
+            const medNome = e.target.dataset.medNome;
+            abrirModalMarcado(medId, medNome);
+        }
+
+        if (e.target.classList.contains('btn-remover-med')) {
+            const medId = e.target.dataset.medId;
+            const medNome = e.target.dataset.medNome;
+            abrirModalRemover(medId, medNome);
+        }
+    });
 }
 
 function abrirModalMarcado(medId, nome) {
@@ -446,7 +461,7 @@ function abrirModalMarcado(medId, nome) {
     const mensagem = document.getElementById('modalMensagem');
     const btnConfirmar = document.getElementById('btnConfirmar');
 
-    mensagem.textContent = `Você deseja marcar "${escaparHTML(nome)}" como tomado?`;
+    mensagem.textContent = `Você deseja marcar "${nome}" como tomado?`;
 
     btnConfirmar.onclick = async () => {
         await marcarMedicamentoComoTomado(medId, nome);
@@ -461,7 +476,7 @@ function abrirModalRemover(medId, nome) {
     const mensagem = document.getElementById('modalRemoverMensagem');
     const btnConfirmar = document.getElementById('btnConfirmarRemover');
 
-    mensagem.textContent = `Você deseja remover "${escaparHTML(nome)}"? Esta ação não pode ser desfeita.`;
+    mensagem.textContent = `Você deseja remover "${nome}"? Esta ação não pode ser desfeita.`;
 
     btnConfirmar.onclick = async () => {
         await removerMedicamento(medId, nome);
