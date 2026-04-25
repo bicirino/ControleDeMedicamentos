@@ -4,6 +4,7 @@ Aplicação Flask para interface web do Controle de Medicamentos.
 Expõe endpoints REST que integram com a lógica de negócio existente.
 """
 
+import re
 from flask import Flask, render_template, request, jsonify
 from database import get_conexao, inicializar_banco
 from medicamentos import (
@@ -16,6 +17,36 @@ app = Flask(__name__)
 
 # Inicializar banco ao iniciar a aplicação
 inicializar_banco()
+
+
+def formatar_resposta_medicamento(texto: str) -> str:
+    """
+    Formata a resposta do medicamento removendo asteríscos e numeração,
+    convertendo para bullet points e deixando títulos em negrito.
+    
+    Args:
+        texto: Texto com formatação de asteríscos e numeração
+        
+    Returns:
+        Texto formatado com bullet points e títulos em HTML bold
+    """
+    # Remove asteríscos de formatação
+    texto = re.sub(r'\*\*([^*]+)\*\*', r'\1', texto)
+    texto = re.sub(r'\*([^*]+)\*', r'\1', texto)
+    
+    # Substitui numeração por bullet points
+    texto = re.sub(r'^\d+\.\s', '• ', texto, flags=re.MULTILINE)
+    
+    # Remove asteríscos de bullet points do início de linhas
+    texto = re.sub(r'^\*\s', '• ', texto, flags=re.MULTILINE)
+    
+    # Deixa títulos em negrito (padrão: "Título": ou Título:)
+    # Primeiro padrão: "Título":
+    texto = re.sub(r'"([^"]+)":', r'<strong>\1</strong>:', texto)
+    # Segundo padrão: linha que começa com título (sem aspas)
+    texto = re.sub(r'^• ([A-Z][^:]*?):\s', r'• <strong>\1</strong>: ', texto, flags=re.MULTILINE)
+    
+    return texto.strip()
 
 
 @app.route("/")
@@ -230,11 +261,19 @@ def remover_medicamento(med_id):
 def consultar_medicamento(nome):
     """Consulta informações sobre um medicamento via Groq API."""
     try:
-        informacoes = buscar_medicamento_groq(nome)
+        resultado = buscar_medicamento_groq(nome)
+        if resultado is None:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Medicamento não encontrado"
+            }), 404
+        
+        informacoes_formatadas = formatar_resposta_medicamento(resultado["informacoes"])
+        
         return jsonify({
             "sucesso": True,
-            "medicamento": nome,
-            "informacoes": informacoes
+            "medicamento": resultado["nome"],
+            "informacoes": informacoes_formatadas
         })
     except APIError as e:
         return jsonify({

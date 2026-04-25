@@ -386,7 +386,7 @@ async function submeterFormularioConsulta() {
 
         if (dados.sucesso) {
             document.getElementById('consultaMedicamento').textContent = `💊 ${dados.medicamento}`;
-            document.getElementById('consultaInfo').textContent = dados.informacoes;
+            document.getElementById('consultaInfo').innerHTML = dados.informacoes;
             resultado.style.display = 'block';
         } else {
             mensagem.className = 'form-message error';
