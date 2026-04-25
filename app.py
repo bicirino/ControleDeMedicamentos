@@ -23,29 +23,31 @@ def formatar_resposta_medicamento(texto: str) -> str:
     """
     Formata a resposta do medicamento removendo asteríscos e numeração,
     convertendo para bullet points e deixando títulos em negrito.
-    
+
     Args:
         texto: Texto com formatação de asteríscos e numeração
-        
+
     Returns:
         Texto formatado com bullet points e títulos em HTML bold
     """
     # Remove asteríscos de formatação
     texto = re.sub(r'\*\*([^*]+)\*\*', r'\1', texto)
     texto = re.sub(r'\*([^*]+)\*', r'\1', texto)
-    
+
     # Substitui numeração por bullet points
     texto = re.sub(r'^\d+\.\s', '• ', texto, flags=re.MULTILINE)
-    
+
     # Remove asteríscos de bullet points do início de linhas
     texto = re.sub(r'^\*\s', '• ', texto, flags=re.MULTILINE)
-    
+
     # Deixa títulos em negrito (padrão: "Título": ou Título:)
     # Primeiro padrão: "Título":
     texto = re.sub(r'"([^"]+)":', r'<strong>\1</strong>:', texto)
     # Segundo padrão: linha que começa com título (sem aspas)
-    texto = re.sub(r'^• ([A-Z][^:]*?):\s', r'• <strong>\1</strong>: ', texto, flags=re.MULTILINE)
-    
+    regex = r'^• ([A-Z][^:]*?):\s'
+    replace = r'• <strong>\1</strong>: '
+    texto = re.sub(regex, replace, texto, flags=re.MULTILINE)
+
     return texto.strip()
 
 
@@ -61,16 +63,18 @@ def get_medicamentos_dia():
     try:
         hoje = _data_hoje()
         conexao = get_conexao()
-        
+
         with get_conexao() as conexao:
             cursor = conexao.cursor()
             cursor.execute(
                 "SELECT id, nome, dosagem, horario "
-                "FROM medicamentos WHERE ativo = 1 ORDER BY horario"
+                "FROM medicamentos WHERE ativo = 1 "
+                "ORDER BY horario"
             )
             medicamentos = cursor.fetchall()
             cursor.execute(
-                "SELECT medicamento_id FROM registros_tomados WHERE data_tomado = ?",
+                "SELECT medicamento_id FROM registros_tomados "
+                "WHERE data_tomado = ?",
                 (hoje,),
             )
             ids_tomados = {row["medicamento_id"] for row in cursor.fetchall()}
@@ -103,7 +107,8 @@ def get_todos_medicamentos():
 
         cursor.execute(
             "SELECT id, nome, dosagem, horario, ativo "
-            "FROM medicamentos WHERE ativo = 1 ORDER BY horario"
+            "FROM medicamentos WHERE ativo = 1 "
+            "ORDER BY horario"
         )
         medicamentos = cursor.fetchall()
 
@@ -130,9 +135,9 @@ def cadastrar_medicamento():
     """Cadastra um novo medicamento."""
     try:
         dados = request.get_json(silent=True)
-        if dados is None: 
+        if dados is None:
             return jsonify({
-                "sucesso": False, 
+                "sucesso": False,
                 "erro": "JSON inválido ou ausente no corpo da requisição"
             }), 400
 
@@ -267,9 +272,12 @@ def consultar_medicamento(nome):
                 "sucesso": False,
                 "erro": "Medicamento não encontrado"
             }), 404
-        
-        informacoes_formatadas = formatar_resposta_medicamento(resultado["informacoes"])
-        
+
+        resultado_info = resultado["informacoes"]
+        informacoes_formatadas = formatar_resposta_medicamento(
+            resultado_info
+        )
+
         return jsonify({
             "sucesso": True,
             "medicamento": resultado["nome"],
