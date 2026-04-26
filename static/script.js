@@ -11,11 +11,23 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarAplicacao();
 });
 
+const DIA_LABELS = {
+    todos: 'Todos os dias',
+    segunda: 'Segunda-feira',
+    terca: 'Terça-feira',
+    quarta: 'Quarta-feira',
+    quinta: 'Quinta-feira',
+    sexta: 'Sexta-feira',
+    sabado: 'Sábado',
+    domingo: 'Domingo'
+};
+
 function inicializarAplicacao() {
     configurarTema();
     configurarNavigacao();
     configurarFormularios();
     configurarModais();
+    configurarDiaPadraoCadastro();
     atualizarDataHoje();
     carregarMedicamentosDoDay();
 }
@@ -156,15 +168,70 @@ async function carregarMedicamentosDoDay() {
             return;
         }
 
+        const grupos = {
+            manha: [],
+            tarde: [],
+            noite: []
+        };
+
         dados.medicamentos.forEach(med => {
-            const card = criarCardMedicamento(med);
-            container.appendChild(card);
+            const periodo = classificarPeriodoPorHorario(med.horario);
+            grupos[periodo].push(med);
+        });
+
+        const secoes = [
+            { chave: 'manha', titulo: '☀️ Manhã' },
+            { chave: 'tarde', titulo: '🌤️ Tarde' },
+            { chave: 'noite', titulo: '🌙 Noite' },
+        ];
+
+        secoes.forEach(secao => {
+            if (grupos[secao.chave].length === 0) {
+                return;
+            }
+
+            const wrapper = document.createElement('section');
+            wrapper.className = 'periodo-secao';
+
+            const titulo = document.createElement('h3');
+            titulo.className = 'periodo-titulo';
+            titulo.textContent = secao.titulo;
+
+            const grid = document.createElement('div');
+            grid.className = 'medicamentos-grid periodo-grid';
+
+            grupos[secao.chave].forEach(med => {
+                const card = criarCardMedicamento(med);
+                grid.appendChild(card);
+            });
+
+            wrapper.appendChild(titulo);
+            wrapper.appendChild(grid);
+            container.appendChild(wrapper);
         });
     } catch (erro) {
         loading.style.display = 'none';
         mostrarAlerta('Erro ao conectar com o servidor', 'error');
         console.error('Erro:', erro);
     }
+}
+
+function classificarPeriodoPorHorario(horario) {
+    const hora = parseInt(String(horario || '').split(':')[0], 10);
+
+    if (!Number.isInteger(hora)) {
+        return 'manha';
+    }
+
+    if (hora < 12) {
+        return 'manha';
+    }
+
+    if (hora < 18) {
+        return 'tarde';
+    }
+
+    return 'noite';
 }
 
 async function carregarMedicamentosTodos() {
@@ -223,17 +290,14 @@ function criarCardMedicamento(med) {
 
     card.innerHTML = `
         <div class="medicamento-header">
-            <span class="medicamento-icon"></span>
             <h3 class="medicamento-nome">${escaparHTML(med.nome)}</h3>
         </div>
-        <div class="medicamento-dosagem">💊 ${escaparHTML(med.dosagem)}</div>
+        <div class="medicamento-dia">📆 ${formatarDiaMedicamento(med.dia)}</div>
+        <div class="medicamento-dosagem"><strong>Dosagem:</strong> ${escaparHTML(med.dosagem)}</div>
         <div class="medicamento-horario">🕐 ${med.horario}</div>
         <div class="medicamento-status ${statusClasse}">${statusTexto}</div>
         <div class="medicamento-actions">
             ${botao}
-            <button class="btn-acao btn btn-danger btn-remover-med" data-med-id="${med.id}" data-med-nome="${med.nome}">
-                 Remover
-            </button>
         </div>
     `;
 
@@ -248,6 +312,7 @@ function criarTabelaMedicamentos(medicamentos) {
     thead.innerHTML = `
         <tr>
             <th>Medicamento</th>
+            <th>Dia</th>
             <th>Dosagem</th>
             <th>Horário</th>
             <th>Status</th>
@@ -267,10 +332,14 @@ function criarTabelaMedicamentos(medicamentos) {
 
         tr.innerHTML = `
             <td>${escaparHTML(med.nome)}</td>
+            <td>${formatarDiaMedicamento(med.dia)}</td>
             <td>${escaparHTML(med.dosagem)}</td>
             <td>${med.horario}</td>
             <td class="${statusClasse}">${statusTexto}</td>
-            <td>
+            <td class="acoes-tabela">
+                <button class="btn btn-secondary btn-editar-med" data-med-id="${med.id}" data-med-nome="${escaparHTML(med.nome)}" data-med-dosagem="${escaparHTML(med.dosagem)}" data-med-horario="${med.horario}" data-med-dia="${med.dia}">
+                    Editar
+                </button>
                 <button class="btn btn-danger btn-remover-med" data-med-id="${med.id}" data-med-nome="${med.nome}">
                      Remover
                 </button>
@@ -305,15 +374,36 @@ function configurarFormularios() {
             await submeterFormularioConsulta();
         });
     }
+
+    if (formCadastrar) {
+        formCadastrar.addEventListener('reset', () => {
+            setTimeout(configurarDiaPadraoCadastro, 0);
+        });
+    }
+}
+
+function configurarDiaPadraoCadastro() {
+    const inputDia = document.getElementById('inputDia');
+    if (!inputDia) {
+        return;
+    }
+
+    inputDia.value = obterDiaSemanaAtualValor();
+}
+
+function obterDiaSemanaAtualValor() {
+    const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+    return dias[new Date().getDay()];
 }
 
 async function submeterFormularioCadastro() {
     const nome = document.getElementById('inputNome').value.trim();
     const dosagem = document.getElementById('inputDosagem').value.trim();
     const horario = document.getElementById('inputHorario').value.trim();
+    const dia = document.getElementById('inputDia').value;
     const mensagem = document.getElementById('formMessage');
 
-    if (!nome || !dosagem || !horario) {
+    if (!nome || !dosagem || !horario || !dia) {
         mensagem.className = 'form-message error';
         mensagem.textContent = '⚠️ Todos os campos são obrigatórios!';
         return;
@@ -328,7 +418,8 @@ async function submeterFormularioCadastro() {
             body: JSON.stringify({
                 nome: nome,
                 dosagem: dosagem,
-                horario: horario
+                horario: horario,
+                dia: dia
             })
         });
 
@@ -359,6 +450,11 @@ async function submeterFormularioCadastro() {
         mensagem.textContent = '❌ Erro ao cadastrar medicamento';
         console.error('Erro:', erro);
     }
+}
+
+function formatarDiaMedicamento(dia) {
+    const chave = String(dia || 'todos').toLowerCase();
+    return DIA_LABELS[chave] || 'Todos os dias';
 }
 
 async function submeterFormularioConsulta() {
@@ -407,9 +503,12 @@ async function submeterFormularioConsulta() {
 function configurarModais() {
     const modalMarcado = document.getElementById('modalMarcado');
     const modalRemover = document.getElementById('modalRemover');
+    const modalEditar = document.getElementById('modalEditar');
 
     const btnCancelarMarcado = document.getElementById('btnCancelar');
     const btnCancelarRemover = document.getElementById('btnCancelarRemover');
+    const btnCancelarEditar = document.getElementById('btnCancelarEditar');
+    const formEditar = document.getElementById('formEditarMedicamento');
 
     if (btnCancelarMarcado) {
         btnCancelarMarcado.addEventListener('click', () => {
@@ -420,6 +519,26 @@ function configurarModais() {
     if (btnCancelarRemover) {
         btnCancelarRemover.addEventListener('click', () => {
             modalRemover.close();
+        });
+    }
+
+    if (btnCancelarEditar && modalEditar) {
+        btnCancelarEditar.addEventListener('click', () => {
+            modalEditar.close();
+        });
+    }
+
+    if (formEditar && modalEditar) {
+        formEditar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const medId = document.getElementById('editarMedId').value;
+            const nome = document.getElementById('editarNome').value.trim();
+            const dosagem = document.getElementById('editarDosagem').value.trim();
+            const horario = document.getElementById('editarHorario').value;
+            const dia = document.getElementById('editarDia').value;
+
+            await atualizarMedicamento(medId, { nome, dosagem, horario, dia });
+            modalEditar.close();
         });
     }
 
@@ -440,6 +559,14 @@ function configurarModais() {
         });
     }
 
+    if (modalEditar) {
+        modalEditar.addEventListener('click', (e) => {
+            if (e.target === modalEditar) {
+                modalEditar.close();
+            }
+        });
+    }
+
     // Listeners para botões de ação (evento delegado)
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-marcar-tomado')) {
@@ -453,7 +580,27 @@ function configurarModais() {
             const medNome = e.target.dataset.medNome;
             abrirModalRemover(medId, medNome);
         }
+
+        if (e.target.classList.contains('btn-editar-med')) {
+            abrirModalEditar({
+                id: e.target.dataset.medId,
+                nome: e.target.dataset.medNome,
+                dosagem: e.target.dataset.medDosagem,
+                horario: e.target.dataset.medHorario,
+                dia: e.target.dataset.medDia || 'todos'
+            });
+        }
     });
+}
+
+function abrirModalEditar(med) {
+    const modal = document.getElementById('modalEditar');
+    document.getElementById('editarMedId').value = med.id;
+    document.getElementById('editarNome').value = desescaparHTML(med.nome);
+    document.getElementById('editarDosagem').value = desescaparHTML(med.dosagem);
+    document.getElementById('editarHorario').value = med.horario;
+    document.getElementById('editarDia').value = String(med.dia || 'todos').toLowerCase();
+    modal.showModal();
 }
 
 function abrirModalMarcado(medId, nome) {
@@ -531,6 +678,31 @@ async function removerMedicamento(medId, nome) {
     }
 }
 
+async function atualizarMedicamento(medId, payload) {
+    try {
+        const response = await fetch(`/api/medicamentos/${medId}/editar`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const dados = await response.json();
+
+        if (dados.sucesso) {
+            mostrarAlerta(`✅ ${dados.mensagem}`, 'success');
+            carregarMedicamentosDoDay();
+            carregarMedicamentosTodos();
+        } else {
+            mostrarAlerta(`❌ ${dados.erro}`, 'error');
+        }
+    } catch (erro) {
+        mostrarAlerta('❌ Erro ao atualizar medicamento', 'error');
+        console.error('Erro:', erro);
+    }
+}
+
 // ==============================
 // ALERTAS
 // ==============================
@@ -562,6 +734,12 @@ function escaparHTML(texto) {
     const div = document.createElement('div');
     div.textContent = texto;
     return div.innerHTML;
+}
+
+function desescaparHTML(texto) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = texto;
+    return textarea.value;
 }
 
 // Recarregar dados a cada 30 segundos (para manter atualizado em tempo real)

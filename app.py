@@ -5,6 +5,7 @@ Expõe endpoints REST que integram com a lógica de negócio existente.
 """
 
 import re
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 from database import get_conexao, inicializar_banco
 from medicamentos import (
@@ -17,6 +18,37 @@ app = Flask(__name__)
 
 # Inicializar banco ao iniciar a aplicação
 inicializar_banco()
+
+DIAS_VALIDOS = {
+    "todos",
+    "segunda",
+    "terca",
+    "quarta",
+    "quinta",
+    "sexta",
+    "sabado",
+    "domingo",
+}
+
+MAPA_DIA_SEMANA = {
+    0: "segunda",
+    1: "terca",
+    2: "quarta",
+    3: "quinta",
+    4: "sexta",
+    5: "sabado",
+    6: "domingo",
+}
+
+
+def _dia_semana_hoje() -> str:
+    """Retorna o dia da semana atual no formato interno."""
+    return MAPA_DIA_SEMANA[datetime.now().weekday()]
+
+
+def _normalizar_dia(dia: str) -> str:
+    """Normaliza o dia recebido para o formato persistido no banco."""
+    return str(dia).strip().lower()
 
 
 def formatar_resposta_medicamento(texto: str) -> str:
@@ -62,14 +94,16 @@ def get_medicamentos_dia():
     """Retorna medicamentos do dia com status de tomado."""
     try:
         hoje = _data_hoje()
-        conexao = get_conexao()
+        dia_hoje = _dia_semana_hoje()
 
         with get_conexao() as conexao:
             cursor = conexao.cursor()
             cursor.execute(
-                "SELECT id, nome, dosagem, horario "
+                "SELECT id, nome, dosagem, horario, dia "
                 "FROM medicamentos WHERE ativo = 1 "
-                "ORDER BY horario"
+                "AND (dia = 'todos' OR dia = ?) "
+                "ORDER BY horario",
+                (dia_hoje,),
             )
             medicamentos = cursor.fetchall()
             cursor.execute(
@@ -86,6 +120,7 @@ def get_medicamentos_dia():
                 "nome": med["nome"],
                 "dosagem": med["dosagem"],
                 "horario": med["horario"],
+                "dia": med["dia"],
                 "tomado": med["id"] in ids_tomados
             })
 
@@ -106,9 +141,19 @@ def get_todos_medicamentos():
         cursor = conexao.cursor()
 
         cursor.execute(
-            "SELECT id, nome, dosagem, horario, ativo "
+            "SELECT id, nome, dosagem, horario, dia, ativo "
             "FROM medicamentos WHERE ativo = 1 "
-            "ORDER BY horario"
+            "ORDER BY "
+            "CASE dia "
+            "WHEN 'todos' THEN 0 "
+            "WHEN 'segunda' THEN 1 "
+            "WHEN 'terca' THEN 2 "
+            "WHEN 'quarta' THEN 3 "
+            "WHEN 'quinta' THEN 4 "
+            "WHEN 'sexta' THEN 5 "
+            "WHEN 'sabado' THEN 6 "
+            "WHEN 'domingo' THEN 7 "
+            "ELSE 8 END, horario"
         )
         medicamentos = cursor.fetchall()
 
@@ -119,6 +164,7 @@ def get_todos_medicamentos():
                 "nome": med["nome"],
                 "dosagem": med["dosagem"],
                 "horario": med["horario"],
+                "dia": med["dia"],
                 "ativo": med["ativo"] == 1
             })
 
@@ -158,13 +204,20 @@ def cadastrar_medicamento():
                 "erro": "Horário inválido. Use o formato HH:MM"
             }), 400
 
+        dia = _normalizar_dia(dados.get("dia", "todos"))
+        if dia not in DIAS_VALIDOS:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Dia inválido para o medicamento"
+            }), 400
+
         conexao = get_conexao()
         cursor = conexao.cursor()
 
         cursor.execute(
-            "INSERT INTO medicamentos (nome, dosagem, horario) "
-            "VALUES (?, ?, ?)",
-            (nome, dosagem, horario),
+            "INSERT INTO medicamentos (nome, dosagem, horario, dia) "
+            "VALUES (?, ?, ?, ?)",
+            (nome, dosagem, horario, dia),
         )
 
         conexao.commit()
@@ -257,6 +310,68 @@ def remover_medicamento(med_id):
         return jsonify({
             "sucesso": True,
             "mensagem": f"Medicamento '{medicamento['nome']}' removido!"
+        })
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+
+@app.route("/api/medicamentos/<int:med_id>/editar", methods=["PUT"])
+def editar_medicamento(med_id):
+    """Atualiza os dados de um medicamento ativo."""
+    try:
+        dados = request.get_json(silent=True)
+        if dados is None:
+            return jsonify({
+                "sucesso": False,
+                "erro": "JSON inválido ou ausente no corpo da requisição"
+            }), 400
+
+        nome = dados.get("nome", "").strip()
+        if not nome:
+            return jsonify({"sucesso": False, "erro": "Nome não pode ser vazio"}), 400
+
+        dosagem = dados.get("dosagem", "").strip()
+        if not dosagem:
+            return jsonify({"sucesso": False, "erro": "Dosagem não pode ser vazia"}), 400
+
+        horario = dados.get("horario", "").strip()
+        if not _validar_horario(horario):
+            return jsonify({
+                "sucesso": False,
+                "erro": "Horário inválido. Use o formato HH:MM"
+            }), 400
+
+        dia = _normalizar_dia(dados.get("dia", "todos"))
+        if dia not in DIAS_VALIDOS:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Dia inválido para o medicamento"
+            }), 400
+
+        conexao = get_conexao()
+        cursor = conexao.cursor()
+
+        cursor.execute(
+            "SELECT id FROM medicamentos WHERE id = ? AND ativo = 1",
+            (med_id,),
+        )
+        if not cursor.fetchone():
+            return jsonify({
+                "sucesso": False,
+                "erro": "Medicamento não encontrado ou inativo"
+            }), 404
+
+        cursor.execute(
+            "UPDATE medicamentos "
+            "SET nome = ?, dosagem = ?, horario = ?, dia = ? "
+            "WHERE id = ?",
+            (nome, dosagem, horario, dia, med_id),
+        )
+        conexao.commit()
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": f"Medicamento '{nome}' atualizado com sucesso!"
         })
     except Exception as e:
         return jsonify({"sucesso": False, "erro": str(e)}), 500
