@@ -223,10 +223,10 @@ function criarCardMedicamento(med) {
 
     card.innerHTML = `
         <div class="medicamento-header">
-            <span class="medicamento-icon">💊</span>
+            <span class="medicamento-icon"></span>
             <h3 class="medicamento-nome">${escaparHTML(med.nome)}</h3>
         </div>
-        <div class="medicamento-dosagem">💪 ${escaparHTML(med.dosagem)}</div>
+        <div class="medicamento-dosagem">💊 ${escaparHTML(med.dosagem)}</div>
         <div class="medicamento-horario">🕐 ${med.horario}</div>
         <div class="medicamento-status ${statusClasse}">${statusTexto}</div>
         <div class="medicamento-actions">
