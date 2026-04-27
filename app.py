@@ -281,6 +281,54 @@ def marcar_como_tomado(med_id):
         return jsonify({"sucesso": False, "erro": str(e)}), 500
 
 
+@app.route("/api/medicamentos/<int:med_id>/desmarcar-tomado", methods=["DELETE"])
+def desmarcar_como_tomado(med_id):
+    """Remove o registro de medicamento tomado hoje (undo)."""
+    try:
+        hoje = _data_hoje()
+        conexao = get_conexao()
+        cursor = conexao.cursor()
+
+        cursor.execute(
+            "SELECT nome FROM medicamentos WHERE id = ? AND ativo = 1",
+            (med_id,),
+        )
+        medicamento = cursor.fetchone()
+
+        if not medicamento:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Medicamento não encontrado ou inativo"
+            }), 404
+
+        cursor.execute(
+            "SELECT id FROM registros_tomados "
+            "WHERE medicamento_id = ? AND data_tomado = ?",
+            (med_id, hoje),
+        )
+        registro = cursor.fetchone()
+        if not registro:
+            med_name = medicamento["nome"]
+            erro_msg = f"'{med_name}' não está marcado como tomado hoje"
+            return jsonify({
+                "sucesso": False,
+                "erro": erro_msg
+            }), 400
+
+        cursor.execute(
+            "DELETE FROM registros_tomados WHERE id = ?",
+            (registro["id"],),
+        )
+        conexao.commit()
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": f"Marcação de '{medicamento['nome']}' desfeita!"
+        })
+    except Exception as e:
+        return jsonify({"sucesso": False, "erro": str(e)}), 500
+
+
 @app.route("/api/medicamentos/<int:med_id>/remover", methods=["DELETE"])
 def remover_medicamento(med_id):
     """Remove (desativa) um medicamento."""
@@ -332,7 +380,10 @@ def editar_medicamento(med_id):
 
         dosagem = dados.get("dosagem", "").strip()
         if not dosagem:
-            return jsonify({"sucesso": False, "erro": "Dosagem não pode ser vazia"}), 400
+            return jsonify({
+                "sucesso": False,
+                "erro": "Dosagem não pode ser vazia"
+            }), 400
 
         horario = dados.get("horario", "").strip()
         if not _validar_horario(horario):

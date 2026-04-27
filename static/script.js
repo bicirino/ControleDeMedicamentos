@@ -279,29 +279,55 @@ function criarCardMedicamento(med) {
     const statusTexto = med.tomado ? '✅ Tomado' : '⏳ Pendente';
     const statusClasse = med.tomado ? 'tomado' : 'pendente';
 
-    let botao = '';
-    if (!med.tomado) {
-        botao = `
-            <button class="btn-acao btn btn-success btn-marcar-tomado" data-med-id="${med.id}" data-med-nome="${med.nome}">
-                ✅ Marcar como Tomado
-            </button>
-        `;
-    }
+    const header = document.createElement('div');
+    header.className = 'medicamento-header';
 
-    card.innerHTML = `
-        <div class="medicamento-header">
-            <h3 class="medicamento-nome">${escaparHTML(med.nome)}</h3>
-        </div>
-        <div class="medicamento-dia">📆 ${formatarDiaMedicamento(med.dia)}</div>
-        <div class="medicamento-dosagem"><strong>Dosagem:</strong> ${escaparHTML(med.dosagem)}</div>
-        <div class="medicamento-horario">🕐 ${med.horario}</div>
-        <div class="medicamento-status ${statusClasse}">${statusTexto}</div>
-        <div class="medicamento-actions">
-            ${botao}
-        </div>
-    `;
+    const nome = document.createElement('h3');
+    nome.className = 'medicamento-nome';
+    nome.textContent = med.nome;
+    header.appendChild(nome);
+
+    const dia = document.createElement('div');
+    dia.className = 'medicamento-dia';
+    dia.textContent = `📆 ${formatarDiaMedicamento(med.dia)}`;
+
+    const dosagem = document.createElement('div');
+    dosagem.className = 'medicamento-dosagem';
+    dosagem.innerHTML = `<strong>Dosagem:</strong> ${escaparHTML(med.dosagem)}`;
+
+    const horario = document.createElement('div');
+    horario.className = 'medicamento-horario';
+    horario.textContent = `🕐 ${med.horario}`;
+
+    const status = document.createElement('div');
+    status.className = `medicamento-status ${statusClasse}`;
+    status.textContent = statusTexto;
+
+    const actions = document.createElement('div');
+    actions.className = 'medicamento-actions';
+
+    const actionButton = med.tomado
+        ? criarBotaoAcaoMedicamento('btn-acao btn btn-secondary btn-desfazer-tomado', 'Desfazer', med)
+        : criarBotaoAcaoMedicamento('btn-acao btn btn-success btn-marcar-tomado', '✅ Marcar como Tomado', med);
+    actions.appendChild(actionButton);
+
+    card.appendChild(header);
+    card.appendChild(dia);
+    card.appendChild(dosagem);
+    card.appendChild(horario);
+    card.appendChild(status);
+    card.appendChild(actions);
 
     return card;
+}
+
+function criarBotaoAcaoMedicamento(classes, texto, med) {
+    const btn = document.createElement('button');
+    btn.className = classes;
+    btn.dataset.medId = String(med.id);
+    btn.dataset.medNome = med.nome;
+    btn.textContent = texto;
+    return btn;
 }
 
 function criarTabelaMedicamentos(medicamentos) {
@@ -330,21 +356,49 @@ function criarTabelaMedicamentos(medicamentos) {
         const statusTexto = med.ativo ? 'Ativo' : 'Inativo';
         const statusClasse = med.ativo ? 'status-ativo' : 'status-inativo';
 
-        tr.innerHTML = `
-            <td>${escaparHTML(med.nome)}</td>
-            <td>${formatarDiaMedicamento(med.dia)}</td>
-            <td>${escaparHTML(med.dosagem)}</td>
-            <td>${med.horario}</td>
-            <td class="${statusClasse}">${statusTexto}</td>
-            <td class="acoes-tabela">
-                <button class="btn btn-secondary btn-editar-med" data-med-id="${med.id}" data-med-nome="${escaparHTML(med.nome)}" data-med-dosagem="${escaparHTML(med.dosagem)}" data-med-horario="${med.horario}" data-med-dia="${med.dia}">
-                    Editar
-                </button>
-                <button class="btn btn-danger btn-remover-med" data-med-id="${med.id}" data-med-nome="${med.nome}">
-                     Remover
-                </button>
-            </td>
-        `;
+        const tdNome = document.createElement('td');
+        tdNome.textContent = med.nome;
+
+        const tdDia = document.createElement('td');
+        tdDia.textContent = formatarDiaMedicamento(med.dia);
+
+        const tdDosagem = document.createElement('td');
+        tdDosagem.textContent = med.dosagem;
+
+        const tdHorario = document.createElement('td');
+        tdHorario.textContent = med.horario;
+
+        const tdStatus = document.createElement('td');
+        tdStatus.className = statusClasse;
+        tdStatus.textContent = statusTexto;
+
+        const tdAcoes = document.createElement('td');
+        tdAcoes.className = 'acoes-tabela';
+
+        const btnEditar = document.createElement('button');
+        btnEditar.className = 'btn btn-secondary btn-editar-med';
+        btnEditar.dataset.medId = String(med.id);
+        btnEditar.dataset.medNome = med.nome;
+        btnEditar.dataset.medDosagem = med.dosagem;
+        btnEditar.dataset.medHorario = med.horario;
+        btnEditar.dataset.medDia = String(med.dia || 'todos');
+        btnEditar.textContent = 'Editar';
+
+        const btnRemover = document.createElement('button');
+        btnRemover.className = 'btn btn-danger btn-remover-med';
+        btnRemover.dataset.medId = String(med.id);
+        btnRemover.dataset.medNome = med.nome;
+        btnRemover.textContent = 'Remover';
+
+        tdAcoes.appendChild(btnEditar);
+        tdAcoes.appendChild(btnRemover);
+
+        tr.appendChild(tdNome);
+        tr.appendChild(tdDia);
+        tr.appendChild(tdDosagem);
+        tr.appendChild(tdHorario);
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdAcoes);
 
         tbody.appendChild(tr);
     });
@@ -572,7 +626,13 @@ function configurarModais() {
         if (e.target.classList.contains('btn-marcar-tomado')) {
             const medId = e.target.dataset.medId;
             const medNome = e.target.dataset.medNome;
-            abrirModalMarcado(medId, medNome);
+            abrirModalTomado(medId, medNome, false);
+        }
+
+        if (e.target.classList.contains('btn-desfazer-tomado')) {
+            const medId = e.target.dataset.medId;
+            const medNome = e.target.dataset.medNome;
+            abrirModalTomado(medId, medNome, true);
         }
 
         if (e.target.classList.contains('btn-remover-med')) {
@@ -596,22 +656,37 @@ function configurarModais() {
 function abrirModalEditar(med) {
     const modal = document.getElementById('modalEditar');
     document.getElementById('editarMedId').value = med.id;
-    document.getElementById('editarNome').value = desescaparHTML(med.nome);
-    document.getElementById('editarDosagem').value = desescaparHTML(med.dosagem);
+    document.getElementById('editarNome').value = med.nome;
+    document.getElementById('editarDosagem').value = med.dosagem;
     document.getElementById('editarHorario').value = med.horario;
     document.getElementById('editarDia').value = String(med.dia || 'todos').toLowerCase();
     modal.showModal();
 }
 
-function abrirModalMarcado(medId, nome) {
+function abrirModalTomado(medId, nome, desfazer = false) {
     const modal = document.getElementById('modalMarcado');
     const mensagem = document.getElementById('modalMensagem');
     const btnConfirmar = document.getElementById('btnConfirmar');
+    const titulo = document.getElementById('modalTitulo');
 
-    mensagem.textContent = `Você deseja marcar "${nome}" como tomado?`;
+    if (desfazer) {
+        if (titulo) titulo.textContent = 'Desfazer Marcação';
+        mensagem.textContent = `Você deseja desmarcar "${nome}" como tomado?`;
+        btnConfirmar.textContent = 'Desfazer';
+        btnConfirmar.className = 'btn btn-secondary';
+    } else {
+        if (titulo) titulo.textContent = 'Confirmar Ação';
+        mensagem.textContent = `Você deseja marcar "${nome}" como tomado?`;
+        btnConfirmar.textContent = '✅ Confirmar';
+        btnConfirmar.className = 'btn btn-primary';
+    }
 
     btnConfirmar.onclick = async () => {
-        await marcarMedicamentoComoTomado(medId, nome);
+        if (desfazer) {
+            await desmarcarMedicamentoComoTomado(medId);
+        } else {
+            await marcarMedicamentoComoTomado(medId);
+        }
         modal.close();
     };
 
@@ -637,7 +712,7 @@ function abrirModalRemover(medId, nome) {
 // AÇÕES COM MEDICAMENTOS
 // ==============================
 
-async function marcarMedicamentoComoTomado(medId, nome) {
+async function marcarMedicamentoComoTomado(medId) {
     try {
         const response = await fetch(`/api/medicamentos/${medId}/marcar-tomado`, {
             method: 'POST'
@@ -653,6 +728,26 @@ async function marcarMedicamentoComoTomado(medId, nome) {
         }
     } catch (erro) {
         mostrarAlerta('❌ Erro ao marcar medicamento', 'error');
+        console.error('Erro:', erro);
+    }
+}
+
+async function desmarcarMedicamentoComoTomado(medId) {
+    try {
+        const response = await fetch(`/api/medicamentos/${medId}/desmarcar-tomado`, {
+            method: 'DELETE'
+        });
+
+        const dados = await response.json();
+
+        if (dados.sucesso) {
+            mostrarAlerta(`✅ ${dados.mensagem}`, 'success');
+            carregarMedicamentosDoDay();
+        } else {
+            mostrarAlerta(`❌ ${dados.erro}`, 'error');
+        }
+    } catch (erro) {
+        mostrarAlerta('❌ Erro ao desfazer marcação do medicamento', 'error');
         console.error('Erro:', erro);
     }
 }
@@ -734,12 +829,6 @@ function escaparHTML(texto) {
     const div = document.createElement('div');
     div.textContent = texto;
     return div.innerHTML;
-}
-
-function desescaparHTML(texto) {
-    const textarea = document.createElement('textarea');
-    textarea.innerHTML = texto;
-    return textarea.value;
 }
 
 // Recarregar dados a cada 30 segundos (para manter atualizado em tempo real)
