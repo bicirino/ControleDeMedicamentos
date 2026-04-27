@@ -440,6 +440,30 @@ html[data-theme="dark"] .toggle-thumb {
     gap: var(--space-lg);
 }
 
+.medicamentos-dia-lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.periodo-secao {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.periodo-titulo {
+    font-size: 1.3rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--space-sm);
+}
+
+.periodo-grid {
+    margin-top: var(--space-sm);
+}
+
 .medicamento-card {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -464,14 +488,7 @@ html[data-theme="dark"] .toggle-thumb {
 
 .medicamento-header {
     display: flex;
-    gap: var(--space-md);
-    align-items: flex-start;
-}
-
-.medicamento-icon {
-    font-size: 2rem;
-    flex-shrink: 0;
-    line-height: 1;
+    align-items: center;
 }
 
 .medicamento-info {
@@ -480,20 +497,25 @@ html[data-theme="dark"] .toggle-thumb {
 }
 
 .medicamento-nome {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: var(--font-weight-semibold);
     color: var(--text-primary);
     margin-bottom: var(--space-xs);
 }
 
+.medicamento-dia {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
 .medicamento-dosagem {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     color: var(--text-secondary);
     margin-bottom: var(--space-sm);
 }
 
 .medicamento-horario {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: var(--color-primary);
     font-weight: var(--font-weight-semibold);
     margin-bottom: var(--space-md);
@@ -515,6 +537,16 @@ html[data-theme="dark"] .toggle-thumb {
 .medicamento-status.tomado {
     background-color: var(--color-success-light);
     color: var(--color-success);
+}
+
+html[data-theme="dark"] .medicamento-card.tomado {
+    background-color: #15433d;
+    border-color: #2f7d73;
+}
+
+html[data-theme="dark"] .medicamento-status.tomado {
+    background-color: #1a5a50;
+    color: #d1fae5;
 }
 
 .medicamento-actions {
@@ -554,6 +586,17 @@ th {
 td {
     padding: var(--space-md);
     border-bottom: 1px solid var(--border-color);
+}
+
+.acoes-tabela {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.acoes-tabela .btn {
+    min-width: 90px;
 }
 
 tbody tr {
@@ -1063,10 +1106,6 @@ input::placeholder {
 
     .medicamento-nome {
         font-size: 1.1rem;
-    }
-
-    .medicamento-icon {
-        font-size: 1.75rem;
     }
 
     .modal-content {

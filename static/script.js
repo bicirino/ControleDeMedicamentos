@@ -11,11 +11,23 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarAplicacao();
 });
 
+const DIA_LABELS = {
+    todos: 'Todos os dias',
+    segunda: 'Segunda-feira',
+    terca: 'Terça-feira',
+    quarta: 'Quarta-feira',
+    quinta: 'Quinta-feira',
+    sexta: 'Sexta-feira',
+    sabado: 'Sábado',
+    domingo: 'Domingo'
+};
+
 function inicializarAplicacao() {
     configurarTema();
     configurarNavigacao();
     configurarFormularios();
     configurarModais();
+    configurarDiaPadraoCadastro();
     atualizarDataHoje();
     carregarMedicamentosDoDay();
 }
@@ -156,15 +168,70 @@ async function carregarMedicamentosDoDay() {
             return;
         }
 
+        const grupos = {
+            manha: [],
+            tarde: [],
+            noite: []
+        };
+
         dados.medicamentos.forEach(med => {
-            const card = criarCardMedicamento(med);
-            container.appendChild(card);
+            const periodo = classificarPeriodoPorHorario(med.horario);
+            grupos[periodo].push(med);
+        });
+
+        const secoes = [
+            { chave: 'manha', titulo: '☀️ Manhã' },
+            { chave: 'tarde', titulo: '🌤️ Tarde' },
+            { chave: 'noite', titulo: '🌙 Noite' },
+        ];
+
+        secoes.forEach(secao => {
+            if (grupos[secao.chave].length === 0) {
+                return;
+            }
+
+            const wrapper = document.createElement('section');
+            wrapper.className = 'periodo-secao';
+
+            const titulo = document.createElement('h3');
+            titulo.className = 'periodo-titulo';
+            titulo.textContent = secao.titulo;
+
+            const grid = document.createElement('div');
+            grid.className = 'medicamentos-grid periodo-grid';
+
+            grupos[secao.chave].forEach(med => {
+                const card = criarCardMedicamento(med);
+                grid.appendChild(card);
+            });
+
+            wrapper.appendChild(titulo);
+            wrapper.appendChild(grid);
+            container.appendChild(wrapper);
         });
     } catch (erro) {
         loading.style.display = 'none';
         mostrarAlerta('Erro ao conectar com o servidor', 'error');
         console.error('Erro:', erro);
     }
+}
+
+function classificarPeriodoPorHorario(horario) {
+    const hora = parseInt(String(horario || '').split(':')[0], 10);
+
+    if (!Number.isInteger(hora)) {
+        return 'manha';
+    }
+
+    if (hora < 12) {
+        return 'manha';
+    }
+
+    if (hora < 18) {
+        return 'tarde';
+    }
+
+    return 'noite';
 }
 
 async function carregarMedicamentosTodos() {
@@ -212,32 +279,55 @@ function criarCardMedicamento(med) {
     const statusTexto = med.tomado ? '✅ Tomado' : '⏳ Pendente';
     const statusClasse = med.tomado ? 'tomado' : 'pendente';
 
-    let botao = '';
-    if (!med.tomado) {
-        botao = `
-            <button class="btn-acao btn btn-success btn-marcar-tomado" data-med-id="${med.id}" data-med-nome="${med.nome}">
-                ✅ Marcar como Tomado
-            </button>
-        `;
-    }
+    const header = document.createElement('div');
+    header.className = 'medicamento-header';
 
-    card.innerHTML = `
-        <div class="medicamento-header">
-            <span class="medicamento-icon"></span>
-            <h3 class="medicamento-nome">${escaparHTML(med.nome)}</h3>
-        </div>
-        <div class="medicamento-dosagem">💊 ${escaparHTML(med.dosagem)}</div>
-        <div class="medicamento-horario">🕐 ${med.horario}</div>
-        <div class="medicamento-status ${statusClasse}">${statusTexto}</div>
-        <div class="medicamento-actions">
-            ${botao}
-            <button class="btn-acao btn btn-danger btn-remover-med" data-med-id="${med.id}" data-med-nome="${med.nome}">
-                 Remover
-            </button>
-        </div>
-    `;
+    const nome = document.createElement('h3');
+    nome.className = 'medicamento-nome';
+    nome.textContent = med.nome;
+    header.appendChild(nome);
+
+    const dia = document.createElement('div');
+    dia.className = 'medicamento-dia';
+    dia.textContent = `📆 ${formatarDiaMedicamento(med.dia)}`;
+
+    const dosagem = document.createElement('div');
+    dosagem.className = 'medicamento-dosagem';
+    dosagem.innerHTML = `<strong>Dosagem:</strong> ${escaparHTML(med.dosagem)}`;
+
+    const horario = document.createElement('div');
+    horario.className = 'medicamento-horario';
+    horario.textContent = `🕐 ${med.horario}`;
+
+    const status = document.createElement('div');
+    status.className = `medicamento-status ${statusClasse}`;
+    status.textContent = statusTexto;
+
+    const actions = document.createElement('div');
+    actions.className = 'medicamento-actions';
+
+    const actionButton = med.tomado
+        ? criarBotaoAcaoMedicamento('btn-acao btn btn-secondary btn-desfazer-tomado', 'Desfazer', med)
+        : criarBotaoAcaoMedicamento('btn-acao btn btn-success btn-marcar-tomado', '✅ Marcar como Tomado', med);
+    actions.appendChild(actionButton);
+
+    card.appendChild(header);
+    card.appendChild(dia);
+    card.appendChild(dosagem);
+    card.appendChild(horario);
+    card.appendChild(status);
+    card.appendChild(actions);
 
     return card;
+}
+
+function criarBotaoAcaoMedicamento(classes, texto, med) {
+    const btn = document.createElement('button');
+    btn.className = classes;
+    btn.dataset.medId = String(med.id);
+    btn.dataset.medNome = med.nome;
+    btn.textContent = texto;
+    return btn;
 }
 
 function criarTabelaMedicamentos(medicamentos) {
@@ -248,6 +338,7 @@ function criarTabelaMedicamentos(medicamentos) {
     thead.innerHTML = `
         <tr>
             <th>Medicamento</th>
+            <th>Dia</th>
             <th>Dosagem</th>
             <th>Horário</th>
             <th>Status</th>
@@ -265,17 +356,49 @@ function criarTabelaMedicamentos(medicamentos) {
         const statusTexto = med.ativo ? 'Ativo' : 'Inativo';
         const statusClasse = med.ativo ? 'status-ativo' : 'status-inativo';
 
-        tr.innerHTML = `
-            <td>${escaparHTML(med.nome)}</td>
-            <td>${escaparHTML(med.dosagem)}</td>
-            <td>${med.horario}</td>
-            <td class="${statusClasse}">${statusTexto}</td>
-            <td>
-                <button class="btn btn-danger btn-remover-med" data-med-id="${med.id}" data-med-nome="${med.nome}">
-                     Remover
-                </button>
-            </td>
-        `;
+        const tdNome = document.createElement('td');
+        tdNome.textContent = med.nome;
+
+        const tdDia = document.createElement('td');
+        tdDia.textContent = formatarDiaMedicamento(med.dia);
+
+        const tdDosagem = document.createElement('td');
+        tdDosagem.textContent = med.dosagem;
+
+        const tdHorario = document.createElement('td');
+        tdHorario.textContent = med.horario;
+
+        const tdStatus = document.createElement('td');
+        tdStatus.className = statusClasse;
+        tdStatus.textContent = statusTexto;
+
+        const tdAcoes = document.createElement('td');
+        tdAcoes.className = 'acoes-tabela';
+
+        const btnEditar = document.createElement('button');
+        btnEditar.className = 'btn btn-secondary btn-editar-med';
+        btnEditar.dataset.medId = String(med.id);
+        btnEditar.dataset.medNome = med.nome;
+        btnEditar.dataset.medDosagem = med.dosagem;
+        btnEditar.dataset.medHorario = med.horario;
+        btnEditar.dataset.medDia = String(med.dia || 'todos');
+        btnEditar.textContent = 'Editar';
+
+        const btnRemover = document.createElement('button');
+        btnRemover.className = 'btn btn-danger btn-remover-med';
+        btnRemover.dataset.medId = String(med.id);
+        btnRemover.dataset.medNome = med.nome;
+        btnRemover.textContent = 'Remover';
+
+        tdAcoes.appendChild(btnEditar);
+        tdAcoes.appendChild(btnRemover);
+
+        tr.appendChild(tdNome);
+        tr.appendChild(tdDia);
+        tr.appendChild(tdDosagem);
+        tr.appendChild(tdHorario);
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdAcoes);
 
         tbody.appendChild(tr);
     });
@@ -305,15 +428,36 @@ function configurarFormularios() {
             await submeterFormularioConsulta();
         });
     }
+
+    if (formCadastrar) {
+        formCadastrar.addEventListener('reset', () => {
+            setTimeout(configurarDiaPadraoCadastro, 0);
+        });
+    }
+}
+
+function configurarDiaPadraoCadastro() {
+    const inputDia = document.getElementById('inputDia');
+    if (!inputDia) {
+        return;
+    }
+
+    inputDia.value = obterDiaSemanaAtualValor();
+}
+
+function obterDiaSemanaAtualValor() {
+    const dias = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+    return dias[new Date().getDay()];
 }
 
 async function submeterFormularioCadastro() {
     const nome = document.getElementById('inputNome').value.trim();
     const dosagem = document.getElementById('inputDosagem').value.trim();
     const horario = document.getElementById('inputHorario').value.trim();
+    const dia = document.getElementById('inputDia').value;
     const mensagem = document.getElementById('formMessage');
 
-    if (!nome || !dosagem || !horario) {
+    if (!nome || !dosagem || !horario || !dia) {
         mensagem.className = 'form-message error';
         mensagem.textContent = '⚠️ Todos os campos são obrigatórios!';
         return;
@@ -328,7 +472,8 @@ async function submeterFormularioCadastro() {
             body: JSON.stringify({
                 nome: nome,
                 dosagem: dosagem,
-                horario: horario
+                horario: horario,
+                dia: dia
             })
         });
 
@@ -359,6 +504,11 @@ async function submeterFormularioCadastro() {
         mensagem.textContent = '❌ Erro ao cadastrar medicamento';
         console.error('Erro:', erro);
     }
+}
+
+function formatarDiaMedicamento(dia) {
+    const chave = String(dia || 'todos').toLowerCase();
+    return DIA_LABELS[chave] || 'Todos os dias';
 }
 
 async function submeterFormularioConsulta() {
@@ -407,9 +557,12 @@ async function submeterFormularioConsulta() {
 function configurarModais() {
     const modalMarcado = document.getElementById('modalMarcado');
     const modalRemover = document.getElementById('modalRemover');
+    const modalEditar = document.getElementById('modalEditar');
 
     const btnCancelarMarcado = document.getElementById('btnCancelar');
     const btnCancelarRemover = document.getElementById('btnCancelarRemover');
+    const btnCancelarEditar = document.getElementById('btnCancelarEditar');
+    const formEditar = document.getElementById('formEditarMedicamento');
 
     if (btnCancelarMarcado) {
         btnCancelarMarcado.addEventListener('click', () => {
@@ -420,6 +573,26 @@ function configurarModais() {
     if (btnCancelarRemover) {
         btnCancelarRemover.addEventListener('click', () => {
             modalRemover.close();
+        });
+    }
+
+    if (btnCancelarEditar && modalEditar) {
+        btnCancelarEditar.addEventListener('click', () => {
+            modalEditar.close();
+        });
+    }
+
+    if (formEditar && modalEditar) {
+        formEditar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const medId = document.getElementById('editarMedId').value;
+            const nome = document.getElementById('editarNome').value.trim();
+            const dosagem = document.getElementById('editarDosagem').value.trim();
+            const horario = document.getElementById('editarHorario').value;
+            const dia = document.getElementById('editarDia').value;
+
+            await atualizarMedicamento(medId, { nome, dosagem, horario, dia });
+            modalEditar.close();
         });
     }
 
@@ -440,12 +613,26 @@ function configurarModais() {
         });
     }
 
+    if (modalEditar) {
+        modalEditar.addEventListener('click', (e) => {
+            if (e.target === modalEditar) {
+                modalEditar.close();
+            }
+        });
+    }
+
     // Listeners para botões de ação (evento delegado)
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-marcar-tomado')) {
             const medId = e.target.dataset.medId;
             const medNome = e.target.dataset.medNome;
-            abrirModalMarcado(medId, medNome);
+            abrirModalTomado(medId, medNome, false);
+        }
+
+        if (e.target.classList.contains('btn-desfazer-tomado')) {
+            const medId = e.target.dataset.medId;
+            const medNome = e.target.dataset.medNome;
+            abrirModalTomado(medId, medNome, true);
         }
 
         if (e.target.classList.contains('btn-remover-med')) {
@@ -453,18 +640,53 @@ function configurarModais() {
             const medNome = e.target.dataset.medNome;
             abrirModalRemover(medId, medNome);
         }
+
+        if (e.target.classList.contains('btn-editar-med')) {
+            abrirModalEditar({
+                id: e.target.dataset.medId,
+                nome: e.target.dataset.medNome,
+                dosagem: e.target.dataset.medDosagem,
+                horario: e.target.dataset.medHorario,
+                dia: e.target.dataset.medDia || 'todos'
+            });
+        }
     });
 }
 
-function abrirModalMarcado(medId, nome) {
+function abrirModalEditar(med) {
+    const modal = document.getElementById('modalEditar');
+    document.getElementById('editarMedId').value = med.id;
+    document.getElementById('editarNome').value = med.nome;
+    document.getElementById('editarDosagem').value = med.dosagem;
+    document.getElementById('editarHorario').value = med.horario;
+    document.getElementById('editarDia').value = String(med.dia || 'todos').toLowerCase();
+    modal.showModal();
+}
+
+function abrirModalTomado(medId, nome, desfazer = false) {
     const modal = document.getElementById('modalMarcado');
     const mensagem = document.getElementById('modalMensagem');
     const btnConfirmar = document.getElementById('btnConfirmar');
+    const titulo = document.getElementById('modalTitulo');
 
-    mensagem.textContent = `Você deseja marcar "${nome}" como tomado?`;
+    if (desfazer) {
+        if (titulo) titulo.textContent = 'Desfazer Marcação';
+        mensagem.textContent = `Você deseja desmarcar "${nome}" como tomado?`;
+        btnConfirmar.textContent = 'Desfazer';
+        btnConfirmar.className = 'btn btn-secondary';
+    } else {
+        if (titulo) titulo.textContent = 'Confirmar Ação';
+        mensagem.textContent = `Você deseja marcar "${nome}" como tomado?`;
+        btnConfirmar.textContent = '✅ Confirmar';
+        btnConfirmar.className = 'btn btn-primary';
+    }
 
     btnConfirmar.onclick = async () => {
-        await marcarMedicamentoComoTomado(medId, nome);
+        if (desfazer) {
+            await desmarcarMedicamentoComoTomado(medId);
+        } else {
+            await marcarMedicamentoComoTomado(medId);
+        }
         modal.close();
     };
 
@@ -490,7 +712,7 @@ function abrirModalRemover(medId, nome) {
 // AÇÕES COM MEDICAMENTOS
 // ==============================
 
-async function marcarMedicamentoComoTomado(medId, nome) {
+async function marcarMedicamentoComoTomado(medId) {
     try {
         const response = await fetch(`/api/medicamentos/${medId}/marcar-tomado`, {
             method: 'POST'
@@ -506,6 +728,26 @@ async function marcarMedicamentoComoTomado(medId, nome) {
         }
     } catch (erro) {
         mostrarAlerta('❌ Erro ao marcar medicamento', 'error');
+        console.error('Erro:', erro);
+    }
+}
+
+async function desmarcarMedicamentoComoTomado(medId) {
+    try {
+        const response = await fetch(`/api/medicamentos/${medId}/desmarcar-tomado`, {
+            method: 'DELETE'
+        });
+
+        const dados = await response.json();
+
+        if (dados.sucesso) {
+            mostrarAlerta(`✅ ${dados.mensagem}`, 'success');
+            carregarMedicamentosDoDay();
+        } else {
+            mostrarAlerta(`❌ ${dados.erro}`, 'error');
+        }
+    } catch (erro) {
+        mostrarAlerta('❌ Erro ao desfazer marcação do medicamento', 'error');
         console.error('Erro:', erro);
     }
 }
@@ -527,6 +769,31 @@ async function removerMedicamento(medId, nome) {
         }
     } catch (erro) {
         mostrarAlerta('❌ Erro ao remover medicamento', 'error');
+        console.error('Erro:', erro);
+    }
+}
+
+async function atualizarMedicamento(medId, payload) {
+    try {
+        const response = await fetch(`/api/medicamentos/${medId}/editar`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const dados = await response.json();
+
+        if (dados.sucesso) {
+            mostrarAlerta(`✅ ${dados.mensagem}`, 'success');
+            carregarMedicamentosDoDay();
+            carregarMedicamentosTodos();
+        } else {
+            mostrarAlerta(`❌ ${dados.erro}`, 'error');
+        }
+    } catch (erro) {
+        mostrarAlerta('❌ Erro ao atualizar medicamento', 'error');
         console.error('Erro:', erro);
     }
 }

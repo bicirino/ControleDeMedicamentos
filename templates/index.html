@@ -53,7 +53,7 @@
                     <p>Carregando medicamentos...</p>
                 </div>
 
-                <div id="medicamentosDiaContainer" class="medicamentos-grid">
+                <div id="medicamentosDiaContainer" class="medicamentos-dia-lista">
                     <!-- Preenchido via JavaScript -->
                 </div>
 
@@ -130,6 +130,28 @@
                             required
                             aria-required="true"
                         >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputDia">
+                            📅 Dia da Medicação
+                            <span class="required" aria-label="campo obrigatório">*</span>
+                        </label>
+                        <select
+                            id="inputDia"
+                            name="dia"
+                            required
+                            aria-required="true"
+                        >
+                            <option value="todos">Todos os dias</option>
+                            <option value="segunda">Segunda-feira</option>
+                            <option value="terca">Terça-feira</option>
+                            <option value="quarta">Quarta-feira</option>
+                            <option value="quinta">Quinta-feira</option>
+                            <option value="sexta">Sexta-feira</option>
+                            <option value="sabado">Sábado</option>
+                            <option value="domingo">Domingo</option>
+                        </select>
                     </div>
 
                     <div class="form-actions">
@@ -223,6 +245,54 @@
                     ❌ Cancelar
                 </button>
             </div>
+        </div>
+    </dialog>
+
+    <!-- Modal para Editar -->
+    <dialog id="modalEditar" class="modal" aria-labelledby="modalEditarTitulo">
+        <div class="modal-content">
+            <h3 id="modalEditarTitulo">Editar Medicamento</h3>
+            <form id="formEditarMedicamento">
+                <input type="hidden" id="editarMedId" name="id">
+
+                <div class="form-group">
+                    <label for="editarNome">📋 Nome do Medicamento</label>
+                    <input type="text" id="editarNome" name="nome" required aria-required="true">
+                </div>
+
+                <div class="form-group">
+                    <label for="editarDosagem">💊 Dosagem</label>
+                    <input type="text" id="editarDosagem" name="dosagem" required aria-required="true">
+                </div>
+
+                <div class="form-group">
+                    <label for="editarHorario">🕐 Horário de Tomar</label>
+                    <input type="time" id="editarHorario" name="horario" required aria-required="true">
+                </div>
+
+                <div class="form-group">
+                    <label for="editarDia">📅 Dia da Medicação</label>
+                    <select id="editarDia" name="dia" required aria-required="true">
+                        <option value="todos">Todos os dias</option>
+                        <option value="segunda">Segunda-feira</option>
+                        <option value="terca">Terça-feira</option>
+                        <option value="quarta">Quarta-feira</option>
+                        <option value="quinta">Quinta-feira</option>
+                        <option value="sexta">Sexta-feira</option>
+                        <option value="sabado">Sábado</option>
+                        <option value="domingo">Domingo</option>
+                    </select>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary" id="btnSalvarEdicao" aria-label="Salvar alterações">
+                        💾 Salvar
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btnCancelarEditar" aria-label="Cancelar edição">
+                        ❌ Cancelar
+                    </button>
+                </div>
+            </form>
         </div>
     </dialog>
 

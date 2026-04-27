@@ -19,9 +19,24 @@ def inicializar_banco() -> None:
             nome        TEXT    NOT NULL,
             dosagem     TEXT    NOT NULL,
             horario     TEXT    NOT NULL,
+            dia         TEXT    NOT NULL DEFAULT 'todos',
             ativo       INTEGER NOT NULL DEFAULT 1
         )
     """)
+
+    # Migração para bancos criados antes da coluna `dia`.
+    cursor.execute("PRAGMA table_info(medicamentos)")
+    colunas = {linha["name"] for linha in cursor.fetchall()}
+    if "dia" not in colunas:
+        cursor.execute(
+            "ALTER TABLE medicamentos "
+            "ADD COLUMN dia TEXT NOT NULL DEFAULT 'todos'"
+        )
+
+    cursor.execute(
+        "UPDATE medicamentos SET dia = 'todos' "
+        "WHERE dia IS NULL OR TRIM(dia) = ''"
+    )
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS registros_tomados (
