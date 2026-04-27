@@ -281,7 +281,10 @@ def marcar_como_tomado(med_id):
         return jsonify({"sucesso": False, "erro": str(e)}), 500
 
 
-@app.route("/api/medicamentos/<int:med_id>/desmarcar-tomado", methods=["DELETE"])
+@app.route(
+    "/api/medicamentos/<int:med_id>/desmarcar-tomado",
+    methods=["DELETE"],
+)
 def desmarcar_como_tomado(med_id):
     """Remove o registro de medicamento tomado hoje (undo)."""
     try:
@@ -376,7 +379,10 @@ def editar_medicamento(med_id):
 
         nome = dados.get("nome", "").strip()
         if not nome:
-            return jsonify({"sucesso": False, "erro": "Nome não pode ser vazio"}), 400
+            return jsonify({
+                "sucesso": False,
+                "erro": "Nome não pode ser vazio",
+            }), 400
 
         dosagem = dados.get("dosagem", "").strip()
         if not dosagem:
