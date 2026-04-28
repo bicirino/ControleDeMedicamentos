@@ -699,7 +699,45 @@ td {
 }
 
 .acoes-tabela .btn {
-    min-width: 90px;
+    min-width: 80px;
+    margin-right: var(--space-lg);
+    padding: 0.45rem 0.8rem;
+    font-size: 0.92rem;
+    border-radius: 10px;
+}
+
+/* Remover sombra e suavizar cores apenas dentro da coluna Ações */
+.acoes-tabela .btn.btn-secondary,
+.acoes-tabela .btn.btn-danger {
+    box-shadow: none;
+}
+
+.acoes-tabela .btn.btn-secondary {
+    background-color: #F3F4F6;
+    color: var(--text-primary);
+    border: 1px solid #E5E7EB;
+}
+
+.acoes-tabela .btn.btn-danger {
+    background-color: #fa4646;
+    color: #fff;
+    border: none;
+}
+
+.acoes-tabela .btn:last-child {
+    margin-right: 0;
+}
+
+/* Ajuste específico para modo escuro: botão secundário na coluna Ações */
+html[data-theme="dark"] .acoes-tabela .btn.btn-secondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+html[data-theme="dark"] .acoes-tabela .btn.btn-secondary:hover {
+    background-color: #2b3440;
+    box-shadow: none;
 }
 
 tbody tr {
@@ -739,9 +777,15 @@ td.status-inativo {
 label {
     display: block;
     font-size: 1.1rem;
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-bold);
     margin-bottom: var(--space-md);
     color: var(--text-primary);
+}
+
+/* Deixar títulos/labels retornados pela consulta em negrito */
+.consulta-info strong {
+    font-weight: var(--font-weight-bold);
+    color: inherit;
 }
 
 .required {
