@@ -39,6 +39,9 @@ function inicializarAplicacao() {
 function configurarTema() {
     const themeToggle = document.getElementById('themeToggle');
     const htmlElement = document.documentElement;
+    if (!themeToggle) {
+        return;
+    }
     
     // Verificar preferência salva no localStorage
     const savedTheme = localStorage.getItem('theme');
@@ -74,14 +77,22 @@ function configurarTema() {
 
 function aplicarTema(isDarkMode) {
     const htmlElement = document.documentElement;
-    const themeToggle = document.querySelector('.toggle-label');
+    const themeToggle = document.getElementById('themeToggle');
     
     if (isDarkMode) {
         htmlElement.setAttribute('data-theme', 'dark');
-        if (themeToggle) themeToggle.textContent = '☀️';
+        if (themeToggle) {
+            themeToggle.setAttribute('aria-label', 'Alternar para modo claro');
+            themeToggle.setAttribute('title', 'Ativar tema claro');
+            themeToggle.setAttribute('aria-pressed', 'true');
+        }
     } else {
         htmlElement.setAttribute('data-theme', 'light');
-        if (themeToggle) themeToggle.textContent = '🌙';
+        if (themeToggle) {
+            themeToggle.setAttribute('aria-label', 'Alternar para modo escuro');
+            themeToggle.setAttribute('title', 'Ativar tema escuro');
+            themeToggle.setAttribute('aria-pressed', 'false');
+        }
     }
 }
 
@@ -216,6 +227,19 @@ async function carregarMedicamentosDoDay() {
     }
 }
 
+function obterMinutosAgora() {
+    const agora = new Date();
+    return (agora.getHours() * 60) + agora.getMinutes();
+}
+
+function converterHorarioParaMinutos(horario) {
+    const [hora, minuto] = String(horario || '').split(':').map((parte) => Number(parte));
+    if (!Number.isInteger(hora) || !Number.isInteger(minuto)) {
+        return null;
+    }
+    return (hora * 60) + minuto;
+}
+
 function classificarPeriodoPorHorario(horario) {
     const hora = parseInt(String(horario || '').split(':')[0], 10);
 
@@ -274,10 +298,11 @@ async function carregarMedicamentosTodos() {
 
 function criarCardMedicamento(med) {
     const card = document.createElement('div');
-    card.className = `medicamento-card ${med.tomado ? 'tomado' : ''}`;
+    const atrasado = !med.tomado && estaHorarioAtrasado(med.horario);
+    card.className = `medicamento-card ${med.tomado ? 'tomado' : ''} ${atrasado ? 'atrasado' : ''}`;
 
-    const statusTexto = med.tomado ? '✅ Tomado' : '⏳ Pendente';
-    const statusClasse = med.tomado ? 'tomado' : 'pendente';
+    const statusClasse = med.tomado ? 'tomado' : (atrasado ? 'atrasado' : 'pendente');
+    const statusTexto = med.tomado ? '✓ Tomado' : (atrasado ? '⚠ Atrasado' : '⏳ Pendente');
 
     const header = document.createElement('div');
     header.className = 'medicamento-header';
@@ -308,7 +333,7 @@ function criarCardMedicamento(med) {
 
     const actionButton = med.tomado
         ? criarBotaoAcaoMedicamento('btn-acao btn btn-secondary btn-desfazer-tomado', 'Desfazer', med)
-        : criarBotaoAcaoMedicamento('btn-acao btn btn-success btn-marcar-tomado', '✅ Marcar como Tomado', med);
+        : criarBotaoAcaoMedicamento('btn-acao btn btn-success btn-marcar-tomado', '✓ Marcar como Tomado', med);
     actions.appendChild(actionButton);
 
     card.appendChild(header);
@@ -328,6 +353,15 @@ function criarBotaoAcaoMedicamento(classes, texto, med) {
     btn.dataset.medNome = med.nome;
     btn.textContent = texto;
     return btn;
+}
+
+function estaHorarioAtrasado(horario) {
+    const minutosHorario = converterHorarioParaMinutos(horario);
+    if (minutosHorario === null) {
+        return false;
+    }
+
+    return minutosHorario < obterMinutosAgora();
 }
 
 function criarTabelaMedicamentos(medicamentos) {
