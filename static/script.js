@@ -71,7 +71,8 @@ const StorageManager = {
      */
     atualizarMedicamento(id, dados) {
         const meds = JSON.parse(localStorage.getItem(this.MEDS_KEY) || '[]');
-        const index = meds.findIndex(m => m.id === id);
+        const idNumerico = Number(id);
+        const index = meds.findIndex(m => Number(m.id) === idNumerico);
         if (index !== -1) {
             meds[index] = { ...meds[index], ...dados, observacao: dados.observacao || '' };
             localStorage.setItem(this.MEDS_KEY, JSON.stringify(meds));
@@ -85,7 +86,8 @@ const StorageManager = {
      */
     removerMedicamento(id) {
         const meds = JSON.parse(localStorage.getItem(this.MEDS_KEY) || '[]');
-        const index = meds.findIndex(m => m.id === id);
+        const idNumerico = Number(id);
+        const index = meds.findIndex(m => Number(m.id) === idNumerico);
         if (index !== -1) {
             meds[index].ativo = 0;
             localStorage.setItem(this.MEDS_KEY, JSON.stringify(meds));
