@@ -52,7 +52,7 @@ const StorageManager = {
     adicionarMedicamento(medicamento) {
         const meds = JSON.parse(localStorage.getItem(this.MEDS_KEY) || '[]');
         const novoId = meds.length > 0 ? Math.max(...meds.map(m => m.id)) + 1 : 1;
-        const novoMed = { ...medicamento, id: novoId, ativo: 1 };
+        const novoMed = { ...medicamento, observacao: medicamento.observacao || '', id: novoId, ativo: 1 };
         meds.push(novoMed);
         localStorage.setItem(this.MEDS_KEY, JSON.stringify(meds));
         return novoMed;
@@ -73,7 +73,7 @@ const StorageManager = {
         const meds = JSON.parse(localStorage.getItem(this.MEDS_KEY) || '[]');
         const index = meds.findIndex(m => m.id === id);
         if (index !== -1) {
-            meds[index] = { ...meds[index], ...dados };
+            meds[index] = { ...meds[index], ...dados, observacao: dados.observacao || '' };
             localStorage.setItem(this.MEDS_KEY, JSON.stringify(meds));
             return meds[index];
         }
@@ -445,6 +445,10 @@ function criarCardMedicamento(med) {
     horario.className = 'medicamento-horario';
     horario.textContent = `🕐 ${med.horario}`;
 
+    const observacao = document.createElement('div');
+    observacao.className = 'medicamento-observacao';
+    observacao.innerHTML = `<strong>Obs:</strong> ${escaparHTML(med.observacao || 'Sem observação')}`;
+
     const status = document.createElement('div');
     status.className = `medicamento-status ${statusClasse}`;
     status.textContent = statusTexto;
@@ -461,6 +465,7 @@ function criarCardMedicamento(med) {
     card.appendChild(dia);
     card.appendChild(dosagem);
     card.appendChild(horario);
+    card.appendChild(observacao);
     card.appendChild(status);
     card.appendChild(actions);
 
@@ -496,6 +501,7 @@ function criarTabelaMedicamentos(medicamentos) {
             <th>Dia</th>
             <th>Dosagem</th>
             <th>Horário</th>
+            <th>Observação</th>
             <th>Status</th>
             <th>Ações</th>
         </tr>
@@ -523,6 +529,9 @@ function criarTabelaMedicamentos(medicamentos) {
         const tdHorario = document.createElement('td');
         tdHorario.textContent = med.horario;
 
+        const tdObservacao = document.createElement('td');
+        tdObservacao.textContent = med.observacao || 'Sem observação';
+
         const tdStatus = document.createElement('td');
         tdStatus.className = statusClasse;
         tdStatus.textContent = statusTexto;
@@ -536,6 +545,7 @@ function criarTabelaMedicamentos(medicamentos) {
         btnEditar.dataset.medNome = med.nome;
         btnEditar.dataset.medDosagem = med.dosagem;
         btnEditar.dataset.medHorario = med.horario;
+        btnEditar.dataset.medObservacao = med.observacao || '';
         btnEditar.dataset.medDia = String(med.dia || 'todos');
         btnEditar.textContent = 'Editar';
 
@@ -552,6 +562,7 @@ function criarTabelaMedicamentos(medicamentos) {
         tr.appendChild(tdDia);
         tr.appendChild(tdDosagem);
         tr.appendChild(tdHorario);
+        tr.appendChild(tdObservacao);
         tr.appendChild(tdStatus);
         tr.appendChild(tdAcoes);
 
@@ -609,6 +620,7 @@ async function submeterFormularioCadastro() {
     const nome = document.getElementById('inputNome').value.trim();
     const dosagem = document.getElementById('inputDosagem').value.trim();
     const horario = document.getElementById('inputHorario').value.trim();
+    const observacao = document.getElementById('inputObservacao').value.trim();
     const dia = document.getElementById('inputDia').value;
     const mensagem = document.getElementById('formMessage');
 
@@ -624,6 +636,7 @@ async function submeterFormularioCadastro() {
             nome: nome,
             dosagem: dosagem,
             horario: horario,
+            observacao: observacao,
             dia: dia
         });
 
@@ -737,9 +750,10 @@ function configurarModais() {
             const nome = document.getElementById('editarNome').value.trim();
             const dosagem = document.getElementById('editarDosagem').value.trim();
             const horario = document.getElementById('editarHorario').value;
+            const observacao = document.getElementById('editarObservacao').value.trim();
             const dia = document.getElementById('editarDia').value;
 
-            await atualizarMedicamento(medId, { nome, dosagem, horario, dia });
+            await atualizarMedicamento(medId, { nome, dosagem, horario, observacao, dia });
             modalEditar.close();
         });
     }
@@ -795,6 +809,7 @@ function configurarModais() {
                 nome: e.target.dataset.medNome,
                 dosagem: e.target.dataset.medDosagem,
                 horario: e.target.dataset.medHorario,
+                observacao: e.target.dataset.medObservacao || '',
                 dia: e.target.dataset.medDia || 'todos'
             });
         }
@@ -807,6 +822,7 @@ function abrirModalEditar(med) {
     document.getElementById('editarNome').value = med.nome;
     document.getElementById('editarDosagem').value = med.dosagem;
     document.getElementById('editarHorario').value = med.horario;
+    document.getElementById('editarObservacao').value = med.observacao || '';
     document.getElementById('editarDia').value = String(med.dia || 'todos').toLowerCase();
     modal.showModal();
 }
