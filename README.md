@@ -2,7 +2,7 @@
 
 **Uma aplicação web moderna para auxiliar idosos e cuidadores no controle de medicamentos e horários.**
 
-> **🌐 Deploy ao Vivo:** [Disponível em breve - link será adicionado após publicação]
+> **🌐 Deploy ao Vivo:** [[Clique aqui]](https://controledemedicamentos-t7d1.onrender.com/)
 
 ---
 
