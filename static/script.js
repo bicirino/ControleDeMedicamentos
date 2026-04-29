@@ -895,7 +895,7 @@ async function desmarcarMedicamentoComoTomado(medId) {
         mostrarAlerta('❌ Erro ao desfazer marcação do medicamento', 'error');
         console.error('Erro:', erro);
     }
-}}
+}
 
 async function removerMedicamento(medId, nome) {
     try {
@@ -931,7 +931,7 @@ async function atualizarMedicamento(medId, payload) {
         mostrarAlerta('❌ Erro ao atualizar medicamento', 'error');
         console.error('Erro:', erro);
     }
-}}
+}
 
 // ==============================
 // ALERTAS
