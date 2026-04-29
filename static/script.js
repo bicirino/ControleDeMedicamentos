@@ -101,11 +101,11 @@ const StorageManager = {
         const hoje = _data_hoje();
         const tomados = JSON.parse(localStorage.getItem(this.TOMADOS_KEY) || '[]');
         
-        // Verifica se já foi marcado hoje
-        const jaExiste = tomados.some(t => t.medicamento_id === medicamentoId && t.data_tomado === hoje);
+        // Verifica se já foi marcado hoje (converte para número para garantir comparação)
+        const jaExiste = tomados.some(t => Number(t.medicamento_id) === Number(medicamentoId) && t.data_tomado === hoje);
         if (jaExiste) return false;
         
-        tomados.push({ medicamento_id: medicamentoId, data_tomado: hoje });
+        tomados.push({ medicamento_id: Number(medicamentoId), data_tomado: hoje });
         localStorage.setItem(this.TOMADOS_KEY, JSON.stringify(tomados));
         return true;
     },
@@ -116,7 +116,7 @@ const StorageManager = {
     desmarcarTomado(medicamentoId) {
         const hoje = _data_hoje();
         const tomados = JSON.parse(localStorage.getItem(this.TOMADOS_KEY) || '[]');
-        const novosTomados = tomados.filter(t => !(t.medicamento_id === medicamentoId && t.data_tomado === hoje));
+        const novosTomados = tomados.filter(t => !(Number(t.medicamento_id) === Number(medicamentoId) && t.data_tomado === hoje));
         localStorage.setItem(this.TOMADOS_KEY, JSON.stringify(novosTomados));
         return true;
     },
@@ -127,7 +127,7 @@ const StorageManager = {
     foiTomadoHoje(medicamentoId) {
         const hoje = _data_hoje();
         const tomados = JSON.parse(localStorage.getItem(this.TOMADOS_KEY) || '[]');
-        return tomados.some(t => t.medicamento_id === medicamentoId && t.data_tomado === hoje);
+        return tomados.some(t => Number(t.medicamento_id) === Number(medicamentoId) && t.data_tomado === hoje);
     }
 };
 
