@@ -15,11 +15,18 @@
                 <p class="tagline">Sua rotina de saúde em dia!</p>
             </div>
             <div class="theme-toggle-container">
-                <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema">
-                    <span class="toggle-track">
-                        <span class="toggle-thumb"></span>
+                <button id="themeToggle" class="theme-toggle" aria-label="Alternar para modo escuro" aria-pressed="false" title="Alternar tema">
+                    <span class="theme-toggle-icon theme-icon-sun" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <path d="M12 1.8V4.2M12 19.8V22.2M4.22 4.22L5.92 5.92M18.08 18.08L19.78 19.78M1.8 12H4.2M19.8 12H22.2M4.22 19.78L5.92 18.08M18.08 5.92L19.78 4.22"></path>
+                        </svg>
                     </span>
-                    <span class="toggle-label">🌙</span>
+                    <span class="theme-toggle-icon theme-icon-moon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M20.2 15.6A8.9 8.9 0 1 1 8.4 3.8a7.1 7.1 0 1 0 11.8 11.8z"></path>
+                        </svg>
+                    </span>
                 </button>
             </div>
         </header>
