@@ -22,7 +22,117 @@ const DIA_LABELS = {
     domingo: 'Domingo'
 };
 
+// ==============================
+// STORAGE LOCAL (localStorage)
+// ==============================
+
+const StorageManager = {
+    // Chaves do localStorage
+    MEDS_KEY: 'medicamentos_lista',
+    TOMADOS_KEY: 'registros_tomados',
+    VERSION_KEY: 'storage_version',
+    STORAGE_VERSION: 1,
+
+    /**
+     * Inicializa o storage se não existir
+     */
+    inicializar() {
+        if (!localStorage.getItem(this.MEDS_KEY)) {
+            localStorage.setItem(this.MEDS_KEY, JSON.stringify([]));
+        }
+        if (!localStorage.getItem(this.TOMADOS_KEY)) {
+            localStorage.setItem(this.TOMADOS_KEY, JSON.stringify([]));
+        }
+        localStorage.setItem(this.VERSION_KEY, this.STORAGE_VERSION);
+    },
+
+    /**
+     * Salva um novo medicamento no localStorage
+     */
+    adicionarMedicamento(medicamento) {
+        const meds = JSON.parse(localStorage.getItem(this.MEDS_KEY) || '[]');
+        const novoId = meds.length > 0 ? Math.max(...meds.map(m => m.id)) + 1 : 1;
+        const novoMed = { ...medicamento, id: novoId, ativo: 1 };
+        meds.push(novoMed);
+        localStorage.setItem(this.MEDS_KEY, JSON.stringify(meds));
+        return novoMed;
+    },
+
+    /**
+     * Carrega todos os medicamentos ativos do localStorage
+     */
+    carregarMedicamentos() {
+        const meds = JSON.parse(localStorage.getItem(this.MEDS_KEY) || '[]');
+        return meds.filter(m => m.ativo === 1);
+    },
+
+    /**
+     * Atualiza um medicamento no localStorage
+     */
+    atualizarMedicamento(id, dados) {
+        const meds = JSON.parse(localStorage.getItem(this.MEDS_KEY) || '[]');
+        const index = meds.findIndex(m => m.id === id);
+        if (index !== -1) {
+            meds[index] = { ...meds[index], ...dados };
+            localStorage.setItem(this.MEDS_KEY, JSON.stringify(meds));
+            return meds[index];
+        }
+        return null;
+    },
+
+    /**
+     * Remove (desativa) um medicamento
+     */
+    removerMedicamento(id) {
+        const meds = JSON.parse(localStorage.getItem(this.MEDS_KEY) || '[]');
+        const index = meds.findIndex(m => m.id === id);
+        if (index !== -1) {
+            meds[index].ativo = 0;
+            localStorage.setItem(this.MEDS_KEY, JSON.stringify(meds));
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Marca medicamento como tomado hoje
+     */
+    marcarTomado(medicamentoId) {
+        const hoje = _data_hoje();
+        const tomados = JSON.parse(localStorage.getItem(this.TOMADOS_KEY) || '[]');
+        
+        // Verifica se já foi marcado hoje
+        const jaExiste = tomados.some(t => t.medicamento_id === medicamentoId && t.data_tomado === hoje);
+        if (jaExiste) return false;
+        
+        tomados.push({ medicamento_id: medicamentoId, data_tomado: hoje });
+        localStorage.setItem(this.TOMADOS_KEY, JSON.stringify(tomados));
+        return true;
+    },
+
+    /**
+     * Desmarcar medicamento como tomado
+     */
+    desmarcarTomado(medicamentoId) {
+        const hoje = _data_hoje();
+        const tomados = JSON.parse(localStorage.getItem(this.TOMADOS_KEY) || '[]');
+        const novosTomados = tomados.filter(t => !(t.medicamento_id === medicamentoId && t.data_tomado === hoje));
+        localStorage.setItem(this.TOMADOS_KEY, JSON.stringify(novosTomados));
+        return true;
+    },
+
+    /**
+     * Verifica se medicamento foi tomado hoje
+     */
+    foiTomadoHoje(medicamentoId) {
+        const hoje = _data_hoje();
+        const tomados = JSON.parse(localStorage.getItem(this.TOMADOS_KEY) || '[]');
+        return tomados.some(t => t.medicamento_id === medicamentoId && t.data_tomado === hoje);
+    }
+};
+
 function inicializarAplicacao() {
+    StorageManager.inicializar();
     configurarTema();
     configurarNavigacao();
     configurarFormularios();
@@ -164,17 +274,19 @@ async function carregarMedicamentosDoDay() {
     noDados.style.display = 'none';
 
     try {
-        const response = await fetch('/api/medicamentos/dia');
-        const dados = await response.json();
+        // Carregar do localStorage (dados locais)
+        const medicamentos = StorageManager.carregarMedicamentos();
+        const hoje = _data_hoje();
+        const diaSemanaHoje = _dia_semana_hoje();
+
+        // Filtrar medicamentos do dia (todos + dia da semana)
+        const medicamentosHoje = medicamentos.filter(med => 
+            med.dia === 'todos' || med.dia === diaSemanaHoje
+        );
 
         loading.style.display = 'none';
 
-        if (!dados.sucesso) {
-            mostrarAlerta('Erro ao carregar medicamentos', 'error');
-            return;
-        }
-
-        if (dados.medicamentos.length === 0) {
+        if (medicamentosHoje.length === 0) {
             noDados.style.display = 'block';
             return;
         }
@@ -185,9 +297,11 @@ async function carregarMedicamentosDoDay() {
             noite: []
         };
 
-        dados.medicamentos.forEach(med => {
+        medicamentosHoje.forEach(med => {
             const periodo = classificarPeriodoPorHorario(med.horario);
-            grupos[periodo].push(med);
+            // Verificar se foi tomado hoje
+            const tomado = StorageManager.foiTomadoHoje(med.id);
+            grupos[periodo].push({ ...med, tomado });
         });
 
         const secoes = [
@@ -268,22 +382,29 @@ async function carregarMedicamentosTodos() {
     noDados.style.display = 'none';
 
     try {
-        const response = await fetch('/api/medicamentos/todos');
-        const dados = await response.json();
+        // Carregar do localStorage
+        const medicamentos = StorageManager.carregarMedicamentos();
 
         loading.style.display = 'none';
 
-        if (!dados.sucesso) {
-            mostrarAlerta('Erro ao carregar medicamentos', 'error');
-            return;
-        }
-
-        if (dados.medicamentos.length === 0) {
+        if (medicamentos.length === 0) {
             noDados.style.display = 'block';
             return;
         }
 
-        const tabela = criarTabelaMedicamentos(dados.medicamentos);
+        const ordernarPorDia = (med) => {
+            const diasOrd = ['todos', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
+            return diasOrd.indexOf(med.dia);
+        };
+
+        medicamentos.sort((a, b) => {
+            const ordA = ordernarPorDia(a);
+            const ordB = ordernarPorDia(b);
+            if (ordA !== ordB) return ordA - ordB;
+            return a.horario.localeCompare(b.horario);
+        });
+
+        const tabela = criarTabelaMedicamentos(medicamentos);
         container.appendChild(tabela);
     } catch (erro) {
         loading.style.display = 'none';
@@ -498,24 +619,17 @@ async function submeterFormularioCadastro() {
     }
 
     try {
-        const response = await fetch('/api/medicamentos/cadastrar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                nome: nome,
-                dosagem: dosagem,
-                horario: horario,
-                dia: dia
-            })
+        // Salvar no localStorage (storage local)
+        const novoMed = StorageManager.adicionarMedicamento({
+            nome: nome,
+            dosagem: dosagem,
+            horario: horario,
+            dia: dia
         });
 
-        const dados = await response.json();
-
-        if (dados.sucesso) {
+        if (novoMed) {
             mensagem.className = 'form-message success';
-            mensagem.textContent = `✅ ${dados.mensagem}`;
+            mensagem.textContent = `✅ Medicamento '${nome}' cadastrado com sucesso!`;
 
             // Limpar formulário
             document.getElementById('formCadastrar').reset();
@@ -531,7 +645,7 @@ async function submeterFormularioCadastro() {
             }, 3000);
         } else {
             mensagem.className = 'form-message error';
-            mensagem.textContent = `❌ ${dados.erro}`;
+            mensagem.textContent = '❌ Erro ao cadastrar medicamento';
         }
     } catch (erro) {
         mensagem.className = 'form-message error';
@@ -748,18 +862,19 @@ function abrirModalRemover(medId, nome) {
 
 async function marcarMedicamentoComoTomado(medId) {
     try {
-        const response = await fetch(`/api/medicamentos/${medId}/marcar-tomado`, {
-            method: 'POST'
-        });
+        // Marcar no localStorage
+        const sucesso = StorageManager.marcarTomado(medId);
 
-        const dados = await response.json();
-
-        if (dados.sucesso) {
-            mostrarAlerta(`✅ ${dados.mensagem}`, 'success');
-            carregarMedicamentosDoDay();
-        } else {
-            mostrarAlerta(`❌ ${dados.erro}`, 'error');
+        if (!sucesso) {
+            mostrarAlerta('❌ Medicamento já foi marcado como tomado hoje', 'error');
+            return;
         }
+
+        const med = StorageManager.carregarMedicamentos().find(m => m.id === medId);
+        if (med) {
+            mostrarAlerta(`✅ '${med.nome}' marcado como tomado!`, 'success');
+        }
+        carregarMedicamentosDoDay();
     } catch (erro) {
         mostrarAlerta('❌ Erro ao marcar medicamento', 'error');
         console.error('Erro:', erro);
@@ -768,38 +883,31 @@ async function marcarMedicamentoComoTomado(medId) {
 
 async function desmarcarMedicamentoComoTomado(medId) {
     try {
-        const response = await fetch(`/api/medicamentos/${medId}/desmarcar-tomado`, {
-            method: 'DELETE'
-        });
+        // Desmarcar no localStorage
+        StorageManager.desmarcarTomado(medId);
 
-        const dados = await response.json();
-
-        if (dados.sucesso) {
-            mostrarAlerta(`✅ ${dados.mensagem}`, 'success');
-            carregarMedicamentosDoDay();
-        } else {
-            mostrarAlerta(`❌ ${dados.erro}`, 'error');
+        const med = StorageManager.carregarMedicamentos().find(m => m.id === medId);
+        if (med) {
+            mostrarAlerta(`✅ Marcação de '${med.nome}' desfeita!`, 'success');
         }
+        carregarMedicamentosDoDay();
     } catch (erro) {
         mostrarAlerta('❌ Erro ao desfazer marcação do medicamento', 'error');
         console.error('Erro:', erro);
     }
-}
+}}
 
 async function removerMedicamento(medId, nome) {
     try {
-        const response = await fetch(`/api/medicamentos/${medId}/remover`, {
-            method: 'DELETE'
-        });
+        // Remover do localStorage
+        const sucesso = StorageManager.removerMedicamento(medId);
 
-        const dados = await response.json();
-
-        if (dados.sucesso) {
-            mostrarAlerta(`✅ ${dados.mensagem}`, 'success');
+        if (sucesso) {
+            mostrarAlerta(`✅ Medicamento '${nome}' removido!`, 'success');
             carregarMedicamentosDoDay();
             carregarMedicamentosTodos();
         } else {
-            mostrarAlerta(`❌ ${dados.erro}`, 'error');
+            mostrarAlerta('❌ Erro ao remover medicamento', 'error');
         }
     } catch (erro) {
         mostrarAlerta('❌ Erro ao remover medicamento', 'error');
@@ -809,28 +917,21 @@ async function removerMedicamento(medId, nome) {
 
 async function atualizarMedicamento(medId, payload) {
     try {
-        const response = await fetch(`/api/medicamentos/${medId}/editar`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        });
+        // Atualizar no localStorage
+        const med = StorageManager.atualizarMedicamento(medId, payload);
 
-        const dados = await response.json();
-
-        if (dados.sucesso) {
-            mostrarAlerta(`✅ ${dados.mensagem}`, 'success');
+        if (med) {
+            mostrarAlerta(`✅ Medicamento atualizado com sucesso!`, 'success');
             carregarMedicamentosDoDay();
             carregarMedicamentosTodos();
         } else {
-            mostrarAlerta(`❌ ${dados.erro}`, 'error');
+            mostrarAlerta('❌ Medicamento não encontrado', 'error');
         }
     } catch (erro) {
         mostrarAlerta('❌ Erro ao atualizar medicamento', 'error');
         console.error('Erro:', erro);
     }
-}
+}}
 
 // ==============================
 // ALERTAS
@@ -858,6 +959,26 @@ function mostrarAlerta(mensagem, tipo = 'info') {
 // ==============================
 // UTILITÁRIOS
 // ==============================
+
+/**
+ * Retorna a data atual no formato YYYY-MM-DD
+ */
+function _data_hoje() {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+}
+
+/**
+ * Retorna o dia da semana atual no formato interno
+ * (segunda, terca, quarta, quinta, sexta, sabado, domingo)
+ */
+function _dia_semana_hoje() {
+    const diasMapa = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+    return diasMapa[new Date().getDay()];
+}
 
 function escaparHTML(texto) {
     const div = document.createElement('div');
