@@ -60,7 +60,7 @@ function configurarTema() {
     
     // Listener para o botão de toggle
     themeToggle.addEventListener('click', () => {
-        const currentTheme = localStorage.getItem('theme');
+        const currentTheme = htmlElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         localStorage.setItem('theme', newTheme);
         aplicarTema(newTheme === 'dark');
