@@ -55,30 +55,28 @@ def inicializar_banco() -> None:
                 ativo       INTEGER NOT NULL DEFAULT 1,
                 FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
             )
-        """)
-        
+            """)
+
         # Se houver dados existentes, criar usuário padrão e migrar
         cursor.execute("SELECT COUNT(*) as cnt FROM medicamentos")
         tem_dados = cursor.fetchone()["cnt"] > 0
-        
+
         if tem_dados:
             # Criar usuário padrão para dados existentes
             try:
-                from datetime import datetime
                 from werkzeug.security import generate_password_hash
-                
+
                 cursor.execute(
-                    "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
-                    "VALUES (?, ?, ?, ?)",
+                    "INSERT INTO usuarios (email, nome, senha_hash, "
+                    "criado_em) VALUES (?, ?, ?, ?)",
                     (
                         "padrão@local",
                         "Usuário Padrão",
                         generate_password_hash("mudeSenha123"),
-                        datetime.now().isoformat()
+                        datetime.now().isoformat(),
                     )
                 )
-                usuario_id = cursor.lastrowid
-                
+
                 # Copiar dados existentes
                 cursor.execute(
                     "INSERT INTO medicamentos_temp "
@@ -94,7 +92,7 @@ def inicializar_banco() -> None:
                     "SELECT 1, nome, dosagem, horario, dia, ativo "
                     "FROM medicamentos"
                 )
-        
+
         # Remover tabela antiga e renomear
         cursor.execute("DROP TABLE medicamentos")
         cursor.execute(
@@ -106,7 +104,10 @@ def inicializar_banco() -> None:
     colunas = {linha["name"] for linha in cursor.fetchall()}
     if "observacao" not in colunas:
         try:
-            cursor.execute("ALTER TABLE medicamentos ADD COLUMN observacao TEXT DEFAULT ''")
+            cursor.execute(
+                "ALTER TABLE medicamentos ADD COLUMN observacao TEXT "
+                "DEFAULT ''"
+            )
         except Exception:
             # Se ALTER TABLE falhar por qualquer razão, ignorar (não crítico)
             pass

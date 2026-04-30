@@ -14,8 +14,6 @@ from flask import (
     request,
     jsonify,
     session,
-    redirect,
-    url_for,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_conexao, inicializar_banco
@@ -315,13 +313,18 @@ def get_medicamentos_dia():
 
         resultado = []
         for med in medicamentos:
+            observacao = (
+                med["observacao"]
+                if "observacao" in med.keys()
+                else ""
+            )
             resultado.append({
                 "id": med["id"],
                 "nome": med["nome"],
                 "dosagem": med["dosagem"],
                 "horario": med["horario"],
                 "dia": med["dia"],
-                "observacao": med["observacao"] if "observacao" in med.keys() else "",
+                "observacao": observacao,
                 "tomado": med["id"] in ids_tomados
             })
 
@@ -364,13 +367,18 @@ def get_todos_medicamentos():
 
         resultado = []
         for med in medicamentos:
+            observacao = (
+                med["observacao"]
+                if "observacao" in med.keys()
+                else ""
+            )
             resultado.append({
                 "id": med["id"],
                 "nome": med["nome"],
                 "dosagem": med["dosagem"],
                 "horario": med["horario"],
                 "dia": med["dia"],
-                "observacao": med["observacao"] if "observacao" in med.keys() else "",
+                "observacao": observacao,
                 "ativo": med["ativo"] == 1
             })
 
