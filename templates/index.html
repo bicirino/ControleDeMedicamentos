@@ -10,11 +10,7 @@
     <div class="container">
         <!-- Header -->
         <header class="header" role="banner">
-            <div class="header-content">
-                <h1 class="logo"> Controle de Medicamentos</h1>
-                <p class="tagline">Sua rotina de saúde em dia!</p>
-            </div>
-            <div class="theme-toggle-container">
+            <div class="theme-toggle-left-container">
                 <button id="themeToggle" class="theme-toggle" aria-label="Alternar para modo escuro" aria-pressed="false" title="Alternar tema">
                     <span class="theme-toggle-icon theme-icon-sun" aria-hidden="true">
                         <svg viewBox="0 0 24 24" focusable="false">
@@ -28,6 +24,23 @@
                         </svg>
                     </span>
                 </button>
+            </div>
+
+            <div class="header-content">
+                <h1 class="logo"> Controle de Medicamentos</h1>
+                <p class="tagline">Sua rotina de saúde em dia!</p>
+                <div class="user-info" id="userInfo" style="display:none;">
+                    <span id="userName">Olá, Usuário!</span>
+                </div>
+            </div>
+
+            <div class="hamburger-container">
+                <button id="hamburgerBtn" class="hamburger" aria-haspopup="true" aria-expanded="false" title="Abrir menu">
+                    <span class="hamburger-lines" aria-hidden="true"></span>
+                </button>
+                <div id="hamburgerMenu" class="hamburger-menu" hidden aria-hidden="true">
+                    <button class="hamburger-item logout-btn" onclick="logout()" title="Desconectar">Sair</button>
+                </div>
             </div>
         </header>
 
