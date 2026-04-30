@@ -33,6 +33,7 @@ def inicializar_banco() -> None:
             dosagem     TEXT    NOT NULL,
             horario     TEXT    NOT NULL,
             dia         TEXT    NOT NULL DEFAULT 'todos',
+            observacao  TEXT    DEFAULT '',
             ativo       INTEGER NOT NULL DEFAULT 1,
             FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
         )
@@ -99,6 +100,16 @@ def inicializar_banco() -> None:
         cursor.execute(
             "ALTER TABLE medicamentos_temp RENAME TO medicamentos"
         )
+
+    # Garantir coluna `observacao` em bancos antigos
+    cursor.execute("PRAGMA table_info(medicamentos)")
+    colunas = {linha["name"] for linha in cursor.fetchall()}
+    if "observacao" not in colunas:
+        try:
+            cursor.execute("ALTER TABLE medicamentos ADD COLUMN observacao TEXT DEFAULT ''")
+        except Exception:
+            # Se ALTER TABLE falhar por qualquer razão, ignorar (não crítico)
+            pass
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS registros_tomados (

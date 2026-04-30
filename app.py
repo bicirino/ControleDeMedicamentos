@@ -299,7 +299,7 @@ def get_medicamentos_dia():
         with get_conexao() as conexao:
             cursor = conexao.cursor()
             cursor.execute(
-                "SELECT id, nome, dosagem, horario, dia "
+                "SELECT id, nome, dosagem, horario, dia, observacao "
                 "FROM medicamentos WHERE usuario_id = ? "
                 "AND ativo = 1 AND (dia = 'todos' OR dia = ?) "
                 "ORDER BY horario",
@@ -321,6 +321,7 @@ def get_medicamentos_dia():
                 "dosagem": med["dosagem"],
                 "horario": med["horario"],
                 "dia": med["dia"],
+                "observacao": med["observacao"] if "observacao" in med.keys() else "",
                 "tomado": med["id"] in ids_tomados
             })
 
@@ -343,7 +344,7 @@ def get_todos_medicamentos():
         cursor = conexao.cursor()
 
         cursor.execute(
-            "SELECT id, nome, dosagem, horario, dia, ativo "
+            "SELECT id, nome, dosagem, horario, dia, observacao, ativo "
             "FROM medicamentos WHERE usuario_id = ? "
             "AND ativo = 1 "
             "ORDER BY "
@@ -369,6 +370,7 @@ def get_todos_medicamentos():
                 "dosagem": med["dosagem"],
                 "horario": med["horario"],
                 "dia": med["dia"],
+                "observacao": med["observacao"] if "observacao" in med.keys() else "",
                 "ativo": med["ativo"] == 1
             })
 
@@ -420,11 +422,13 @@ def cadastrar_medicamento():
         conexao = get_conexao()
         cursor = conexao.cursor()
 
+        observacao = dados.get("observacao", "").strip()
+
         cursor.execute(
             "INSERT INTO medicamentos "
-            "(usuario_id, nome, dosagem, horario, dia) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (usuario_id, nome, dosagem, horario, dia),
+            "(usuario_id, nome, dosagem, horario, dia, observacao) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (usuario_id, nome, dosagem, horario, dia, observacao),
         )
 
         conexao.commit()
@@ -637,11 +641,13 @@ def editar_medicamento(med_id):
                 "erro": "Medicamento não encontrado ou inativo"
             }), 404
 
+        observacao = dados.get("observacao", "").strip()
+
         cursor.execute(
             "UPDATE medicamentos "
-            "SET nome = ?, dosagem = ?, horario = ?, dia = ? "
+            "SET nome = ?, dosagem = ?, horario = ?, dia = ?, observacao = ? "
             "WHERE id = ?",
-            (nome, dosagem, horario, dia, med_id),
+            (nome, dosagem, horario, dia, observacao, med_id),
         )
         conexao.commit()
 

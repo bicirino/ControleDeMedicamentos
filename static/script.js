@@ -48,7 +48,7 @@ function atualizarInfoUsuario(usuario) {
     const userInfo = document.getElementById('userInfo');
     const userName = document.getElementById('userName');
     if (userInfo && userName) {
-        userName.textContent = `Olá, ${usuario.nome}`;
+        userName.textContent = `Olá, ${usuario.nome}!`;
         userInfo.style.display = 'flex';
     }
 }
