@@ -365,13 +365,15 @@ html[data-theme="dark"] .theme-toggle {
     display: flex;
     align-items: center;
     gap: var(--space-md);
-    margin-top: var(--space-lg);
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
+    position: absolute;
+    top: var(--space-lg);
+    left: var(--space-lg);
 }
 
 #userName {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: var(--text-secondary);
     font-weight: var(--font-weight-medium);
 }
@@ -380,29 +382,37 @@ html[data-theme="dark"] .theme-toggle {
     display: inline-flex;
     align-items: center;
     gap: var(--space-sm);
-    padding: 8px 16px;
-    background: linear-gradient(135deg, #EF4444, #DC2626);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: var(--font-weight-semibold);
+    padding: 6px 10px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: var(--font-weight-medium);
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: var(--shadow-sm);
 }
 
 .logout-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border-color: var(--color-primary);
 }
 
 .logout-btn:active {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 html[data-theme="dark"] .logout-btn {
-    background: linear-gradient(135deg, #EF4444, #F87171);
+    color: var(--text-secondary);
+    background: rgba(17, 24, 39, 0.78);
+    border-color: #334155;
+}
+
+html[data-theme="dark"] .logout-btn:hover {
+    color: #F3F4F6;
+    background: rgba(30, 41, 59, 0.9);
+    border-color: #3B82F6;
 }
 
 /* ==============================

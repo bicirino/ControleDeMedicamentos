@@ -12,17 +12,37 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #eeeeee 0%, #1410ff 100%);
+            font-family: var(--font-sans);
+            background:
+                radial-gradient(900px 420px at -10% -12%, rgba(37, 99, 235, 0.14), transparent 60%),
+                radial-gradient(760px 360px at 110% -8%, rgba(14, 165, 233, 0.12), transparent 60%),
+                linear-gradient(180deg, #EEF2FF 0%, #F8FAFC 40%, #E8EEF9 100%);
+            color: var(--text-primary);
+            padding: var(--space-xl);
+        }
+
+        html[data-theme="dark"] body {
+            background:
+                radial-gradient(900px 420px at -10% -12%, rgba(59, 130, 246, 0.18), transparent 60%),
+                radial-gradient(760px 360px at 110% -8%, rgba(16, 185, 129, 0.12), transparent 60%),
+                linear-gradient(180deg, #0B1324 0%, #0F172A 55%, #111827 100%);
         }
 
         .auth-container {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 48px;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--header-glass-border);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             width: 100%;
-            max-width: 400px;
+            max-width: 560px;
             animation: slideIn 0.3s ease-out;
+        }
+
+        html[data-theme="dark"] .auth-container {
+            background: rgba(17, 24, 39, 0.9);
         }
 
         @keyframes slideIn {
@@ -43,15 +63,18 @@
 
         .auth-header h1 {
             margin: 0;
-            color: #333;
-            font-size: 24px;
-            font-weight: 600;
+            color: var(--text-primary);
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: var(--font-weight-bold);
+            line-height: 1.1;
+            letter-spacing: -0.6px;
         }
 
         .auth-header p {
             margin: 10px 0 0 0;
-            color: #999;
-            font-size: 14px;
+            color: var(--text-secondary);
+            font-size: 1rem;
         }
 
         .auth-form {
@@ -69,7 +92,7 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: var(--text-primary);
             font-weight: 500;
             font-size: 14px;
         }
@@ -77,30 +100,32 @@
         .form-group input {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
             font-size: 14px;
             box-sizing: border-box;
             transition: border-color 0.2s;
+            background: var(--bg-primary);
+            color: var(--text-primary);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12);
         }
 
         .form-group input[type="email"] {
-            font-family: monospace;
+            font-family: var(--font-sans);
         }
 
         .form-button {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #4869ff 0%, #b3b2b4 100%);
+            background: linear-gradient(160deg, var(--color-primary), #0EA5E9);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--radius-md);
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
@@ -109,7 +134,7 @@
 
         .form-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            box-shadow: var(--shadow-md);
         }
 
         .form-button:active {
@@ -125,14 +150,14 @@
         .toggle-form {
             text-align: center;
             margin-top: 20px;
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
         }
 
         .toggle-form button {
             background: none;
             border: none;
-            color: #667eea;
+            color: var(--color-primary);
             cursor: pointer;
             text-decoration: underline;
             font-size: 14px;
@@ -141,7 +166,7 @@
         }
 
         .toggle-form button:hover {
-            color: #764ba2;
+            color: #0EA5E9;
         }
 
         .error-message {
@@ -197,7 +222,6 @@
         }
 
         html[data-theme="dark"] .auth-container {
-            background: #2a2a2a;
             color: #fff;
         }
 
@@ -214,13 +238,13 @@
         }
 
         html[data-theme="dark"] .form-group input {
-            background-color: #1a1a1a;
+            background-color: #111827;
             color: #fff;
-            border-color: #444;
+            border-color: #374151;
         }
 
         html[data-theme="dark"] .form-group input:focus {
-            border-color: #667eea;
+            border-color: #60A5FA;
         }
 
         html[data-theme="dark"] .toggle-form {
@@ -235,6 +259,16 @@
         html[data-theme="dark"] .success-message {
             background-color: #1f3a1f;
             color: #6bff6b;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: var(--space-md);
+            }
+
+            .auth-container {
+                padding: 32px 24px;
+            }
         }
     </style>
 </head>
@@ -414,7 +448,7 @@
                 const data = await response.json();
 
                 if (data.sucesso) {
-                    showSuccess('loginSuccess', `${data.mensagem} Redirecionando...`);
+                    showSuccess('loginSuccess', `${data.mensagem} `);
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 1500);
@@ -458,7 +492,7 @@
                 const data = await response.json();
 
                 if (data.sucesso) {
-                    showSuccess('registerSuccess', `${data.mensagem} Redirecionando...`);
+                    showSuccess('registerSuccess', `${data.mensagem} `);
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 1500);
