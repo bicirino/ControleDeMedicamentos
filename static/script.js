@@ -601,6 +601,7 @@ async function submeterFormularioCadastro() {
     const dosagem = document.getElementById('inputDosagem').value.trim();
     const horario = document.getElementById('inputHorario').value.trim();
     const dia = document.getElementById('inputDia').value;
+    const observacao = document.getElementById('inputObservacao').value.trim();
     const mensagem = document.getElementById('formMessage');
 
     if (!nome || !dosagem || !horario || !dia) {
@@ -613,7 +614,13 @@ async function submeterFormularioCadastro() {
         const response = await fetch('/api/medicamentos/cadastrar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nome, dosagem, horario, dia })
+            body: JSON.stringify({
+                nome,
+                dosagem,
+                horario,
+                dia,
+                observacao,
+            })
         });
 
         const dados = await response.json();
