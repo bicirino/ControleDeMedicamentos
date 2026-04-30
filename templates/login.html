@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Controle de Medicamentos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #eeeeee 0%, #1410ff 100%);
+        }
+
+        .auth-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            margin: 0;
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .auth-header p {
+            margin: 10px 0 0 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input[type="email"] {
+            font-family: monospace;
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4869ff 0%, #b3b2b4 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .form-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-button:active {
+            transform: translateY(0);
+        }
+
+        .form-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toggle-form button {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 14px;
+            padding: 0;
+            margin-left: 4px;
+        }
+
+        .toggle-form button:hover {
+            color: #764ba2;
+        }
+
+        .error-message {
+            display: none;
+            background-color: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            animation: slideIn 0.2s ease-out;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            display: none;
+            background-color: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            animation: slideIn 0.2s ease-out;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            margin-left: 2px;
+            background-color: currentColor;
+            border-radius: 50%;
+            animation: blink 1.4s infinite;
+        }
+
+        @keyframes blink {
+            0%, 20%, 50%, 80%, 100% {
+                opacity: 1;
+            }
+            40% {
+                opacity: 0.5;
+            }
+            60% {
+                opacity: 0.3;
+            }
+        }
+
+        html[data-theme="dark"] .auth-container {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        html[data-theme="dark"] .auth-header h1 {
+            color: #fff;
+        }
+
+        html[data-theme="dark"] .auth-header p {
+            color: #aaa;
+        }
+
+        html[data-theme="dark"] .form-group label {
+            color: #ccc;
+        }
+
+        html[data-theme="dark"] .form-group input {
+            background-color: #1a1a1a;
+            color: #fff;
+            border-color: #444;
+        }
+
+        html[data-theme="dark"] .form-group input:focus {
+            border-color: #667eea;
+        }
+
+        html[data-theme="dark"] .toggle-form {
+            color: #aaa;
+        }
+
+        html[data-theme="dark"] .error-message {
+            background-color: #3a1f1f;
+            color: #ff6b6b;
+        }
+
+        html[data-theme="dark"] .success-message {
+            background-color: #1f3a1f;
+            color: #6bff6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1> Controlador de Medicamentos</h1>
+            <p id="formTitle">Faça seu login</p>
+        </div>
+
+        <!-- Formulário de Login -->
+        <form class="auth-form active" id="loginForm">
+            <div class="error-message" id="loginError"></div>
+            <div class="success-message" id="loginSuccess"></div>
+
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input 
+                    type="email" 
+                    id="loginEmail" 
+                    placeholder="seu@email.com"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="loginPassword">Senha</label>
+                <input 
+                    type="password" 
+                    id="loginPassword" 
+                    placeholder="Sua senha"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="form-button" id="loginBtn">
+                Entrar
+            </button>
+
+            <div class="toggle-form">
+                Não tem conta?
+                <button type="button" onclick="toggleForm()">
+                    Crie uma agora
+                </button>
+            </div>
+        </form>
+
+        <!-- Formulário de Cadastro -->
+        <form class="auth-form" id="registerForm">
+            <div class="error-message" id="registerError"></div>
+            <div class="success-message" id="registerSuccess"></div>
+
+            <div class="form-group">
+                <label for="registerName">Nome Completo</label>
+                <input 
+                    type="text" 
+                    id="registerName" 
+                    placeholder="Seu nome"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="registerEmail">Email</label>
+                <input 
+                    type="email" 
+                    id="registerEmail" 
+                    placeholder="seu@email.com"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="registerPassword">Senha (mínimo 6 caracteres)</label>
+                <input 
+                    type="password" 
+                    id="registerPassword" 
+                    placeholder="Escolha uma senha segura"
+                    minlength="6"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="registerPasswordConfirm">Confirme a Senha</label>
+                <input 
+                    type="password" 
+                    id="registerPasswordConfirm" 
+                    placeholder="Confirme sua senha"
+                    minlength="6"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="form-button" id="registerBtn">
+                Criar Conta
+            </button>
+
+            <div class="toggle-form">
+                Já tem conta?
+                <button type="button" onclick="toggleForm()">
+                    Faça login
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Configurar tema ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            configurarTema();
+        });
+
+        function configurarTema() {
+            const htmlElement = document.documentElement;
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+            htmlElement.setAttribute('data-theme', theme);
+        }
+
+        function toggleForm() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const formTitle = document.getElementById('formTitle');
+
+            loginForm.classList.toggle('active');
+            registerForm.classList.toggle('active');
+
+            if (loginForm.classList.contains('active')) {
+                formTitle.textContent = 'Faça seu login';
+                clearErrors();
+            } else {
+                formTitle.textContent = 'Crie sua conta';
+                clearErrors();
+            }
+        }
+
+        function clearErrors() {
+            document.getElementById('loginError').classList.remove('show');
+            document.getElementById('loginSuccess').classList.remove('show');
+            document.getElementById('registerError').classList.remove('show');
+            document.getElementById('registerSuccess').classList.remove('show');
+        }
+
+        function showError(elementId, message) {
+            const errorEl = document.getElementById(elementId);
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showSuccess(elementId, message) {
+            const successEl = document.getElementById(elementId);
+            successEl.textContent = message;
+            successEl.classList.add('show');
+        }
+
+        // Formulário de Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('loginEmail').value;
+            const senha = document.getElementById('loginPassword').value;
+            const btnLogin = document.getElementById('loginBtn');
+
+            btnLogin.disabled = true;
+            btnLogin.textContent = 'Entrando...';
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                const data = await response.json();
+
+                if (data.sucesso) {
+                    showSuccess('loginSuccess', `${data.mensagem} Redirecionando...`);
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1500);
+                } else {
+                    showError('loginError', data.erro || 'Erro ao fazer login');
+                    btnLogin.disabled = false;
+                    btnLogin.textContent = 'Entrar';
+                }
+            } catch (error) {
+                showError('loginError', 'Erro de conexão. Tente novamente.');
+                btnLogin.disabled = false;
+                btnLogin.textContent = 'Entrar';
+            }
+        });
+
+        // Formulário de Cadastro
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nome = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const senha = document.getElementById('registerPassword').value;
+            const senhaConfirm = document.getElementById('registerPasswordConfirm').value;
+            const btnRegister = document.getElementById('registerBtn');
+
+            if (senha !== senhaConfirm) {
+                showError('registerError', 'As senhas não coincidem');
+                return;
+            }
+
+            btnRegister.disabled = true;
+            btnRegister.textContent = 'Criando conta...';
+
+            try {
+                const response = await fetch('/api/auth/registro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, nome, senha })
+                });
+
+                const data = await response.json();
+
+                if (data.sucesso) {
+                    showSuccess('registerSuccess', `${data.mensagem} Redirecionando...`);
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1500);
+                } else {
+                    showError('registerError', data.erro || 'Erro ao criar conta');
+                    btnRegister.disabled = false;
+                    btnRegister.textContent = 'Criar Conta';
+                }
+            } catch (error) {
+                showError('registerError', 'Erro de conexão. Tente novamente.');
+                btnRegister.disabled = false;
+                btnRegister.textContent = 'Criar Conta';
+            }
+        });
+    </script>
+</body>
+</html>

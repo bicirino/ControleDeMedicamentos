@@ -358,6 +358,54 @@ html[data-theme="dark"] .theme-toggle {
 }
 
 /* ==============================
+   INFORMAÇÕES DO USUÁRIO
+   ============================== */
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#userName {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.logout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.logout-btn:active {
+    transform: translateY(0);
+}
+
+html[data-theme="dark"] .logout-btn {
+    background: linear-gradient(135deg, #EF4444, #F87171);
+}
+
+/* ==============================
    NAVEGAÇÃO - ABAS
    ============================== */
 
