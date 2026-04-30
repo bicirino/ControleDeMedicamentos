@@ -80,7 +80,49 @@ function inicializarAplicacao() {
         configurarDiaPadraoCadastro();
         atualizarDataHoje();
         carregarMedicamentosDoDay();
+            configurarHamburger();
     });
+}
+
+function configurarHamburger() {
+    const btn = document.getElementById('hamburgerBtn');
+    const menu = document.getElementById('hamburgerMenu');
+    if (!btn || !menu) return;
+
+    const openMenu = () => {
+        menu.hidden = false;
+        // force a frame to allow transition
+        requestAnimationFrame(() => menu.classList.add('open'));
+        menu.setAttribute('aria-hidden', 'false');
+        btn.setAttribute('aria-expanded', 'true');
+    };
+
+    const closeMenu = () => {
+        menu.classList.remove('open');
+        menu.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
+        const onEnd = (ev) => {
+            if (ev.target === menu) {
+                menu.hidden = true;
+                menu.removeEventListener('transitionend', onEnd);
+            }
+        };
+        menu.addEventListener('transitionend', onEnd);
+    };
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+        if (isOpen) closeMenu(); else openMenu();
+    });
+
+    // Fechar ao clicar fora
+    document.addEventListener('click', () => {
+        if (!menu.hidden) closeMenu();
+    });
+
+    // Evitar fechamento ao clicar dentro do menu
+    menu.addEventListener('click', (e) => e.stopPropagation());
 }
 
 // ==============================
