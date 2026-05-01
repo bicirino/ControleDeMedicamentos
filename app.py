@@ -6,7 +6,7 @@ Expõe endpoints REST que integram com a lógica de negócio existente.
 
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from flask import (
     Flask,
@@ -25,6 +25,7 @@ from api_integration import buscar_medicamento_groq, APIError
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 
 # Inicializar banco ao iniciar a aplicação
 inicializar_banco()
@@ -206,6 +207,7 @@ def login():
 
         email = dados.get("email", "").strip().lower()
         senha = dados.get("senha", "").strip()
+        lembrar_me = bool(dados.get("lembrar_me", False))
 
         if not email or not senha:
             return jsonify({
@@ -233,6 +235,7 @@ def login():
             }), 401
 
         # Criar sessão
+        session.permanent = lembrar_me
         session["usuario_id"] = usuario["id"]
         session["email"] = email
         session["nome"] = usuario["nome"]
