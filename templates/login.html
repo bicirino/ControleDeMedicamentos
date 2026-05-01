@@ -89,6 +89,30 @@
             margin-bottom: 20px;
         }
 
+        .remember-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: -4px 0 20px;
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .remember-row input {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            accent-color: var(--color-primary);
+            flex: 0 0 auto;
+        }
+
+        .remember-row label {
+            margin: 0;
+            font-weight: 500;
+            color: inherit;
+            cursor: pointer;
+        }
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
@@ -267,7 +291,21 @@
             }
 
             .auth-container {
-                padding: 32px 24px;
+                padding: 28px 20px;
+                border-radius: 18px;
+                max-width: 100%;
+            }
+
+            .auth-header h1 {
+                font-size: clamp(1.8rem, 8vw, 2.2rem);
+            }
+
+            .form-group input {
+                font-size: 16px;
+            }
+
+            .form-button {
+                min-height: 48px;
             }
         }
     </style>
@@ -302,6 +340,11 @@
                     placeholder="Sua senha"
                     required
                 >
+            </div>
+
+            <div class="remember-row">
+                <input type="checkbox" id="rememberMe">
+                <label for="rememberMe">Lembrar de mim</label>
             </div>
 
             <button type="submit" class="form-button" id="loginBtn">
@@ -442,7 +485,11 @@
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, senha })
+                    body: JSON.stringify({
+                        email,
+                        senha,
+                        lembrar_me: document.getElementById('rememberMe').checked
+                    })
                 });
 
                 const data = await response.json();

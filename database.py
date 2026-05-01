@@ -1,12 +1,14 @@
+import os
 import sqlite3
 from datetime import datetime
 
-DB_NAME = "medicamentos.db"
+DB_NAME = os.path.join(os.path.dirname(__file__), "medicamentos.db")
 
 
 def get_conexao() -> sqlite3.Connection:
     conexao = sqlite3.connect(DB_NAME)
     conexao.row_factory = sqlite3.Row
+    conexao.execute("PRAGMA foreign_keys = ON")
     return conexao
 
 
