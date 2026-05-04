@@ -318,7 +318,7 @@
         </div>
 
         <!-- Formulário de Login -->
-        <form class="auth-form active" id="loginForm">
+        <form class="auth-form active" id="loginForm" autocomplete="off">
             <div class="error-message" id="loginError"></div>
             <div class="success-message" id="loginSuccess"></div>
 
@@ -343,7 +343,7 @@
             </div>
 
             <div class="remember-row">
-                <input type="checkbox" id="rememberMe">
+                <input type="checkbox" id="rememberMe" autocomplete="off">
                 <label for="rememberMe">Lembrar de mim</label>
             </div>
 
@@ -423,7 +423,17 @@
         // Configurar tema ao carregar a página
         document.addEventListener('DOMContentLoaded', () => {
             configurarTema();
+            limparPreferenciasDeLogin();
         });
+
+        window.addEventListener('pageshow', limparPreferenciasDeLogin);
+
+        function limparPreferenciasDeLogin() {
+            const rememberMe = document.getElementById('rememberMe');
+            if (rememberMe) {
+                rememberMe.checked = false;
+            }
+        }
 
         function configurarTema() {
             const htmlElement = document.documentElement;

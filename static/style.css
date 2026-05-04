@@ -817,10 +817,13 @@ html[data-theme="dark"] .medicamento-horario {
 
 .medicamentos-table {
     overflow-x: auto;
+    display: block;
+    width: 100%;
 }
 
 table {
     width: 100%;
+    min-width: max-content;
     border-collapse: collapse;
     font-size: 0.95rem;
 }
@@ -853,10 +856,14 @@ td {
 
 .acoes-tabela .btn {
     min-width: 80px;
-    margin-right: var(--space-lg);
     padding: 0.45rem 0.8rem;
     font-size: 0.92rem;
     border-radius: 10px;
+    flex: 1;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Remover sombra e suavizar cores apenas dentro da coluna Ações */
@@ -877,9 +884,7 @@ td {
     border: none;
 }
 
-.acoes-tabela .btn:last-child {
-    margin-right: 0;
-}
+
 
 /* Ajuste específico para modo escuro: botão secundário na coluna Ações */
 html[data-theme="dark"] .acoes-tabela .btn.btn-secondary {
@@ -1474,6 +1479,35 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
     .btn {
         padding: var(--space-md) var(--space-md);
         font-size: 0.9rem;
+    }
+
+    .medicamentos-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        display: block;
+        width: 100%;
+        margin-bottom: var(--space-md);
+    }
+
+    table {
+        width: auto;
+        min-width: 100%;
+    }
+
+    .acoes-tabela {
+        gap: var(--space-sm);
+        white-space: nowrap;
+    }
+
+    .acoes-tabela .btn {
+        min-width: 70px;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+        flex: 0 0 auto;
+    }
+
+    td:last-child {
+        padding-right: calc(var(--space-md) + var(--space-lg));
     }
 }
 

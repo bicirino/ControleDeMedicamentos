@@ -173,7 +173,8 @@ def registrar():
         novo_id = cursor.lastrowid
         conexao.close()
 
-        # Criar sessão automaticamente
+        # Criar sessão automaticamente (persistente por 30 dias)
+        session.permanent = True
         session["usuario_id"] = novo_id
         session["email"] = email
         session["nome"] = nome
