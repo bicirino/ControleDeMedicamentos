@@ -306,7 +306,7 @@ def index():
         )
         if not cursor.fetchone():
             session.clear()
-        return render_template("login.html")
+            return render_template("login.html")
     return render_template("index.html")
 
 
