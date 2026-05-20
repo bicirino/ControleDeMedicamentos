@@ -1,6 +1,11 @@
+import os
 import sqlite3
 
-DB_NAME = "medicamentos.db"
+_DEFAULT_DB = "medicamentos.db"
+DB_NAME = os.environ.get("DB_PATH", _DEFAULT_DB)
+_db_dir = os.path.dirname(DB_NAME)
+if _db_dir:
+    os.makedirs(_db_dir, exist_ok=True)
 
 
 def get_conexao() -> sqlite3.Connection:
@@ -12,6 +17,16 @@ def get_conexao() -> sqlite3.Connection:
 def inicializar_banco() -> None:
     conexao = get_conexao()
     cursor = conexao.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            email       TEXT    UNIQUE NOT NULL,
+            nome        TEXT    NOT NULL,
+            senha_hash  TEXT    NOT NULL,
+            criado_em   TEXT    NOT NULL
+        )
+    """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS medicamentos (

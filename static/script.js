@@ -692,7 +692,10 @@ async function submeterFormularioConsulta() {
     mensagem.className = 'form-message';
 
     try {
-        const response = await fetch(`/api/medicamentos/${encodeURIComponent(nome)}/consultar`);
+        const response = await fetch(
+            `/api/medicamentos/${encodeURIComponent(nome)}/consultar`,
+            { credentials: 'include' }
+        );
         const dados = await response.json();
 
         loading.style.display = 'none';

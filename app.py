@@ -6,8 +6,10 @@ Expõe endpoints REST que integram com a lógica de negócio existente.
 
 import os
 import re
-from datetime import datetime
-from flask import Flask, render_template, request, jsonify
+from datetime import datetime, timedelta
+from functools import wraps
+from flask import Flask, render_template, request, jsonify, session
+from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_conexao, inicializar_banco
 from medicamentos import (
     _data_hoje,
@@ -16,6 +18,8 @@ from medicamentos import (
 from api_integration import buscar_medicamento_groq, APIError
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 
 # Inicializar banco ao iniciar a aplicação
 inicializar_banco()
@@ -84,9 +88,201 @@ def formatar_resposta_medicamento(texto: str) -> str:
     return texto.strip()
 
 
+def _usuario_logado_existe() -> bool:
+    usuario_id = session.get("usuario_id")
+    if not usuario_id:
+        return False
+    with get_conexao() as conexao:
+        cursor = conexao.cursor()
+        cursor.execute(
+            "SELECT id FROM usuarios WHERE id = ?",
+            (usuario_id,),
+        )
+        return cursor.fetchone() is not None
+
+
+def login_required(f):
+    """Decorador para proteger rotas que requerem autenticação."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not _usuario_logado_existe():
+            session.clear()
+            return jsonify({
+                "sucesso": False,
+                "erro": "Não autenticado",
+                "requer_login": True
+            }), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@app.route("/api/auth/registro", methods=["POST"])
+def registrar():
+    """Registra um novo usuário."""
+    try:
+        dados = request.get_json(silent=True)
+        if dados is None:
+            return jsonify({
+                "sucesso": False,
+                "erro": "JSON inválido"
+            }), 400
+
+        email = dados.get("email", "").strip().lower()
+        nome = dados.get("nome", "").strip()
+        senha = dados.get("senha", "").strip()
+
+        if not email:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Email é obrigatório"
+            }), 400
+
+        if not nome:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Nome é obrigatório"
+            }), 400
+
+        if not senha or len(senha) < 6:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Senha deve ter no mínimo 6 caracteres"
+            }), 400
+
+        if "@" not in email or "." not in email:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Email inválido"
+            }), 400
+
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+            if cursor.fetchone():
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Este email já está cadastrado"
+                }), 400
+
+            senha_hash = generate_password_hash(senha)
+            cursor.execute(
+                "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
+                "VALUES (?, ?, ?, ?)",
+                (email, nome, senha_hash, datetime.now().isoformat()),
+            )
+            conexao.commit()
+            novo_id = cursor.lastrowid
+
+        session.permanent = True
+        session["usuario_id"] = novo_id
+        session["email"] = email
+        session["nome"] = nome
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": f"Bem-vindo, {nome}!",
+            "usuario": {
+                "id": novo_id,
+                "email": email,
+                "nome": nome
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "sucesso": False,
+            "erro": str(e)
+        }), 500
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def login():
+    """Realiza o login do usuário."""
+    try:
+        dados = request.get_json(silent=True)
+        if dados is None:
+            return jsonify({
+                "sucesso": False,
+                "erro": "JSON inválido"
+            }), 400
+
+        email = dados.get("email", "").strip().lower()
+        senha = dados.get("senha", "").strip()
+        lembrar_me = bool(dados.get("lembrar_me", False))
+
+        if not email or not senha:
+            return jsonify({
+                "sucesso": False,
+                "erro": "Email e senha são obrigatórios"
+            }), 400
+
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT id, nome, senha_hash FROM usuarios WHERE email = ?",
+                (email,),
+            )
+            usuario = cursor.fetchone()
+
+        if not usuario or not check_password_hash(
+            usuario["senha_hash"],
+            senha,
+        ):
+            return jsonify({
+                "sucesso": False,
+                "erro": "Email ou senha inválidos"
+            }), 401
+
+        session.permanent = lembrar_me
+        session["usuario_id"] = usuario["id"]
+        session["email"] = email
+        session["nome"] = usuario["nome"]
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": f"Bem-vindo, {usuario['nome']}!",
+            "usuario": {
+                "id": usuario["id"],
+                "email": email,
+                "nome": usuario["nome"]
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "sucesso": False,
+            "erro": str(e)
+        }), 500
+
+
+@app.route("/api/auth/me", methods=["GET"])
+@login_required
+def get_usuario_logado():
+    """Retorna informações do usuário logado."""
+    return jsonify({
+        "sucesso": True,
+        "usuario": {
+            "id": session.get("usuario_id"),
+            "email": session.get("email"),
+            "nome": session.get("nome")
+        }
+    })
+
+
+@app.route("/api/auth/logout", methods=["POST"])
+def logout():
+    """Realiza o logout do usuário."""
+    session.clear()
+    return jsonify({
+        "sucesso": True,
+        "mensagem": "Desconectado com sucesso"
+    })
+
+
 @app.route("/")
 def index():
     """Renderiza a página principal."""
+    if not _usuario_logado_existe():
+        session.clear()
+        return render_template("login.html")
     return render_template("index.html")
 
 
