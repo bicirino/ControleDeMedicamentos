@@ -8,7 +8,13 @@ import os
 import re
 from datetime import datetime, timedelta
 from functools import wraps
-from flask import Flask, render_template, request, jsonify, session
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    session,
+)
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_conexao, inicializar_banco
 from medicamentos import (
@@ -88,30 +94,34 @@ def formatar_resposta_medicamento(texto: str) -> str:
     return texto.strip()
 
 
-def _usuario_logado_existe() -> bool:
-    usuario_id = session.get("usuario_id")
-    if not usuario_id:
-        return False
-    with get_conexao() as conexao:
-        cursor = conexao.cursor()
-        cursor.execute(
-            "SELECT id FROM usuarios WHERE id = ?",
-            (usuario_id,),
-        )
-        return cursor.fetchone() is not None
-
+# ==============================
+# AUTENTICAÇÃO
+# ==============================
 
 def login_required(f):
     """Decorador para proteger rotas que requerem autenticação."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not _usuario_logado_existe():
-            session.clear()
+        if "usuario_id" not in session:
             return jsonify({
                 "sucesso": False,
                 "erro": "Não autenticado",
                 "requer_login": True
             }), 401
+        usuario_id = session.get("usuario_id")
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT id FROM usuarios WHERE id = ?",
+                (usuario_id,),
+            )
+            if not cursor.fetchone():
+                session.clear()
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Sessão inválida",
+                    "requer_login": True
+                }), 401
         return f(*args, **kwargs)
     return decorated_function
 
@@ -157,6 +167,8 @@ def registrar():
 
         with get_conexao() as conexao:
             cursor = conexao.cursor()
+
+            # Verificar se usuário já existe
             cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
             if cursor.fetchone():
                 return jsonify({
@@ -164,6 +176,7 @@ def registrar():
                     "erro": "Este email já está cadastrado"
                 }), 400
 
+            # Inserir novo usuário
             senha_hash = generate_password_hash(senha)
             cursor.execute(
                 "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
@@ -173,6 +186,7 @@ def registrar():
             conexao.commit()
             novo_id = cursor.lastrowid
 
+        # Criar sessão automaticamente (persistente por 30 dias)
         session.permanent = True
         session["usuario_id"] = novo_id
         session["email"] = email
@@ -232,6 +246,7 @@ def login():
                 "erro": "Email ou senha inválidos"
             }), 401
 
+        # Criar sessão
         session.permanent = lembrar_me
         session["usuario_id"] = usuario["id"]
         session["email"] = email
@@ -280,27 +295,38 @@ def logout():
 @app.route("/")
 def index():
     """Renderiza a página principal."""
-    if not _usuario_logado_existe():
-        session.clear()
+    if "usuario_id" not in session:
+        return render_template("login.html")
+    usuario_id = session.get("usuario_id")
+    with get_conexao() as conexao:
+        cursor = conexao.cursor()
+        cursor.execute(
+            "SELECT id FROM usuarios WHERE id = ?",
+            (usuario_id,),
+        )
+        if not cursor.fetchone():
+            session.clear()
         return render_template("login.html")
     return render_template("index.html")
 
 
 @app.route("/api/medicamentos/dia", methods=["GET"])
+@login_required
 def get_medicamentos_dia():
     """Retorna medicamentos do dia com status de tomado."""
     try:
         hoje = _data_hoje()
         dia_hoje = _dia_semana_hoje()
+        usuario_id = session["usuario_id"]
 
         with get_conexao() as conexao:
             cursor = conexao.cursor()
             cursor.execute(
-                "SELECT id, nome, dosagem, horario, dia "
-                "FROM medicamentos WHERE ativo = 1 "
-                "AND (dia = 'todos' OR dia = ?) "
+                "SELECT id, nome, dosagem, horario, dia, observacao "
+                "FROM medicamentos WHERE usuario_id = ? "
+                "AND ativo = 1 AND (dia = 'todos' OR dia = ?) "
                 "ORDER BY horario",
-                (dia_hoje,),
+                (usuario_id, dia_hoje),
             )
             medicamentos = cursor.fetchall()
             cursor.execute(
@@ -312,12 +338,18 @@ def get_medicamentos_dia():
 
         resultado = []
         for med in medicamentos:
+            observacao = (
+                med["observacao"]
+                if "observacao" in med.keys()
+                else ""
+            )
             resultado.append({
                 "id": med["id"],
                 "nome": med["nome"],
                 "dosagem": med["dosagem"],
                 "horario": med["horario"],
                 "dia": med["dia"],
+                "observacao": observacao,
                 "tomado": med["id"] in ids_tomados
             })
 
@@ -331,15 +363,18 @@ def get_medicamentos_dia():
 
 
 @app.route("/api/medicamentos/todos", methods=["GET"])
+@login_required
 def get_todos_medicamentos():
     """Retorna todos os medicamentos cadastrados (apenas ativos)."""
     try:
+        usuario_id = session["usuario_id"]
         conexao = get_conexao()
         cursor = conexao.cursor()
 
         cursor.execute(
-            "SELECT id, nome, dosagem, horario, dia, ativo "
-            "FROM medicamentos WHERE ativo = 1 "
+            "SELECT id, nome, dosagem, horario, dia, observacao, ativo "
+            "FROM medicamentos WHERE usuario_id = ? "
+            "AND ativo = 1 "
             "ORDER BY "
             "CASE dia "
             "WHEN 'todos' THEN 0 "
@@ -350,18 +385,25 @@ def get_todos_medicamentos():
             "WHEN 'sexta' THEN 5 "
             "WHEN 'sabado' THEN 6 "
             "WHEN 'domingo' THEN 7 "
-            "ELSE 8 END, horario"
+            "ELSE 8 END, horario",
+            (usuario_id,)
         )
         medicamentos = cursor.fetchall()
 
         resultado = []
         for med in medicamentos:
+            observacao = (
+                med["observacao"]
+                if "observacao" in med.keys()
+                else ""
+            )
             resultado.append({
                 "id": med["id"],
                 "nome": med["nome"],
                 "dosagem": med["dosagem"],
                 "horario": med["horario"],
                 "dia": med["dia"],
+                "observacao": observacao,
                 "ativo": med["ativo"] == 1
             })
 
@@ -374,9 +416,11 @@ def get_todos_medicamentos():
 
 
 @app.route("/api/medicamentos/cadastrar", methods=["POST"])
+@login_required
 def cadastrar_medicamento():
     """Cadastra um novo medicamento."""
     try:
+        usuario_id = session["usuario_id"]
         dados = request.get_json(silent=True)
         if dados is None:
             return jsonify({
@@ -408,17 +452,19 @@ def cadastrar_medicamento():
                 "erro": "Dia inválido para o medicamento"
             }), 400
 
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            observacao = dados.get("observacao", "").strip()
 
-        cursor.execute(
-            "INSERT INTO medicamentos (nome, dosagem, horario, dia) "
-            "VALUES (?, ?, ?, ?)",
-            (nome, dosagem, horario, dia),
-        )
+            cursor.execute(
+                "INSERT INTO medicamentos "
+                "(usuario_id, nome, dosagem, horario, dia, observacao) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (usuario_id, nome, dosagem, horario, dia, observacao),
+            )
 
-        conexao.commit()
-        novo_id = cursor.lastrowid
+            conexao.commit()
+            novo_id = cursor.lastrowid
 
         return jsonify({
             "sucesso": True,
@@ -430,45 +476,47 @@ def cadastrar_medicamento():
 
 
 @app.route("/api/medicamentos/<int:med_id>/marcar-tomado", methods=["POST"])
+@login_required
 def marcar_como_tomado(med_id):
     """Marca um medicamento como tomado hoje."""
     try:
+        usuario_id = session["usuario_id"]
         hoje = _data_hoje()
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT nome FROM medicamentos "
+                "WHERE id = ? AND usuario_id = ? AND ativo = 1",
+                (med_id, usuario_id),
+            )
+            medicamento = cursor.fetchone()
 
-        cursor.execute(
-            "SELECT nome FROM medicamentos WHERE id = ? AND ativo = 1",
-            (med_id,),
-        )
-        medicamento = cursor.fetchone()
+            if not medicamento:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Medicamento não encontrado ou inativo"
+                }), 404
 
-        if not medicamento:
-            return jsonify({
-                "sucesso": False,
-                "erro": "Medicamento não encontrado ou inativo"
-            }), 404
+            cursor.execute(
+                "SELECT id FROM registros_tomados "
+                "WHERE medicamento_id = ? AND data_tomado = ?",
+                (med_id, hoje),
+            )
+            if cursor.fetchone():
+                med_name = medicamento['nome']
+                erro_msg = f"'{med_name}' já foi marcado como tomado"
+                return jsonify({
+                    "sucesso": False,
+                    "erro": erro_msg
+                }), 400
 
-        cursor.execute(
-            "SELECT id FROM registros_tomados "
-            "WHERE medicamento_id = ? AND data_tomado = ?",
-            (med_id, hoje),
-        )
-        if cursor.fetchone():
-            med_name = medicamento['nome']
-            erro_msg = f"'{med_name}' já foi marcado como tomado"
-            return jsonify({
-                "sucesso": False,
-                "erro": erro_msg
-            }), 400
+            cursor.execute(
+                "INSERT INTO registros_tomados (medicamento_id, data_tomado) "
+                "VALUES (?, ?)",
+                (med_id, hoje),
+            )
 
-        cursor.execute(
-            "INSERT INTO registros_tomados (medicamento_id, data_tomado) "
-            "VALUES (?, ?)",
-            (med_id, hoje),
-        )
-
-        conexao.commit()
+            conexao.commit()
 
         return jsonify({
             "sucesso": True,
@@ -482,44 +530,46 @@ def marcar_como_tomado(med_id):
     "/api/medicamentos/<int:med_id>/desmarcar-tomado",
     methods=["DELETE"],
 )
+@login_required
 def desmarcar_como_tomado(med_id):
     """Remove o registro de medicamento tomado hoje (undo)."""
     try:
+        usuario_id = session["usuario_id"]
         hoje = _data_hoje()
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT nome FROM medicamentos "
+                "WHERE id = ? AND usuario_id = ? AND ativo = 1",
+                (med_id, usuario_id),
+            )
+            medicamento = cursor.fetchone()
 
-        cursor.execute(
-            "SELECT nome FROM medicamentos WHERE id = ? AND ativo = 1",
-            (med_id,),
-        )
-        medicamento = cursor.fetchone()
+            if not medicamento:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Medicamento não encontrado ou inativo"
+                }), 404
 
-        if not medicamento:
-            return jsonify({
-                "sucesso": False,
-                "erro": "Medicamento não encontrado ou inativo"
-            }), 404
+            cursor.execute(
+                "SELECT id FROM registros_tomados "
+                "WHERE medicamento_id = ? AND data_tomado = ?",
+                (med_id, hoje),
+            )
+            registro = cursor.fetchone()
+            if not registro:
+                med_name = medicamento["nome"]
+                erro_msg = f"'{med_name}' não está marcado como tomado hoje"
+                return jsonify({
+                    "sucesso": False,
+                    "erro": erro_msg
+                }), 400
 
-        cursor.execute(
-            "SELECT id FROM registros_tomados "
-            "WHERE medicamento_id = ? AND data_tomado = ?",
-            (med_id, hoje),
-        )
-        registro = cursor.fetchone()
-        if not registro:
-            med_name = medicamento["nome"]
-            erro_msg = f"'{med_name}' não está marcado como tomado hoje"
-            return jsonify({
-                "sucesso": False,
-                "erro": erro_msg
-            }), 400
-
-        cursor.execute(
-            "DELETE FROM registros_tomados WHERE id = ?",
-            (registro["id"],),
-        )
-        conexao.commit()
+            cursor.execute(
+                "DELETE FROM registros_tomados WHERE id = ?",
+                (registro["id"],),
+            )
+            conexao.commit()
 
         return jsonify({
             "sucesso": True,
@@ -530,30 +580,32 @@ def desmarcar_como_tomado(med_id):
 
 
 @app.route("/api/medicamentos/<int:med_id>/remover", methods=["DELETE"])
+@login_required
 def remover_medicamento(med_id):
     """Remove (desativa) um medicamento."""
     try:
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        usuario_id = session["usuario_id"]
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT nome FROM medicamentos "
+                "WHERE id = ? AND usuario_id = ?",
+                (med_id, usuario_id),
+            )
+            medicamento = cursor.fetchone()
 
-        cursor.execute(
-            "SELECT nome FROM medicamentos WHERE id = ?",
-            (med_id,),
-        )
-        medicamento = cursor.fetchone()
+            if not medicamento:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Medicamento não encontrado"
+                }), 404
 
-        if not medicamento:
-            return jsonify({
-                "sucesso": False,
-                "erro": "Medicamento não encontrado"
-            }), 404
+            cursor.execute(
+                "UPDATE medicamentos SET ativo = 0 WHERE id = ?",
+                (med_id,),
+            )
 
-        cursor.execute(
-            "UPDATE medicamentos SET ativo = 0 WHERE id = ?",
-            (med_id,),
-        )
-
-        conexao.commit()
+            conexao.commit()
 
         return jsonify({
             "sucesso": True,
@@ -564,9 +616,11 @@ def remover_medicamento(med_id):
 
 
 @app.route("/api/medicamentos/<int:med_id>/editar", methods=["PUT"])
+@login_required
 def editar_medicamento(med_id):
     """Atualiza os dados de um medicamento ativo."""
     try:
+        usuario_id = session["usuario_id"]
         dados = request.get_json(silent=True)
         if dados is None:
             return jsonify({
@@ -602,30 +656,36 @@ def editar_medicamento(med_id):
                 "erro": "Dia inválido para o medicamento"
             }), 400
 
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT id FROM medicamentos "
+                "WHERE id = ? AND usuario_id = ? AND ativo = 1",
+                (med_id, usuario_id),
+            )
+            if not cursor.fetchone():
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Medicamento não encontrado ou inativo"
+                }), 404
 
-        cursor.execute(
-            "SELECT id FROM medicamentos WHERE id = ? AND ativo = 1",
-            (med_id,),
+            observacao = dados.get("observacao", "").strip()
+
+            cursor.execute(
+                "UPDATE medicamentos "
+                "SET nome = ?, dosagem = ?, horario = ?, "
+                "dia = ?, observacao = ? "
+                "WHERE id = ?",
+                (nome, dosagem, horario, dia, observacao, med_id),
+            )
+            conexao.commit()
+
+        mensagem = (
+            f"Medicamento '{nome}' atualizado com sucesso!"
         )
-        if not cursor.fetchone():
-            return jsonify({
-                "sucesso": False,
-                "erro": "Medicamento não encontrado ou inativo"
-            }), 404
-
-        cursor.execute(
-            "UPDATE medicamentos "
-            "SET nome = ?, dosagem = ?, horario = ?, dia = ? "
-            "WHERE id = ?",
-            (nome, dosagem, horario, dia, med_id),
-        )
-        conexao.commit()
-
         return jsonify({
             "sucesso": True,
-            "mensagem": f"Medicamento '{nome}' atualizado com sucesso!"
+            "mensagem": mensagem
         })
     except Exception as e:
         return jsonify({"sucesso": False, "erro": str(e)}), 500

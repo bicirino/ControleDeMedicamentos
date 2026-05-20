@@ -1,7 +1,8 @@
 import os
 import sqlite3
+from datetime import datetime
 
-_DEFAULT_DB = "medicamentos.db"
+_DEFAULT_DB = os.path.join(os.path.dirname(__file__), "medicamentos.db")
 DB_NAME = os.environ.get("DB_PATH", _DEFAULT_DB)
 _db_dir = os.path.dirname(DB_NAME)
 if _db_dir:
@@ -9,8 +10,10 @@ if _db_dir:
 
 
 def get_conexao() -> sqlite3.Connection:
-    conexao = sqlite3.connect(DB_NAME)
+    conexao = sqlite3.connect(DB_NAME, timeout=10)
     conexao.row_factory = sqlite3.Row
+    conexao.execute("PRAGMA foreign_keys = ON")
+    conexao.execute("PRAGMA journal_mode = WAL")
     return conexao
 
 
@@ -18,6 +21,7 @@ def inicializar_banco() -> None:
     conexao = get_conexao()
     cursor = conexao.cursor()
 
+    # Criar tabela de usuários
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,27 +35,89 @@ def inicializar_banco() -> None:
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS medicamentos (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id  INTEGER NOT NULL,
             nome        TEXT    NOT NULL,
             dosagem     TEXT    NOT NULL,
             horario     TEXT    NOT NULL,
             dia         TEXT    NOT NULL DEFAULT 'todos',
-            ativo       INTEGER NOT NULL DEFAULT 1
+            observacao  TEXT    DEFAULT '',
+            ativo       INTEGER NOT NULL DEFAULT 1,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
         )
     """)
 
-    # Migração para bancos criados antes da coluna `dia`.
+    # Migração para bancos criados antes da coluna `usuario_id`.
     cursor.execute("PRAGMA table_info(medicamentos)")
     colunas = {linha["name"] for linha in cursor.fetchall()}
-    if "dia" not in colunas:
+    if "usuario_id" not in colunas:
+        # Criar tabela temporária com a nova estrutura
+        cursor.execute("""
+            CREATE TABLE medicamentos_temp (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id  INTEGER NOT NULL,
+                nome        TEXT    NOT NULL,
+                dosagem     TEXT    NOT NULL,
+                horario     TEXT    NOT NULL,
+                dia         TEXT    NOT NULL DEFAULT 'todos',
+                ativo       INTEGER NOT NULL DEFAULT 1,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+            )
+            """)
+
+        # Se houver dados existentes, criar usuário padrão e migrar
+        cursor.execute("SELECT COUNT(*) as cnt FROM medicamentos")
+        tem_dados = cursor.fetchone()["cnt"] > 0
+
+        if tem_dados:
+            # Criar usuário padrão para dados existentes
+            try:
+                from werkzeug.security import generate_password_hash
+
+                cursor.execute(
+                    "INSERT INTO usuarios (email, nome, senha_hash, "
+                    "criado_em) VALUES (?, ?, ?, ?)",
+                    (
+                        "padrão@local",
+                        "Usuário Padrão",
+                        generate_password_hash("mudeSenha123"),
+                        datetime.now().isoformat(),
+                    )
+                )
+
+                # Copiar dados existentes
+                cursor.execute(
+                    "INSERT INTO medicamentos_temp "
+                    "(usuario_id, nome, dosagem, horario, dia, ativo) "
+                    "SELECT ?, nome, dosagem, horario, dia, ativo "
+                    "FROM medicamentos"
+                )
+            except Exception:
+                # Se falhar, usar usuario_id = 1
+                cursor.execute(
+                    "INSERT INTO medicamentos_temp "
+                    "(usuario_id, nome, dosagem, horario, dia, ativo) "
+                    "SELECT 1, nome, dosagem, horario, dia, ativo "
+                    "FROM medicamentos"
+                )
+
+        # Remover tabela antiga e renomear
+        cursor.execute("DROP TABLE medicamentos")
         cursor.execute(
-            "ALTER TABLE medicamentos "
-            "ADD COLUMN dia TEXT NOT NULL DEFAULT 'todos'"
+            "ALTER TABLE medicamentos_temp RENAME TO medicamentos"
         )
 
-    cursor.execute(
-        "UPDATE medicamentos SET dia = 'todos' "
-        "WHERE dia IS NULL OR TRIM(dia) = ''"
-    )
+    # Garantir coluna `observacao` em bancos antigos
+    cursor.execute("PRAGMA table_info(medicamentos)")
+    colunas = {linha["name"] for linha in cursor.fetchall()}
+    if "observacao" not in colunas:
+        try:
+            cursor.execute(
+                "ALTER TABLE medicamentos ADD COLUMN observacao TEXT "
+                "DEFAULT ''"
+            )
+        except Exception:
+            # Se ALTER TABLE falhar por qualquer razão, ignorar (não crítico)
+            pass
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS registros_tomados (
