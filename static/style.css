@@ -268,12 +268,109 @@ textarea:focus-visible {
     max-width: 860px;
 }
 
-/* Theme Toggle Button */
-.theme-toggle-container {
+/* Theme Toggle Button (mover para esquerda) */
+.theme-toggle-left-container {
+    position: absolute;
+    top: var(--space-lg);
+    left: var(--space-lg);
+}
+
+/* Hamburger / menu (direita) */
+.hamburger-container {
     position: absolute;
     top: var(--space-lg);
     right: var(--space-lg);
+    display: flex;
+    align-items: center;
 }
+
+.hamburger {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: linear-gradient(150deg, var(--bg-primary), var(--bg-tertiary));
+    color: var(--text-primary);
+    display: grid;
+    place-items: center;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.hamburger:hover {
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.hamburger:active {
+    transform: scale(0.97);
+}
+
+.hamburger-lines {
+    position: relative;
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    display: block;
+}
+
+.hamburger-lines::before,
+.hamburger-lines::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.hamburger-lines::before {
+    top: -6px;
+}
+
+.hamburger-lines::after {
+    top: 6px;
+}
+
+.hamburger-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    transform-origin: top right;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 18px 40px rgba(2,6,23,0.08);
+    padding: 8px;
+    z-index: 60;
+    min-width: 140px;
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+    pointer-events: none;
+    transition: transform 160ms cubic-bezier(.2,.9,.2,1), opacity 160ms ease;
+}
+.hamburger-menu.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.hamburger-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 6px;
+}
+.hamburger-item:hover { background: var(--bg-secondary); }
 
 .theme-toggle {
     width: 44px;
@@ -355,6 +452,62 @@ html[data-theme="dark"] .theme-toggle {
     color: var(--text-secondary);
     margin: 0;
     letter-spacing: 0.2px;
+}
+
+/* ==============================
+   INFORMAÇÕES DO USUÁRIO
+   ============================== */
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: var(--space-md);
+}
+
+#userName {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 6px 10px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border-color: var(--color-primary);
+}
+
+.logout-btn:active {
+    transform: scale(0.98);
+}
+
+html[data-theme="dark"] .logout-btn {
+    color: var(--text-secondary);
+    background: rgba(17, 24, 39, 0.78);
+    border-color: #334155;
+}
+
+html[data-theme="dark"] .logout-btn:hover {
+    color: #F3F4F6;
+    background: rgba(30, 41, 59, 0.9);
+    border-color: #3B82F6;
 }
 
 /* ==============================
@@ -664,10 +817,13 @@ html[data-theme="dark"] .medicamento-horario {
 
 .medicamentos-table {
     overflow-x: auto;
+    display: block;
+    width: 100%;
 }
 
 table {
     width: 100%;
+    min-width: max-content;
     border-collapse: collapse;
     font-size: 0.95rem;
 }
@@ -700,10 +856,14 @@ td {
 
 .acoes-tabela .btn {
     min-width: 80px;
-    margin-right: var(--space-lg);
     padding: 0.45rem 0.8rem;
     font-size: 0.92rem;
     border-radius: 10px;
+    flex: 1;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Remover sombra e suavizar cores apenas dentro da coluna Ações */
@@ -724,9 +884,7 @@ td {
     border: none;
 }
 
-.acoes-tabela .btn:last-child {
-    margin-right: 0;
-}
+
 
 /* Ajuste específico para modo escuro: botão secundário na coluna Ações */
 html[data-theme="dark"] .acoes-tabela .btn.btn-secondary {
@@ -1217,20 +1375,47 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
     }
 
     .header {
-        padding: var(--space-xl) var(--space-md);
+        padding: 58px var(--space-md) var(--space-lg);
+        align-items: center;
     }
 
-    .theme-toggle-container {
+    .theme-toggle-left-container,
+    .hamburger-container {
         top: var(--space-md);
+    }
+
+    .theme-toggle-left-container {
+        left: var(--space-md);
+    }
+
+    .hamburger-container {
         right: var(--space-md);
     }
 
+    .theme-toggle,
+    .hamburger {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+    }
+
+    .theme-toggle-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .header-content {
+        width: 100%;
+        padding: 0 56px;
+    }
+
     .logo {
-        font-size: 2rem;
+        font-size: clamp(1.7rem, 5.5vw, 2rem);
     }
 
     .tagline {
         font-size: 1rem;
+        line-height: 1.35;
     }
 
     .main-nav {
@@ -1295,6 +1480,35 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
         padding: var(--space-md) var(--space-md);
         font-size: 0.9rem;
     }
+
+    .medicamentos-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        display: block;
+        width: 100%;
+        margin-bottom: var(--space-md);
+    }
+
+    table {
+        width: auto;
+        min-width: 100%;
+    }
+
+    .acoes-tabela {
+        gap: var(--space-sm);
+        white-space: nowrap;
+    }
+
+    .acoes-tabela .btn {
+        min-width: 70px;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+        flex: 0 0 auto;
+    }
+
+    td:last-child {
+        padding-right: calc(var(--space-md) + var(--space-lg));
+    }
 }
 
 @media (max-width: 480px) {
@@ -1302,13 +1516,24 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
         padding: var(--space-md);
     }
 
+    .header {
+        padding: 54px 12px 16px;
+    }
+
+    .header-content {
+        padding: 0 48px;
+    }
+
     .logo {
-        font-size: 1.5rem;
-        padding-right: 52px;
+        font-size: clamp(1.45rem, 7vw, 1.75rem);
     }
 
     .tagline {
         font-size: 0.9rem;
+    }
+
+    #userName {
+        font-size: 0.98rem;
     }
 
     .section-header h2 {
