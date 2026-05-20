@@ -108,6 +108,20 @@ def login_required(f):
                 "erro": "Não autenticado",
                 "requer_login": True
             }), 401
+        usuario_id = session.get("usuario_id")
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT id FROM usuarios WHERE id = ?",
+                (usuario_id,),
+            )
+            if not cursor.fetchone():
+                session.clear()
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Sessão inválida",
+                    "requer_login": True
+                }), 401
         return f(*args, **kwargs)
     return decorated_function
 
@@ -282,6 +296,16 @@ def logout():
 def index():
     """Renderiza a página principal."""
     if "usuario_id" not in session:
+        return render_template("login.html")
+    usuario_id = session.get("usuario_id")
+    with get_conexao() as conexao:
+        cursor = conexao.cursor()
+        cursor.execute(
+            "SELECT id FROM usuarios WHERE id = ?",
+            (usuario_id,),
+        )
+        if not cursor.fetchone():
+            session.clear()
         return render_template("login.html")
     return render_template("index.html")
 
