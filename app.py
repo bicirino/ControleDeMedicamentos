@@ -655,9 +655,12 @@ def editar_medicamento(med_id):
             )
             conexao.commit()
 
+        mensagem = (
+            f"Medicamento '{nome}' atualizado com sucesso!"
+        )
         return jsonify({
             "sucesso": True,
-            "mensagem": f"Medicamento '{nome}' atualizado com sucesso!"
+            "mensagem": mensagem
         })
     except Exception as e:
         return jsonify({"sucesso": False, "erro": str(e)}), 500
