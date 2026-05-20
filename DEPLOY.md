@@ -50,6 +50,7 @@ Preencha os campos conforme abaixo:
 GROQ_API_KEY=sua_chave_groq_aqui
 DEBUG=False
 PYTHON_VERSION=3.12
+DB_PATH=/var/data/medicamentos.db
 ```
 
 2. **Para `GROQ_API_KEY`:**
@@ -67,6 +68,17 @@ PYTHON_VERSION=3.12
 ```
 https://controle-medicamentos.onrender.com
 ```
+
+---
+
+## 💾 Persistencia do SQLite no Render
+
+O Render apaga o disco local em reinicios. Para nao perder usuarios,
+configure um disco persistente e use o caminho do banco via `DB_PATH`.
+
+Se voce usa o `render.yaml`, ele ja inclui:
+- um disco persistente montado em `/var/data`
+- `DB_PATH=/var/data/medicamentos.db`
 
 ---
 
