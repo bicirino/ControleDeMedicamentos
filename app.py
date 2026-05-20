@@ -151,27 +151,26 @@ def registrar():
                 "erro": "Email inválido"
             }), 400
 
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
 
-        # Verificar se usuário já existe
-        cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
-        if cursor.fetchone():
-            return jsonify({
-                "sucesso": False,
-                "erro": "Este email já está cadastrado"
-            }), 400
+            # Verificar se usuário já existe
+            cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+            if cursor.fetchone():
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Este email já está cadastrado"
+                }), 400
 
-        # Inserir novo usuário
-        senha_hash = generate_password_hash(senha)
-        cursor.execute(
-            "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
-            "VALUES (?, ?, ?, ?)",
-            (email, nome, senha_hash, datetime.now().isoformat()),
-        )
-        conexao.commit()
-        novo_id = cursor.lastrowid
-        conexao.close()
+            # Inserir novo usuário
+            senha_hash = generate_password_hash(senha)
+            cursor.execute(
+                "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
+                "VALUES (?, ?, ?, ?)",
+                (email, nome, senha_hash, datetime.now().isoformat()),
+            )
+            conexao.commit()
+            novo_id = cursor.lastrowid
 
         # Criar sessão automaticamente (persistente por 30 dias)
         session.permanent = True
@@ -216,15 +215,13 @@ def login():
                 "erro": "Email e senha são obrigatórios"
             }), 400
 
-        conexao = get_conexao()
-        cursor = conexao.cursor()
-
-        cursor.execute(
-            "SELECT id, nome, senha_hash FROM usuarios WHERE email = ?",
-            (email,),
-        )
-        usuario = cursor.fetchone()
-        conexao.close()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT id, nome, senha_hash FROM usuarios WHERE email = ?",
+                (email,),
+            )
+            usuario = cursor.fetchone()
 
         if not usuario or not check_password_hash(
             usuario["senha_hash"],
@@ -431,20 +428,19 @@ def cadastrar_medicamento():
                 "erro": "Dia inválido para o medicamento"
             }), 400
 
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            observacao = dados.get("observacao", "").strip()
 
-        observacao = dados.get("observacao", "").strip()
+            cursor.execute(
+                "INSERT INTO medicamentos "
+                "(usuario_id, nome, dosagem, horario, dia, observacao) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (usuario_id, nome, dosagem, horario, dia, observacao),
+            )
 
-        cursor.execute(
-            "INSERT INTO medicamentos "
-            "(usuario_id, nome, dosagem, horario, dia, observacao) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
-            (usuario_id, nome, dosagem, horario, dia, observacao),
-        )
-
-        conexao.commit()
-        novo_id = cursor.lastrowid
+            conexao.commit()
+            novo_id = cursor.lastrowid
 
         return jsonify({
             "sucesso": True,
@@ -462,42 +458,41 @@ def marcar_como_tomado(med_id):
     try:
         usuario_id = session["usuario_id"]
         hoje = _data_hoje()
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT nome FROM medicamentos "
+                "WHERE id = ? AND usuario_id = ? AND ativo = 1",
+                (med_id, usuario_id),
+            )
+            medicamento = cursor.fetchone()
 
-        cursor.execute(
-            "SELECT nome FROM medicamentos "
-            "WHERE id = ? AND usuario_id = ? AND ativo = 1",
-            (med_id, usuario_id),
-        )
-        medicamento = cursor.fetchone()
+            if not medicamento:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Medicamento não encontrado ou inativo"
+                }), 404
 
-        if not medicamento:
-            return jsonify({
-                "sucesso": False,
-                "erro": "Medicamento não encontrado ou inativo"
-            }), 404
+            cursor.execute(
+                "SELECT id FROM registros_tomados "
+                "WHERE medicamento_id = ? AND data_tomado = ?",
+                (med_id, hoje),
+            )
+            if cursor.fetchone():
+                med_name = medicamento['nome']
+                erro_msg = f"'{med_name}' já foi marcado como tomado"
+                return jsonify({
+                    "sucesso": False,
+                    "erro": erro_msg
+                }), 400
 
-        cursor.execute(
-            "SELECT id FROM registros_tomados "
-            "WHERE medicamento_id = ? AND data_tomado = ?",
-            (med_id, hoje),
-        )
-        if cursor.fetchone():
-            med_name = medicamento['nome']
-            erro_msg = f"'{med_name}' já foi marcado como tomado"
-            return jsonify({
-                "sucesso": False,
-                "erro": erro_msg
-            }), 400
+            cursor.execute(
+                "INSERT INTO registros_tomados (medicamento_id, data_tomado) "
+                "VALUES (?, ?)",
+                (med_id, hoje),
+            )
 
-        cursor.execute(
-            "INSERT INTO registros_tomados (medicamento_id, data_tomado) "
-            "VALUES (?, ?)",
-            (med_id, hoje),
-        )
-
-        conexao.commit()
+            conexao.commit()
 
         return jsonify({
             "sucesso": True,
@@ -517,41 +512,40 @@ def desmarcar_como_tomado(med_id):
     try:
         usuario_id = session["usuario_id"]
         hoje = _data_hoje()
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT nome FROM medicamentos "
+                "WHERE id = ? AND usuario_id = ? AND ativo = 1",
+                (med_id, usuario_id),
+            )
+            medicamento = cursor.fetchone()
 
-        cursor.execute(
-            "SELECT nome FROM medicamentos "
-            "WHERE id = ? AND usuario_id = ? AND ativo = 1",
-            (med_id, usuario_id),
-        )
-        medicamento = cursor.fetchone()
+            if not medicamento:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Medicamento não encontrado ou inativo"
+                }), 404
 
-        if not medicamento:
-            return jsonify({
-                "sucesso": False,
-                "erro": "Medicamento não encontrado ou inativo"
-            }), 404
+            cursor.execute(
+                "SELECT id FROM registros_tomados "
+                "WHERE medicamento_id = ? AND data_tomado = ?",
+                (med_id, hoje),
+            )
+            registro = cursor.fetchone()
+            if not registro:
+                med_name = medicamento["nome"]
+                erro_msg = f"'{med_name}' não está marcado como tomado hoje"
+                return jsonify({
+                    "sucesso": False,
+                    "erro": erro_msg
+                }), 400
 
-        cursor.execute(
-            "SELECT id FROM registros_tomados "
-            "WHERE medicamento_id = ? AND data_tomado = ?",
-            (med_id, hoje),
-        )
-        registro = cursor.fetchone()
-        if not registro:
-            med_name = medicamento["nome"]
-            erro_msg = f"'{med_name}' não está marcado como tomado hoje"
-            return jsonify({
-                "sucesso": False,
-                "erro": erro_msg
-            }), 400
-
-        cursor.execute(
-            "DELETE FROM registros_tomados WHERE id = ?",
-            (registro["id"],),
-        )
-        conexao.commit()
+            cursor.execute(
+                "DELETE FROM registros_tomados WHERE id = ?",
+                (registro["id"],),
+            )
+            conexao.commit()
 
         return jsonify({
             "sucesso": True,
@@ -567,28 +561,27 @@ def remover_medicamento(med_id):
     """Remove (desativa) um medicamento."""
     try:
         usuario_id = session["usuario_id"]
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT nome FROM medicamentos "
+                "WHERE id = ? AND usuario_id = ?",
+                (med_id, usuario_id),
+            )
+            medicamento = cursor.fetchone()
 
-        cursor.execute(
-            "SELECT nome FROM medicamentos "
-            "WHERE id = ? AND usuario_id = ?",
-            (med_id, usuario_id),
-        )
-        medicamento = cursor.fetchone()
+            if not medicamento:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Medicamento não encontrado"
+                }), 404
 
-        if not medicamento:
-            return jsonify({
-                "sucesso": False,
-                "erro": "Medicamento não encontrado"
-            }), 404
+            cursor.execute(
+                "UPDATE medicamentos SET ativo = 0 WHERE id = ?",
+                (med_id,),
+            )
 
-        cursor.execute(
-            "UPDATE medicamentos SET ativo = 0 WHERE id = ?",
-            (med_id,),
-        )
-
-        conexao.commit()
+            conexao.commit()
 
         return jsonify({
             "sucesso": True,
@@ -639,33 +632,36 @@ def editar_medicamento(med_id):
                 "erro": "Dia inválido para o medicamento"
             }), 400
 
-        conexao = get_conexao()
-        cursor = conexao.cursor()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT id FROM medicamentos "
+                "WHERE id = ? AND usuario_id = ? AND ativo = 1",
+                (med_id, usuario_id),
+            )
+            if not cursor.fetchone():
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Medicamento não encontrado ou inativo"
+                }), 404
 
-        cursor.execute(
-            "SELECT id FROM medicamentos "
-            "WHERE id = ? AND usuario_id = ? AND ativo = 1",
-            (med_id, usuario_id),
+            observacao = dados.get("observacao", "").strip()
+
+            cursor.execute(
+                "UPDATE medicamentos "
+                "SET nome = ?, dosagem = ?, horario = ?, "
+                "dia = ?, observacao = ? "
+                "WHERE id = ?",
+                (nome, dosagem, horario, dia, observacao, med_id),
+            )
+            conexao.commit()
+
+        mensagem = (
+            f"Medicamento '{nome}' atualizado com sucesso!"
         )
-        if not cursor.fetchone():
-            return jsonify({
-                "sucesso": False,
-                "erro": "Medicamento não encontrado ou inativo"
-            }), 404
-
-        observacao = dados.get("observacao", "").strip()
-
-        cursor.execute(
-            "UPDATE medicamentos "
-            "SET nome = ?, dosagem = ?, horario = ?, dia = ?, observacao = ? "
-            "WHERE id = ?",
-            (nome, dosagem, horario, dia, observacao, med_id),
-        )
-        conexao.commit()
-
         return jsonify({
             "sucesso": True,
-            "mensagem": f"Medicamento '{nome}' atualizado com sucesso!"
+            "mensagem": mensagem
         })
     except Exception as e:
         return jsonify({"sucesso": False, "erro": str(e)}), 500
