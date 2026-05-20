@@ -649,7 +649,8 @@ def editar_medicamento(med_id):
 
             cursor.execute(
                 "UPDATE medicamentos "
-                "SET nome = ?, dosagem = ?, horario = ?, dia = ?, observacao = ? "
+                "SET nome = ?, dosagem = ?, horario = ?, "
+                "dia = ?, observacao = ? "
                 "WHERE id = ?",
                 (nome, dosagem, horario, dia, observacao, med_id),
             )
