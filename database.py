@@ -6,9 +6,10 @@ DB_NAME = os.path.join(os.path.dirname(__file__), "medicamentos.db")
 
 
 def get_conexao() -> sqlite3.Connection:
-    conexao = sqlite3.connect(DB_NAME)
+    conexao = sqlite3.connect(DB_NAME, timeout=10)
     conexao.row_factory = sqlite3.Row
     conexao.execute("PRAGMA foreign_keys = ON")
+    conexao.execute("PRAGMA journal_mode = WAL")
     return conexao
 
 
