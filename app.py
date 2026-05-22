@@ -186,15 +186,9 @@ def registrar():
             conexao.commit()
             novo_id = cursor.lastrowid
 
-        # Criar sessão automaticamente (persistente por 30 dias)
-        session.permanent = True
-        session["usuario_id"] = novo_id
-        session["email"] = email
-        session["nome"] = nome
-
         return jsonify({
             "sucesso": True,
-            "mensagem": f"Bem-vindo, {nome}!",
+            "mensagem": "Conta criada com sucesso. Faça login para continuar.",
             "usuario": {
                 "id": novo_id,
                 "email": email,
@@ -232,19 +226,43 @@ def login():
         with get_conexao() as conexao:
             cursor = conexao.cursor()
             cursor.execute(
-                "SELECT id, nome, senha_hash FROM usuarios WHERE email = ?",
+                "SELECT id, nome, senha_hash, email "
+                "FROM usuarios WHERE lower(email) = ?",
                 (email,),
             )
             usuario = cursor.fetchone()
 
-        if not usuario or not check_password_hash(
-            usuario["senha_hash"],
-            senha,
-        ):
-            return jsonify({
-                "sucesso": False,
-                "erro": "Email ou senha inválidos"
-            }), 401
+            if not usuario:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Email ou senha inválidos"
+                }), 401
+
+            senha_hash = usuario["senha_hash"] or ""
+            senha_ok = check_password_hash(senha_hash, senha)
+
+            if not senha_ok and senha_hash == senha:
+                # Compatibilidade: migrar senhas antigas em texto puro.
+                senha_hash = generate_password_hash(senha)
+                cursor.execute(
+                    "UPDATE usuarios SET senha_hash = ? WHERE id = ?",
+                    (senha_hash, usuario["id"]),
+                )
+                conexao.commit()
+                senha_ok = True
+
+            if not senha_ok:
+                return jsonify({
+                    "sucesso": False,
+                    "erro": "Email ou senha inválidos"
+                }), 401
+
+            if usuario["email"] != email:
+                cursor.execute(
+                    "UPDATE usuarios SET email = ? WHERE id = ?",
+                    (email, usuario["id"]),
+                )
+                conexao.commit()
 
         # Criar sessão
         session.permanent = lembrar_me
