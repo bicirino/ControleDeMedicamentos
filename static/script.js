@@ -79,7 +79,7 @@ function inicializarAplicacao() {
         configurarModais();
         configurarDiaPadraoCadastro();
         atualizarDataHoje();
-        carregarMedicamentosDoDay();
+        carregarMedicamentosDoDia();
             configurarHamburger();
     });
 }
@@ -231,7 +231,7 @@ function mudarAba(tabName) {
     if (tabName === 'todos') {
         carregarMedicamentosTodos();
     } else if (tabName === 'dia') {
-        carregarMedicamentosDoDay();
+        carregarMedicamentosDoDia();
     }
 }
 
@@ -251,7 +251,7 @@ function atualizarDataHoje() {
 // CARREGAMENTO DE MEDICAMENTOS
 // ==============================
 
-async function carregarMedicamentosDoDay() {
+async function carregarMedicamentosDoDia() {
     const container = document.getElementById('medicamentosDiaContainer');
     const loading = document.getElementById('loadingDia');
     const noDados = document.getElementById('noDadosDia');
@@ -630,7 +630,7 @@ async function submeterFormularioCadastro() {
             mensagem.textContent = `✅ ${dados.mensagem}`;
 
             document.getElementById('formCadastrar').reset();
-            carregarMedicamentosDoDay();
+            carregarMedicamentosDoDia();
             carregarMedicamentosTodos();
 
             setTimeout(() => {
@@ -870,7 +870,7 @@ async function marcarMedicamentoComoTomado(medId) {
 
         if (dados.sucesso) {
             mostrarAlerta(dados.mensagem, 'success');
-            carregarMedicamentosDoDay();
+            carregarMedicamentosDoDia();
         } else {
             mostrarAlerta(dados.erro, 'error');
         }
@@ -890,7 +890,7 @@ async function desmarcarMedicamentoComoTomado(medId) {
 
         if (dados.sucesso) {
             mostrarAlerta(dados.mensagem, 'success');
-            carregarMedicamentosDoDay();
+            carregarMedicamentosDoDia();
         } else {
             mostrarAlerta(dados.erro, 'error');
         }
@@ -910,7 +910,7 @@ async function removerMedicamento(medId, nome) {
 
         if (dados.sucesso) {
             mostrarAlerta(dados.mensagem, 'success');
-            carregarMedicamentosDoDay();
+            carregarMedicamentosDoDia();
             carregarMedicamentosTodos();
         } else {
             mostrarAlerta(dados.erro, 'error');
@@ -933,7 +933,7 @@ async function atualizarMedicamento(medId, payload) {
 
         if (dados.sucesso) {
             mostrarAlerta(dados.mensagem, 'success');
-            carregarMedicamentosDoDay();
+            carregarMedicamentosDoDia();
             carregarMedicamentosTodos();
         } else {
             mostrarAlerta(dados.erro, 'error');
@@ -1001,6 +1001,6 @@ function escaparHTML(texto) {
 setInterval(() => {
     const tabAtiva = document.querySelector('.tab-content.active');
     if (tabAtiva && tabAtiva.id === 'tab-dia') {
-        carregarMedicamentosDoDay();
+        carregarMedicamentosDoDia();
     }
 }, 30000);

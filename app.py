@@ -186,7 +186,8 @@ def registrar():
             conexao.commit()
             novo_id = cursor.lastrowid
 
-        return jsonify({
+        # Retornar sucesso SEM criar sessão
+        resposta = jsonify({
             "sucesso": True,
             "mensagem": "Conta criada com sucesso. Faça login para continuar.",
             "usuario": {
@@ -195,6 +196,10 @@ def registrar():
                 "nome": nome
             }
         })
+        
+        # Garantir que não há sessão ativa após registro
+        resposta.delete_cookie('session')
+        return resposta
     except Exception as e:
         return jsonify({
             "sucesso": False,
@@ -308,6 +313,12 @@ def logout():
         "sucesso": True,
         "mensagem": "Desconectado com sucesso"
     })
+
+
+@app.route("/login")
+def login_page():
+    """Renderiza a página de login."""
+    return render_template("login.html")
 
 
 @app.route("/")

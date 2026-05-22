@@ -420,94 +420,184 @@
     </div>
 
     <script>
+
         // Configurar tema ao carregar a página
+
         document.addEventListener('DOMContentLoaded', () => {
+
             configurarTema();
+
             limparPreferenciasDeLogin();
+
         });
+
+
 
         window.addEventListener('pageshow', limparPreferenciasDeLogin);
 
+
+
         function limparPreferenciasDeLogin() {
+
             const rememberMe = document.getElementById('rememberMe');
+
             if (rememberMe) {
+
                 rememberMe.checked = false;
+
             }
+
         }
+
+
 
         function configurarTema() {
+
             const htmlElement = document.documentElement;
+
             const savedTheme = localStorage.getItem('theme');
+
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
             const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+
             htmlElement.setAttribute('data-theme', theme);
+
         }
+
+
 
         function toggleForm() {
+
             const loginForm = document.getElementById('loginForm');
+
             const registerForm = document.getElementById('registerForm');
+
             const formTitle = document.getElementById('formTitle');
 
+
+
             loginForm.classList.toggle('active');
+
             registerForm.classList.toggle('active');
 
+
+
             if (loginForm.classList.contains('active')) {
+
                 formTitle.textContent = 'Faça seu login';
+
                 clearErrors();
+
             } else {
+
                 formTitle.textContent = 'Crie sua conta';
+
                 clearErrors();
+
             }
+
         }
+
+
 
         function clearErrors() {
+
             document.getElementById('loginError').classList.remove('show');
+
             document.getElementById('loginSuccess').classList.remove('show');
+
             document.getElementById('registerError').classList.remove('show');
+
             document.getElementById('registerSuccess').classList.remove('show');
+
         }
+
+
 
         function showError(elementId, message) {
+
             const errorEl = document.getElementById(elementId);
+
             errorEl.textContent = message;
+
             errorEl.classList.add('show');
+
             errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
         }
+
+
 
         function showSuccess(elementId, message) {
+
             const successEl = document.getElementById(elementId);
+
             successEl.textContent = message;
+
             successEl.classList.add('show');
+
         }
 
+
+
         // Formulário de Login
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
+
             e.preventDefault();
 
+
+
             const email = document.getElementById('loginEmail').value;
+
             const senha = document.getElementById('loginPassword').value;
+
             const btnLogin = document.getElementById('loginBtn');
+
             const controller = new AbortController();
+
             const timeoutId = setTimeout(() => controller.abort(), 10000);
+
             let sucesso = false;
 
+
+
             btnLogin.disabled = true;
+
             btnLogin.textContent = 'Entrando...';
 
+
+
             try {
+
                 const response = await fetch('/api/auth/login', {
+
                     method: 'POST',
+
                     headers: { 'Content-Type': 'application/json' },
+
                     credentials: 'include',
+
                     body: JSON.stringify({
+
                         email,
+
                         senha,
+
                         lembrar_me: document.getElementById('rememberMe').checked
+
                     }),
+
                     signal: controller.signal
+
                 });
 
+
+
                 const data = await response.json();
+
+
 
                 if (data.sucesso) {
                     sucesso = true;
@@ -515,77 +605,177 @@
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 1500);
+
                 } else {
+
                     showError('loginError', data.erro || 'Erro ao fazer login');
+
                 }
+
             } catch (error) {
+
                 const mensagem = error.name === 'AbortError'
+
                     ? 'Tempo limite ao conectar. Tente novamente.'
+
                     : 'Erro de conexão. Tente novamente.';
+
                 showError('loginError', mensagem);
+
             } finally {
+
                 clearTimeout(timeoutId);
+
                 if (!sucesso) {
+
                     btnLogin.disabled = false;
+
                     btnLogin.textContent = 'Entrar';
+
                 }
+
             }
+
         });
 
+
+
         // Formulário de Cadastro
+
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
+
             e.preventDefault();
 
+
+
             const nome = document.getElementById('registerName').value;
+
             const email = document.getElementById('registerEmail').value;
+
             const senha = document.getElementById('registerPassword').value;
+
             const senhaConfirm = document.getElementById('registerPasswordConfirm').value;
+
             const btnRegister = document.getElementById('registerBtn');
+
             const controller = new AbortController();
+
             const timeoutId = setTimeout(() => controller.abort(), 10000);
+
             let sucesso = false;
 
+
+
             if (senha !== senhaConfirm) {
+
                 showError('registerError', 'As senhas não coincidem');
+
                 return;
+
             }
 
+
+
             btnRegister.disabled = true;
+
             btnRegister.textContent = 'Criando conta...';
 
+
+
             try {
+
                 const response = await fetch('/api/auth/registro', {
+
                     method: 'POST',
+
                     headers: { 'Content-Type': 'application/json' },
+
                     credentials: 'include',
+
                     body: JSON.stringify({ email, nome, senha }),
+
                     signal: controller.signal
+
                 });
+
+
 
                 const data = await response.json();
 
+
+
                 if (data.sucesso) {
+
                     sucesso = true;
+
                     showSuccess('registerSuccess', `${data.mensagem} `);
+
+
+
+                    // Garante que não há sessão anterior ativa.
+
+                    try {
+
+                        await fetch('/api/auth/logout', { method: 'POST' });
+
+                    } catch (logoutError) {
+
+                        console.warn('Falha ao limpar sessão após cadastro:', logoutError);
+
+                    }
+
+
+
                     setTimeout(() => {
-                        window.location.href = '/'; 
-                    }, 1500);
+
+                        if (!document.getElementById('loginForm').classList.contains('active')) {
+
+                            toggleForm();
+
+                        }
+
+                        showSuccess('loginSuccess', 'Conta criada. Faça login para continuar.');
+
+                        document.getElementById('loginEmail').value = email;
+
+                        document.getElementById('loginPassword').value = '';
+
+                    }, 600);
+
                 } else {
+
                     showError('registerError', data.erro || 'Erro ao criar conta');
+
                 }
+
             } catch (error) {
+
                 const mensagem = error.name === 'AbortError'
+
                     ? 'Tempo limite ao conectar. Tente novamente.'
+
                     : 'Erro de conexão. Tente novamente.';
+
                 showError('registerError', mensagem);
+
             } finally {
+
                 clearTimeout(timeoutId);
+
                 if (!sucesso) {
+
                     btnRegister.disabled = false;
+
                     btnRegister.textContent = 'Criar Conta';
+
                 }
+
             }
+
         });
-    </script>
+
+    </script> 
+
+
 </body>
 </html>
