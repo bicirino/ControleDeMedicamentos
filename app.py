@@ -196,7 +196,7 @@ def registrar():
                 "nome": nome
             }
         })
-        
+
         # Garantir que não há sessão ativa após registro
         resposta.delete_cookie('session')
         return resposta
