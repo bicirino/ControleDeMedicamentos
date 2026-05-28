@@ -10,8 +10,6 @@ from pathlib import Path
 
 from database import DB_KIND, DB_NAME, DATABASE_URL
 
-from database import DB_NAME
-
 print("=" * 60)
 print("🔍 VERIFICANDO CONFIGURAÇÃO DO SISTEMA")
 print("=" * 60)

@@ -129,8 +129,14 @@ class _DBConnection:
 
 def get_conexao():
     if DB_KIND == "postgres":
-        import psycopg
-        from psycopg.rows import dict_row
+        try:
+            import psycopg
+            from psycopg.rows import dict_row
+        except ModuleNotFoundError as exc:
+            raise RuntimeError(
+                "Dependencia 'psycopg' nao encontrada. "
+                "Instale com: pip install -r requirements.txt"
+            ) from exc
 
         conexao = psycopg.connect(DATABASE_URL, row_factory=dict_row)
         return _DBConnection(conexao, DB_KIND)
