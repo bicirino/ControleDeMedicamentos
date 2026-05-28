@@ -276,53 +276,30 @@ Para usar a consulta de medicamentos com IA, você precisa de uma chave Groq (gr
 
 > **Nota:** A chave Groq é **gratuita** e vem com um limite generoso de requisições (suficiente para uso pessoal) 
 
-### 💾 Persistência de Dados (Supabase/Postgres)
+### 💾 Persistência de Dados (Render + Supabase)
 
-Para garantir persistência em nuvem no plano gratuito do Render, o projeto
-passou a suportar Postgres via Supabase. O comportamento é:
+No plano gratuito do Render, o disco persistente pode nao estar disponivel.
+Por isso, a persistencia em nuvem foi feita via Postgres (Supabase).
+
+Comportamento:
 
 - Se `DATABASE_URL` estiver definida, o app usa Postgres (Supabase).
-- Se não estiver, o app usa SQLite local.
+- Se nao estiver, o app usa SQLite local (recomendado apenas para dev).
 
-Variáveis relevantes:
+Variavel necessaria no Render:
 
 ```
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require
 ```
 
-Pacote necessário:
+Pacote necessario:
 
 ```
 psycopg[binary]>=3.2.2
 ```
 
-### 💾 Persistência em Nuvem com Supabase (Postgres)
-
-Para manter dados em nuvem, usaremos um banco Postgres gerenciado (Supabase).
-
-1. Crie um projeto no Supabase
-2. Copie a **Connection String** do Postgres
-3. Defina a variável `DATABASE_URL`:
-
-```
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require
-```
-
-Se `DATABASE_URL` estiver definida, o app usa Postgres automaticamente.
-Caso contrário, continua usando SQLite local.
-
-### 💾 Persistência de Dados em Nuvem
-
-Para manter o banco SQLite persistente em provedores como Render, o 
-`DB_PATH` deve estar apontando para um volume persistente. Exemplo:
-
-```
-DB_PATH=/var/data/medicamentos.db
-```
-
-Se o `DB_PATH` não estiver definido e o diretório `/var/data` existir, a
-aplicação usará esse caminho automaticamente. Em ambiente local, o banco
-permanece como `medicamentos.db` dentro do projeto.
+Observacao: `DB_PATH` so faz sentido se voce usar SQLite com volume
+persistente (plano pago). No Render free, mantenha somente `DATABASE_URL`.
 
 ---
 
