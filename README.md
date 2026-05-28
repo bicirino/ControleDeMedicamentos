@@ -44,7 +44,8 @@ Uma aplicação web moderna e intuitiva que permite:
 |----------|--------|-----|
 | **Python** | 3.12 | Linguagem principal |
 | **Flask** | 3.0.0+ | Framework web para interface gráfica |
-| **SQLite / Postgres (Supabase)** | 3 | Banco de dados |
+| **SQLite** | 3 | Banco de dados local |
+| **Postgres (Supabase)** | N/A / gerenciado | Banco de dados em produção |
 | **HTML5** | - | Markup semântico |
 | **CSS3** | - | Estilos acessíveis e responsivos |
 | **JavaScript** | - | Interatividade da interface |
