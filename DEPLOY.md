@@ -50,7 +50,7 @@ Preencha os campos conforme abaixo:
 GROQ_API_KEY=sua_chave_groq_aqui
 DEBUG=False
 PYTHON_VERSION=3.12
-DB_PATH=/var/data/medicamentos.db
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require
 ```
 
 2. **Para `GROQ_API_KEY`:**
@@ -71,17 +71,15 @@ https://controle-medicamentos.onrender.com
 
 ---
 
-## 💾 Persistencia do SQLite no Render
+## 💾 Persistencia com Supabase (Postgres)
 
-O Render apaga o disco local em reinicios. Para nao perder usuarios,
-configure um disco persistente e use o caminho do banco via `DB_PATH`.
+Para persistir dados em nuvem, configurarei o `DATABASE_URL` com um banco
+Postgres gerenciado (Supabase).
 
-Se voce usa o `render.yaml`, ele ja inclui:
-- um disco persistente montado em `/var/data`
-- `DB_PATH=/var/data/medicamentos.db`
-
-Se `DB_PATH` nao estiver definido e `/var/data` existir, a aplicacao
-usa automaticamente `/var/data/medicamentos.db`.
+Passos resumidos:
+1. Crie um projeto no Supabase
+2. Copie a Connection String do Postgres
+3. Cole em `DATABASE_URL` no Render
 
 ---
 

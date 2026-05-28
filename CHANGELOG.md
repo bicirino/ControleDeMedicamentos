@@ -63,6 +63,11 @@ e este projeto respeita o [Versionamento Semântico](https://semver.org/lang/pt-
 
 ## [Não Lançado]
 
+### ✅ Alterado
+
+- Suporte a Postgres (Supabase) via `DATABASE_URL`, mantendo fallback para
+  SQLite local.
+
 ### Futuras Melhorias Planejadas
 
 - [ ] Notificações/alarmes para horários de medicação

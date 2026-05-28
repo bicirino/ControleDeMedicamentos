@@ -44,7 +44,7 @@ Uma aplicação web moderna e intuitiva que permite:
 |----------|--------|-----|
 | **Python** | 3.12 | Linguagem principal |
 | **Flask** | 3.0.0+ | Framework web para interface gráfica |
-| **SQLite** | 3 | Banco de dados |
+| **SQLite / Postgres (Supabase)** | 3 | Banco de dados |
 | **HTML5** | - | Markup semântico |
 | **CSS3** | - | Estilos acessíveis e responsivos |
 | **JavaScript** | - | Interatividade da interface |
@@ -275,6 +275,21 @@ Para usar a consulta de medicamentos com IA, você precisa de uma chave Groq (gr
 3. **Pronto!** ✅ A aba "Consultar" funcionará normalmente
 
 > **Nota:** A chave Groq é **gratuita** e vem com um limite generoso de requisições (suficiente para uso pessoal) 
+
+### 💾 Persistência em Nuvem com Supabase (Postgres)
+
+Para manter dados em nuvem, usaremos um banco Postgres gerenciado (Supabase).
+
+1. Crie um projeto no Supabase
+2. Copie a **Connection String** do Postgres
+3. Defina a variável `DATABASE_URL`:
+
+```
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require
+```
+
+Se `DATABASE_URL` estiver definida, o app usa Postgres automaticamente.
+Caso contrário, continua usando SQLite local.
 
 ### 💾 Persistência de Dados em Nuvem
 
