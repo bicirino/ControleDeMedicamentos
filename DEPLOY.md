@@ -71,7 +71,7 @@ https://controle-medicamentos.onrender.com
 
 ---
 
-## 💾 Persistencia com Supabase (Postgres)
+## 💾 Persistência de dados com Supabase (Postgres)
 
 Para persistir dados em nuvem, configurarei o `DATABASE_URL` com um banco
 Postgres gerenciado (Supabase).
