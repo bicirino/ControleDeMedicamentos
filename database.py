@@ -3,7 +3,22 @@ import sqlite3
 from datetime import datetime
 
 _DEFAULT_DB = os.path.join(os.path.dirname(__file__), "medicamentos.db")
-DB_NAME = os.environ.get("DB_PATH", _DEFAULT_DB)
+
+
+def _resolver_db_path() -> str:
+    """Resolve o caminho do banco, priorizando persistencia em nuvem."""
+    env_path = os.environ.get("DB_PATH")
+    if env_path:
+        return env_path
+
+    # Render/containers com disco persistente montado em /var/data
+    if os.path.isdir("/var/data"):
+        return os.path.join("/var/data", "medicamentos.db")
+
+    return _DEFAULT_DB
+
+
+DB_NAME = _resolver_db_path()
 _db_dir = os.path.dirname(DB_NAME)
 if _db_dir:
     os.makedirs(_db_dir, exist_ok=True)

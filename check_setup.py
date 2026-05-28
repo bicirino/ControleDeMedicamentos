@@ -8,6 +8,8 @@ import sys
 import os
 from pathlib import Path
 
+from database import DB_NAME
+
 print("=" * 60)
 print("🔍 VERIFICANDO CONFIGURAÇÃO DO SISTEMA")
 print("=" * 60)
@@ -66,12 +68,14 @@ for arquivo in arquivos_necessarios:
 
 # Verificar banco de dados
 print("\n💾 VERIFICANDO BANCO DE DADOS...")
-if Path('medicamentos.db').exists():
-    print("  ✅ medicamentos.db existe")
+print(f"  📌 Caminho do banco: {DB_NAME}")
+db_path = Path(DB_NAME)
+if db_path.exists():
+    print("  ✅ Banco de dados existe")
     # Verificar se as tabelas existem
     try:
         import sqlite3
-        conn = sqlite3.connect('medicamentos.db')
+        conn = sqlite3.connect(str(db_path))
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
         tabelas = cursor.fetchall()

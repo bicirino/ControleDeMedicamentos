@@ -80,6 +80,9 @@ Se voce usa o `render.yaml`, ele ja inclui:
 - um disco persistente montado em `/var/data`
 - `DB_PATH=/var/data/medicamentos.db`
 
+Se `DB_PATH` nao estiver definido e `/var/data` existir, a aplicacao
+usa automaticamente `/var/data/medicamentos.db`.
+
 ---
 
 ## 🔄 Deploy Automático

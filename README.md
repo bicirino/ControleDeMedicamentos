@@ -276,6 +276,19 @@ Para usar a consulta de medicamentos com IA, você precisa de uma chave Groq (gr
 
 > **Nota:** A chave Groq é **gratuita** e vem com um limite generoso de requisições (suficiente para uso pessoal) 
 
+### 💾 Persistência de Dados em Nuvem
+
+Para manter o banco SQLite persistente em provedores como Render, o 
+`DB_PATH` deve estar apontando para um volume persistente. Exemplo:
+
+```
+DB_PATH=/var/data/medicamentos.db
+```
+
+Se o `DB_PATH` não estiver definido e o diretório `/var/data` existir, a
+aplicação usará esse caminho automaticamente. Em ambiente local, o banco
+permanece como `medicamentos.db` dentro do projeto.
+
 ---
 
 ## 🧪 Testes Automatizados
