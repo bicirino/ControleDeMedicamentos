@@ -78,8 +78,10 @@ Postgres gerenciado (Supabase).
 
 Passos resumidos:
 1. Crie um projeto no Supabase
-2. Copie a Connection String do Postgres
+2. Copie a Connection String do Postgres (formato URI)
 3. Cole em `DATABASE_URL` no Render
+4. Remova `DB_PATH` caso exista (opcional)
+5. Faça um Manual Deploy
 
 ---
 

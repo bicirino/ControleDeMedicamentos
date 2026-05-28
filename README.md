@@ -276,6 +276,26 @@ Para usar a consulta de medicamentos com IA, você precisa de uma chave Groq (gr
 
 > **Nota:** A chave Groq é **gratuita** e vem com um limite generoso de requisições (suficiente para uso pessoal) 
 
+### 💾 Persistência de Dados (Supabase/Postgres)
+
+Para garantir persistência em nuvem no plano gratuito do Render, o projeto
+passou a suportar Postgres via Supabase. O comportamento é:
+
+- Se `DATABASE_URL` estiver definida, o app usa Postgres (Supabase).
+- Se não estiver, o app usa SQLite local.
+
+Variáveis relevantes:
+
+```
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require
+```
+
+Pacote necessário:
+
+```
+psycopg[binary]>=3.2.2
+```
+
 ### 💾 Persistência em Nuvem com Supabase (Postgres)
 
 Para manter dados em nuvem, usaremos um banco Postgres gerenciado (Supabase).
