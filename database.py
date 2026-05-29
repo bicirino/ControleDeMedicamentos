@@ -213,20 +213,23 @@ def _inicializar_sqlite(conexao) -> None:
                         datetime.now().isoformat(),
                     )
                 )
+                usuario_padrao_id = cursor.lastrowid
 
-                # Copiar dados existentes
+                dia_expr = "dia" if "dia" in colunas else "'todos'"
                 cursor.execute(
                     "INSERT INTO medicamentos_temp "
                     "(usuario_id, nome, dosagem, horario, dia, ativo) "
-                    "SELECT ?, nome, dosagem, horario, dia, ativo "
-                    "FROM medicamentos"
+                    f"SELECT ?, nome, dosagem, horario, {dia_expr}, ativo "
+                    "FROM medicamentos",
+                    (usuario_padrao_id,),
                 )
             except Exception:
                 # Se falhar, usar usuario_id = 1
+                dia_expr = "dia" if "dia" in colunas else "'todos'"
                 cursor.execute(
                     "INSERT INTO medicamentos_temp "
                     "(usuario_id, nome, dosagem, horario, dia, ativo) "
-                    "SELECT 1, nome, dosagem, horario, dia, ativo "
+                    f"SELECT 1, nome, dosagem, horario, {dia_expr}, ativo "
                     "FROM medicamentos"
                 )
 
