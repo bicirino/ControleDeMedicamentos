@@ -63,6 +63,14 @@ e este projeto respeita o [Versionamento Semântico](https://semver.org/lang/pt-
 
 ## [Não Lançado]
 
+### ✅ Alterado
+
+- Suporte a Postgres (Supabase) via `DATABASE_URL`, mantendo fallback para
+  SQLite local.
+- Dependência `psycopg` adicionada para conexão Postgres.
+- `render.yaml` atualizado para `DATABASE_URL` (sem disk no plano free).
+- `.env.example` ampliado com variáveis de Postgres/Supabase.
+
 ### Futuras Melhorias Planejadas
 
 - [ ] Notificações/alarmes para horários de medicação

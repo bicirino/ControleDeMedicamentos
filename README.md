@@ -44,7 +44,8 @@ Uma aplicação web moderna e intuitiva que permite:
 |----------|--------|-----|
 | **Python** | 3.12 | Linguagem principal |
 | **Flask** | 3.0.0+ | Framework web para interface gráfica |
-| **SQLite** | 3 | Banco de dados |
+| **SQLite** | 3 | Banco de dados local |
+| **Postgres (Supabase)** | N/A / gerenciado | Banco de dados em produção |
 | **HTML5** | - | Markup semântico |
 | **CSS3** | - | Estilos acessíveis e responsivos |
 | **JavaScript** | - | Interatividade da interface |
@@ -275,6 +276,54 @@ Para usar a consulta de medicamentos com IA, você precisa de uma chave Groq (gr
 3. **Pronto!** ✅ A aba "Consultar" funcionará normalmente
 
 > **Nota:** A chave Groq é **gratuita** e vem com um limite generoso de requisições (suficiente para uso pessoal) 
+
+### 💾 Persistência de Dados (Supabase/Postgres)
+
+Para garantir persistência em nuvem no plano gratuito do Render, o projeto
+passou a suportar Postgres via Supabase. O comportamento é:
+
+- Se `DATABASE_URL` estiver definida, o app usa Postgres (Supabase).
+- Se não estiver, o app usa SQLite local.
+
+Variáveis relevantes:
+
+```
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require
+```
+
+Pacote necessário:
+
+```
+psycopg[binary]>=3.2.2
+```
+
+### 💾 Persistência em Nuvem com Supabase (Postgres)
+
+Para manter dados em nuvem, usaremos um banco Postgres gerenciado (Supabase).
+
+1. Crie um projeto no Supabase
+2. Copie a **Connection String** do Postgres
+3. Defina a variável `DATABASE_URL`:
+
+```
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/postgres?sslmode=require
+```
+
+Se `DATABASE_URL` estiver definida, o app usa Postgres automaticamente.
+Caso contrário, continua usando SQLite local.
+
+### 💾 Persistência de Dados em Nuvem
+
+Para manter o banco SQLite persistente em provedores como Render, o 
+`DB_PATH` deve estar apontando para um volume persistente. Exemplo:
+
+```
+DB_PATH=/var/data/medicamentos.db
+```
+
+Se o `DB_PATH` não estiver definido e o diretório `/var/data` existir, a
+aplicação usará esse caminho automaticamente. Em ambiente local, o banco
+permanece como `medicamentos.db` dentro do projeto.
 
 ---
 

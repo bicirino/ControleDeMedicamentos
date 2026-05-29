@@ -8,13 +8,9 @@ services:
     plan: free
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python app.py"
-    disk:
-      name: medicamentos-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
-      - key: DB_PATH
-        value: "/var/data/medicamentos.db"
+      - key: DATABASE_URL
+        value: ""  # Configure com a URL do Supabase/Neon
       - key: GROQ_API_KEY
         value: ""  # Será configurado nas variáveis de ambiente do Render
       - key: DEBUG

@@ -8,6 +8,8 @@ import sys
 import os
 from pathlib import Path
 
+from database import DB_KIND, DB_NAME, DATABASE_URL
+
 print("=" * 60)
 print("🔍 VERIFICANDO CONFIGURAÇÃO DO SISTEMA")
 print("=" * 60)
@@ -29,6 +31,7 @@ pacotes_necessarios = {
     'pytest': 'Pytest (testes)',
     'flake8': 'Flake8 (linting)',
     'sqlite3': 'SQLite3 (banco de dados)',
+    'psycopg': 'Postgres (Supabase/Neon)',
 }
 
 todos_ok = True
@@ -66,23 +69,32 @@ for arquivo in arquivos_necessarios:
 
 # Verificar banco de dados
 print("\n💾 VERIFICANDO BANCO DE DADOS...")
-if Path('medicamentos.db').exists():
-    print("  ✅ medicamentos.db existe")
-    # Verificar se as tabelas existem
-    try:
-        import sqlite3
-        conn = sqlite3.connect('medicamentos.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        tabelas = cursor.fetchall()
-        print(f"  ✅ Tabelas encontradas: {len(tabelas)}")
-        for tabela in tabelas:
-            print(f"     - {tabela[0]}")
-        conn.close()
-    except Exception as e:
-        print(f"  ⚠️  Erro ao verificar banco: {e}")
+print(f"  📌 Tipo: {DB_KIND}")
+if DB_KIND == "postgres":
+    if DATABASE_URL:
+        print("  ✅ DATABASE_URL configurada")
+    else:
+        print("  ❌ DATABASE_URL não configurada")
 else:
-    print("  ℹ️  medicamentos.db não existe (será criado ao iniciar)")
+    print(f"  📌 Caminho do banco: {DB_NAME}")
+    db_path = Path(DB_NAME)
+    if db_path.exists():
+        print("  ✅ Banco de dados existe")
+        # Verificar se as tabelas existem
+        try:
+            import sqlite3
+            conn = sqlite3.connect(str(db_path))
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tabelas = cursor.fetchall()
+            print(f"  ✅ Tabelas encontradas: {len(tabelas)}")
+            for tabela in tabelas:
+                print(f"     - {tabela[0]}")
+            conn.close()
+        except Exception as e:
+            print(f"  ⚠️  Erro ao verificar banco: {e}")
+    else:
+        print("  ℹ️  Banco de dados não existe (será criado ao iniciar)")
 
 # Verificar variáveis de ambiente
 print("\n🔐 VERIFICANDO CONFIGURAÇÕES...")
