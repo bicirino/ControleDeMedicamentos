@@ -8,12 +8,3 @@ services:
     plan: free
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python app.py"
-    envVars:
-      - key: DATABASE_URL
-        value: ""  # Obrigatorio no Render: configure com a URL do Supabase/Neon
-      - key: GROQ_API_KEY
-        value: ""  # Será configurado nas variáveis de ambiente do Render
-      - key: DEBUG
-        value: "False"
-      - key: PYTHON_VERSION
-        value: "3.12"
