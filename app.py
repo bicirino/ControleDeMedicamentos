@@ -721,6 +721,7 @@ def editar_medicamento(med_id):
 
 
 @app.route("/api/medicamentos/<nome>/consultar", methods=["GET"])
+@login_required
 def consultar_medicamento(nome):
     """Consulta informações sobre um medicamento via Groq API."""
     try:
