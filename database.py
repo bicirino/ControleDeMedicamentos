@@ -1,24 +1,112 @@
 import os
 import sqlite3
 from datetime import datetime
+from contextlib import contextmanager
 
-_DEFAULT_DB = os.path.join(os.path.dirname(__file__), "medicamentos.db")
-DB_NAME = os.environ.get("DB_PATH", _DEFAULT_DB)
-_db_dir = os.path.dirname(DB_NAME)
-if _db_dir:
-    os.makedirs(_db_dir, exist_ok=True)
+# Detectar tipo de banco
+DATABASE_URL = os.environ.get("DATABASE_URL")
+USE_POSTGRES = DATABASE_URL is not None
+
+if USE_POSTGRES:
+    import psycopg
+    from psycopg import sql
+else:
+    # SQLite local
+    _DEFAULT_DB = os.path.join(
+        os.path.dirname(__file__), "medicamentos.db"
+    )
+    DB_NAME = os.environ.get("DB_PATH", _DEFAULT_DB)
+    _db_dir = os.path.dirname(DB_NAME)
+    if _db_dir:
+        os.makedirs(_db_dir, exist_ok=True)
 
 
-def get_conexao() -> sqlite3.Connection:
+class Row(dict):
+    """Adapter para fazer PostgreSQL rows behave like sqlite3.Row"""
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return list(self.values())[key]
+        return super().__getitem__(key)
+
+
+@contextmanager
+def get_conexao():
+    """Gerenciador de contexto para conexão de banco"""
+    if USE_POSTGRES:
+        conn = psycopg.connect(DATABASE_URL)
+        conn.autocommit = False
+        try:
+            yield conn
+        finally:
+            conn.close()
+    else:
+        conn = sqlite3.connect(DB_NAME, timeout=10)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA journal_mode = WAL")
+        try:
+            yield conn
+        finally:
+            conn.close()
+
+
+def inicializar_banco() -> None:
+    """Inicializa banco de dados (SQLite ou PostgreSQL)"""
+    if USE_POSTGRES:
+        _inicializar_postgres()
+    else:
+        _inicializar_sqlite()
+
+
+def _inicializar_postgres() -> None:
+    """Inicializa schema no PostgreSQL"""
+    with get_conexao() as conexao:
+        cursor = conexao.cursor()
+
+        # Criar tabela de usuários
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id          SERIAL PRIMARY KEY,
+                email       TEXT UNIQUE NOT NULL,
+                nome        TEXT NOT NULL,
+                senha_hash  TEXT NOT NULL,
+                criado_em   TEXT NOT NULL
+            )
+        """)
+
+        # Criar tabela de medicamentos
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS medicamentos (
+                id          SERIAL PRIMARY KEY,
+                usuario_id  INTEGER NOT NULL REFERENCES usuarios(id),
+                nome        TEXT NOT NULL,
+                dosagem     TEXT NOT NULL,
+                horario     TEXT NOT NULL,
+                dia         TEXT NOT NULL DEFAULT 'todos',
+                observacao  TEXT DEFAULT '',
+                ativo       INTEGER NOT NULL DEFAULT 1
+            )
+        """)
+
+        # Criar tabela de registros tomados
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS registros_tomados (
+                id              SERIAL PRIMARY KEY,
+                medicamento_id  INTEGER NOT NULL
+                                REFERENCES medicamentos(id),
+                data_tomado     TEXT NOT NULL
+            )
+        """)
+
+        conexao.commit()
+
+
+def _inicializar_sqlite() -> None:
+    """Inicializa schema no SQLite"""
     conexao = sqlite3.connect(DB_NAME, timeout=10)
     conexao.row_factory = sqlite3.Row
     conexao.execute("PRAGMA foreign_keys = ON")
     conexao.execute("PRAGMA journal_mode = WAL")
-    return conexao
-
-
-def inicializar_banco() -> None:
-    conexao = get_conexao()
     cursor = conexao.cursor()
 
     # Criar tabela de usuários
@@ -116,7 +204,6 @@ def inicializar_banco() -> None:
                 "DEFAULT ''"
             )
         except Exception:
-            # Se ALTER TABLE falhar por qualquer razão, ignorar (não crítico)
             pass
 
     cursor.execute("""
@@ -130,3 +217,4 @@ def inicializar_banco() -> None:
 
     conexao.commit()
     conexao.close()
+
