@@ -24,8 +24,26 @@ from medicamentos import (
 from api_integration import buscar_medicamento_groq, APIError
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
+
+# Configurar SECRET_KEY com validação
+secret_key = os.environ.get("SECRET_KEY")
+if not secret_key:
+    debug_mode = os.environ.get("DEBUG", "False").lower() == "true"
+    if debug_mode or os.environ.get("FLASK_ENV") == "development":
+        secret_key = "dev-secret-key-change-in-prod"
+    else:
+        raise ValueError(
+            "SECRET_KEY não configurada em produção! "
+            "Configure em variáveis de ambiente."
+        )
+
+app.secret_key = secret_key
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.config['SESSION_COOKIE_SECURE'] = (
+    os.environ.get("DEBUG", "False").lower() != "true"
+)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # Inicializar banco ao iniciar a aplicação
 inicializar_banco()
