@@ -44,7 +44,8 @@ Uma aplicação web moderna e intuitiva que permite:
 |----------|--------|-----|
 | **Python** | 3.12 | Linguagem principal |
 | **Flask** | 3.0.0+ | Framework web para interface gráfica |
-| **SQLite** | 3 | Banco de dados |
+| **SQLite / PostgreSQL** | 3 / 14+ | Banco de dados (local/nuvem) |
+| **Psycopg** | 3.2.2+ | Driver PostgreSQL para Python |
 | **HTML5** | - | Markup semântico |
 | **CSS3** | - | Estilos acessíveis e responsivos |
 | **JavaScript** | - | Interatividade da interface |
@@ -476,23 +477,95 @@ python-dotenv>=1.0.0
 
 ---
 
+## �️ Banco de Dados
+
+### Local (Desenvolvimento)
+- **SQLite** armazenado em `medicamentos.db`
+- Todas as tabelas criadas automaticamente na primeira execução
+- Ideal para testes e prototipagem
+
+### Produção (Nuvem)
+- **PostgreSQL** via [Neon](https://neon.tech/) (gratuito e recomendado)
+- Dados persistem na nuvem com backups automáticos
+- Configure via variável `DATABASE_URL` no Render.com
+
+---
+
 ## 🚀 Deploy
 
 ### Plataforma de Deploy
 
-Este projeto será hospedado em **Render.com** (gratuito para aplicações Python).
+Este projeto é hospedado em **Render.com** (gratuito para aplicações Python).
 
-**Link do Deploy:** [Será adicionado após publicação]
+**Banco de Dados em Nuvem:** [Neon PostgreSQL](https://neon.tech/)
 
-### Instruções para Deploy
+**Link do Deploy:** [Clique aqui para acessar](https://controledemedicamentos-t7d1.onrender.com/)
 
-1. Faça o push da branch `entrega-intermediaria` para o GitHub
-2. Acesse [render.com](https://render.com)
-3. Conecte sua conta GitHub
-4. Crie um novo "Web Service"
-5. Selecione este repositório
-6. Configure as variáveis de ambiente (.env)
-7. Deploy será automático a cada push
+### Instruções Passo a Passo
+
+#### 1. Criar Conta no Neon (Banco de Dados)
+```bash
+1. Acesse: https://console.neon.tech/
+2. Clique em "Sign up" (GitHub é mais rápido)
+3. Crie um novo projeto:
+   - Name: controle-medicamentos
+   - Region: Escolha perto de você (ex: us-east-1)
+4. Copie a Connection String PostgreSQL
+   Formato: postgresql://postgres:senha@xxxxx.neon.tech/neondb?sslmode=require
+```
+
+#### 2. Deploy no Render.com
+```bash
+1. Acesse: https://render.com
+2. Clique em "New +" → "Web Service"
+3. Selecione seu repositório GitHub
+4. Configure:
+   - Name: controle-medicamentos
+   - Runtime: Python 3
+   - Build Command: pip install -r requirements.txt
+   - Start Command: python app.py
+5. Em "Environment", adicione:
+   - DATABASE_URL = [cole aqui a URI do Neon]
+   - GROQ_API_KEY = [sua chave Groq gratuita]
+   - SECRET_KEY = [gere com: python -c "import secrets; print(secrets.token_hex(32))"]
+   - DEBUG = False
+   - FLASK_ENV = production
+6. Clique em "Create Web Service"
+```
+
+#### 3. Deploy Automático
+- A cada push na branch `main`, o Render faz deploy automaticamente
+- Ou clique em "Manual Deploy" no dashboard do Render
+
+### Verificar Deploy
+```bash
+1. Acesse a URL gerada pelo Render
+2. Crie uma conta (email + senha)
+3. Cadastre um medicamento
+4. Recarregue a página (F5)
+5. ✅ Dados devem persistir no Neon
+```
+
+---
+
+## ⚙️ Variáveis de Ambiente
+
+Crie um arquivo `.env` localmente (não será commitado):
+
+```bash
+# Banco de Dados
+DATABASE_URL=postgresql://postgres:senha@xxxxx.neon.tech/neondb?sslmode=require
+
+# API Groq (IA)
+GROQ_API_KEY=sua_chave_groq_aqui
+
+# Flask
+SECRET_KEY=seu_secret_key_aleatorio_aqui
+DEBUG=False
+FLASK_ENV=production
+```
+
+Para desenvolvimento local, você pode deixar `DATABASE_URL` vazio e usar SQLite.
 
 ---
 
