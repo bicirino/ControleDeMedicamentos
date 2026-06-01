@@ -423,27 +423,26 @@ def get_todos_medicamentos():
     """Retorna todos os medicamentos cadastrados (apenas ativos)."""
     try:
         usuario_id = session["usuario_id"]
-        conexao = get_conexao()
-        cursor = conexao.cursor()
-
-        cursor.execute(
-            "SELECT id, nome, dosagem, horario, dia, observacao, ativo "
-            "FROM medicamentos WHERE usuario_id = ? "
-            "AND ativo = 1 "
-            "ORDER BY "
-            "CASE dia "
-            "WHEN 'todos' THEN 0 "
-            "WHEN 'segunda' THEN 1 "
-            "WHEN 'terca' THEN 2 "
-            "WHEN 'quarta' THEN 3 "
-            "WHEN 'quinta' THEN 4 "
-            "WHEN 'sexta' THEN 5 "
-            "WHEN 'sabado' THEN 6 "
-            "WHEN 'domingo' THEN 7 "
-            "ELSE 8 END, horario",
-            (usuario_id,)
-        )
-        medicamentos = cursor.fetchall()
+        with get_conexao() as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "SELECT id, nome, dosagem, horario, dia, observacao, ativo "
+                "FROM medicamentos WHERE usuario_id = ? "
+                "AND ativo = 1 "
+                "ORDER BY "
+                "CASE dia "
+                "WHEN 'todos' THEN 0 "
+                "WHEN 'segunda' THEN 1 "
+                "WHEN 'terca' THEN 2 "
+                "WHEN 'quarta' THEN 3 "
+                "WHEN 'quinta' THEN 4 "
+                "WHEN 'sexta' THEN 5 "
+                "WHEN 'sabado' THEN 6 "
+                "WHEN 'domingo' THEN 7 "
+                "ELSE 8 END, horario",
+                (usuario_id,)
+            )
+            medicamentos = cursor.fetchall()
 
         resultado = []
         for med in medicamentos:
