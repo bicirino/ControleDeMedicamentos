@@ -510,15 +510,24 @@ def cadastrar_medicamento():
             cursor = conexao.cursor()
             observacao = dados.get("observacao", "").strip()
 
-            cursor.execute(
-                "INSERT INTO medicamentos "
-                "(usuario_id, nome, dosagem, horario, dia, observacao) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (usuario_id, nome, dosagem, horario, dia, observacao),
-            )
+            if USE_POSTGRES:
+                cursor.execute(
+                    "INSERT INTO medicamentos "
+                    "(usuario_id, nome, dosagem, horario, dia, observacao) "
+                    "VALUES (?, ?, ?, ?, ?, ?) RETURNING id",
+                    (usuario_id, nome, dosagem, horario, dia, observacao),
+                )
+                novo_id = cursor.fetchone()["id"]
+            else:
+                cursor.execute(
+                    "INSERT INTO medicamentos "
+                    "(usuario_id, nome, dosagem, horario, dia, observacao) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (usuario_id, nome, dosagem, horario, dia, observacao),
+                )
+                novo_id = cursor.lastrowid
 
             conexao.commit()
-            novo_id = cursor.lastrowid
 
         return jsonify({
             "sucesso": True,
