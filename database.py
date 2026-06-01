@@ -9,7 +9,7 @@ USE_POSTGRES = DATABASE_URL is not None
 
 if USE_POSTGRES:
     import psycopg
-    from psycopg import sql
+    from psycopg import rows
 else:
     # SQLite local
     _DEFAULT_DB = os.path.join(
@@ -29,6 +29,46 @@ class Row(dict):
         return super().__getitem__(key)
 
 
+def _adapt_query(query: str) -> str:
+    """Converte placeholders do SQLite para PostgreSQL quando necessario."""
+    if USE_POSTGRES:
+        return query.replace("?", "%s")
+    return query
+
+
+class _CursorAdapter:
+    """Cursor com adaptacao de placeholders para PostgreSQL."""
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    def execute(self, query, params=None):
+        query = _adapt_query(query)
+        if params is None:
+            return self._cursor.execute(query)
+        return self._cursor.execute(query, params)
+
+    def __getattr__(self, name):
+        return getattr(self._cursor, name)
+
+
+class _ConnectionAdapter:
+    """Conexao com cursor adaptado para PostgreSQL."""
+    def __init__(self, conn):
+        self._conn = conn
+
+    def cursor(self):
+        return _CursorAdapter(self._conn.cursor(row_factory=rows.dict_row))
+
+    def execute(self, query, params=None):
+        query = _adapt_query(query)
+        if params is None:
+            return self._conn.execute(query)
+        return self._conn.execute(query, params)
+
+    def __getattr__(self, name):
+        return getattr(self._conn, name)
+
+
 @contextmanager
 def get_conexao():
     """Gerenciador de contexto para conexão de banco"""
@@ -36,7 +76,7 @@ def get_conexao():
         conn = psycopg.connect(DATABASE_URL)
         conn.autocommit = False
         try:
-            yield conn
+            yield _ConnectionAdapter(conn)
         finally:
             conn.close()
     else:
