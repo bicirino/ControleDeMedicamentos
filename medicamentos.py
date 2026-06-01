@@ -49,15 +49,13 @@ def cadastrar_medicamento() -> None:
         print("⚠️  Horario invalido. Use o formato HH:MM (ex: 08:00).\n")
         return
 
-    conexao = get_conexao()
-    cursor = conexao.cursor()
-
-    cursor.execute(
-        "INSERT INTO medicamentos (nome, dosagem, horario) VALUES (?, ?, ?)",
-        (nome, dosagem, horario),
-    )
-
-    conexao.commit()
+    with get_conexao() as conexao:
+        cursor = conexao.cursor()
+        cursor.execute(
+            "INSERT INTO medicamentos (nome, dosagem, horario) VALUES (?, ?, ?)",
+            (nome, dosagem, horario),
+        )
+        conexao.commit()
 
     print(f"\n✅ Medicamento '{nome}' cadastrado com sucesso!\n")
 
@@ -66,24 +64,23 @@ def listar_medicamentos_do_dia() -> None:
     """Lista todos os medicamentos ativos e indica quais ja foram tomados."""
     hoje = _data_hoje()
 
-    conexao = get_conexao()
-    cursor = conexao.cursor()
+    with get_conexao() as conexao:
+        cursor = conexao.cursor()
+        cursor.execute(
+            "SELECT id, nome, dosagem, horario "
+            "FROM medicamentos WHERE ativo = 1 ORDER BY horario"
+        )
+        medicamentos = cursor.fetchall()
 
-    cursor.execute(
-        "SELECT id, nome, dosagem, horario "
-        "FROM medicamentos WHERE ativo = 1 ORDER BY horario"
-    )
-    medicamentos = cursor.fetchall()
+        if not medicamentos:
+            print("\n📭 Nenhum medicamento cadastrado.\n")
+            return
 
-    if not medicamentos:
-        print("\n📭 Nenhum medicamento cadastrado.\n")
-        return
-
-    cursor.execute(
-        "SELECT medicamento_id FROM registros_tomados WHERE data_tomado = ?",
-        (hoje,),
-    )
-    ids_tomados = {row["medicamento_id"] for row in cursor.fetchall()}
+        cursor.execute(
+            "SELECT medicamento_id FROM registros_tomados WHERE data_tomado = ?",
+            (hoje,),
+        )
+        ids_tomados = {row["medicamento_id"] for row in cursor.fetchall()}
 
     print(f"\n📅 Medicamentos para hoje ({hoje}):\n")
     print(f"  {'ID':<5} {'Horario':<10} {'Medicamento':<25} "
@@ -105,60 +102,60 @@ def marcar_como_tomado() -> None:
     listar_medicamentos_do_dia()
 
     hoje = _data_hoje()
-    conexao = get_conexao()
-    cursor = conexao.cursor()
+    with get_conexao() as conexao:
+        cursor = conexao.cursor()
 
-    try:
-        med_id = int(input("🔢 Informe o ID do medicamento tomado: ").strip())
-    except ValueError:
-        print("⚠️  ID invalido. Digite apenas numeros.\n")
-        return
+        try:
+            med_id = int(input("🔢 Informe o ID do medicamento tomado: ").strip())
+        except ValueError:
+            print("⚠️  ID invalido. Digite apenas numeros.\n")
+            return
 
-    cursor.execute(
-        "SELECT nome FROM medicamentos WHERE id = ? AND ativo = 1",
-        (med_id,),
-    )
-    medicamento = cursor.fetchone()
+        cursor.execute(
+            "SELECT nome FROM medicamentos WHERE id = ? AND ativo = 1",
+            (med_id,),
+        )
+        medicamento = cursor.fetchone()
 
-    if not medicamento:
-        print("⚠️  Medicamento nao encontrado ou inativo.\n")
-        return
+        if not medicamento:
+            print("⚠️  Medicamento nao encontrado ou inativo.\n")
+            return
 
-    cursor.execute(
-        "SELECT id FROM registros_tomados "
-        "WHERE medicamento_id = ? AND data_tomado = ?",
-        (med_id, hoje),
-    )
-    if cursor.fetchone():
-        msg = f"ℹ️  '{medicamento['nome']}' ja foi marcado como tomado hoje.\n"
-        print(msg)
-        return
+        cursor.execute(
+            "SELECT id FROM registros_tomados "
+            "WHERE medicamento_id = ? AND data_tomado = ?",
+            (med_id, hoje),
+        )
+        if cursor.fetchone():
+            msg = f"ℹ️  '{medicamento['nome']}' ja foi marcado como tomado hoje.\n"
+            print(msg)
+            return
 
-    cursor.execute(
-        "INSERT INTO registros_tomados (medicamento_id, data_tomado) "
-        "VALUES (?, ?)",
-        (med_id, hoje),
-    )
+        cursor.execute(
+            "INSERT INTO registros_tomados (medicamento_id, data_tomado) "
+            "VALUES (?, ?)",
+            (med_id, hoje),
+        )
 
-    conexao.commit()
+        conexao.commit()
 
     print(f"\n✅ '{medicamento['nome']}' marcado como tomado!\n")
 
 
 def listar_todos_medicamentos() -> None:
     """Lista todos os medicamentos cadastrados, incluindo inativos."""
-    conexao = get_conexao()
-    cursor = conexao.cursor()
+    with get_conexao() as conexao:
+        cursor = conexao.cursor()
 
-    cursor.execute(
-        "SELECT id, nome, dosagem, horario, ativo "
-        "FROM medicamentos ORDER BY horario"
-    )
-    medicamentos = cursor.fetchall()
+        cursor.execute(
+            "SELECT id, nome, dosagem, horario, ativo "
+            "FROM medicamentos ORDER BY horario"
+        )
+        medicamentos = cursor.fetchall()
 
-    if not medicamentos:
-        print("\n📭 Nenhum medicamento cadastrado.\n")
-        return
+        if not medicamentos:
+            print("\n📭 Nenhum medicamento cadastrado.\n")
+            return
 
     print("\n📋 Todos os medicamentos cadastrados:\n")
     print(f"  {'ID':<5} {'Horario':<10} {'Medicamento':<25} "
@@ -182,41 +179,41 @@ def remover_medicamento() -> None:
     """
     listar_todos_medicamentos()
 
-    conexao = get_conexao()
-    cursor = conexao.cursor()
+    with get_conexao() as conexao:
+        cursor = conexao.cursor()
 
-    try:
-        med_id = int(
-            input("🔢 Informe o ID do medicamento a remover: ").strip()
+        try:
+            med_id = int(
+                input("🔢 Informe o ID do medicamento a remover: ").strip()
+            )
+        except ValueError:
+            print("⚠️  ID invalido. Digite apenas numeros.\n")
+            return
+
+        cursor.execute(
+            "SELECT nome FROM medicamentos WHERE id = ? AND ativo = 1",
+            (med_id,),
         )
-    except ValueError:
-        print("⚠️  ID invalido. Digite apenas numeros.\n")
-        return
+        medicamento = cursor.fetchone()
 
-    cursor.execute(
-        "SELECT nome FROM medicamentos WHERE id = ? AND ativo = 1",
-        (med_id,),
-    )
-    medicamento = cursor.fetchone()
+        if not medicamento:
+            print("⚠️  Medicamento nao encontrado ou ja esta inativo.\n")
+            return
 
-    if not medicamento:
-        print("⚠️  Medicamento nao encontrado ou ja esta inativo.\n")
-        return
+        confirmacao = input(
+            f"⚠️  Deseja remover '{medicamento['nome']}'? (s/n): "
+        ).strip().lower()
 
-    confirmacao = input(
-        f"⚠️  Deseja remover '{medicamento['nome']}'? (s/n): "
-    ).strip().lower()
+        if confirmacao != "s":
+            print("❌ Remocao cancelada.\n")
+            return
 
-    if confirmacao != "s":
-        print("❌ Remocao cancelada.\n")
-        return
+        cursor.execute(
+            "UPDATE medicamentos SET ativo = 0 WHERE id = ?",
+            (med_id,),
+        )
 
-    cursor.execute(
-        "UPDATE medicamentos SET ativo = 0 WHERE id = ?",
-        (med_id,),
-    )
-
-    conexao.commit()
+        conexao.commit()
 
     print(f"\n✅ '{medicamento['nome']}' removido com sucesso!\n")
 
