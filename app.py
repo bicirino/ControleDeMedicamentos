@@ -16,7 +16,7 @@ from flask import (
     session,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import get_conexao, inicializar_banco
+from database import get_conexao, inicializar_banco, USE_POSTGRES
 from medicamentos import (
     _data_hoje,
     _validar_horario,
@@ -196,13 +196,21 @@ def registrar():
 
             # Inserir novo usuário
             senha_hash = generate_password_hash(senha)
-            cursor.execute(
-                "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
-                "VALUES (?, ?, ?, ?)",
-                (email, nome, senha_hash, datetime.now().isoformat()),
-            )
+            if USE_POSTGRES:
+                cursor.execute(
+                    "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
+                    "VALUES (?, ?, ?, ?) RETURNING id",
+                    (email, nome, senha_hash, datetime.now().isoformat()),
+                )
+                novo_id = cursor.fetchone()["id"]
+            else:
+                cursor.execute(
+                    "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
+                    "VALUES (?, ?, ?, ?)",
+                    (email, nome, senha_hash, datetime.now().isoformat()),
+                )
+                novo_id = cursor.lastrowid
             conexao.commit()
-            novo_id = cursor.lastrowid
 
         # Retornar sucesso SEM criar sessão
         resposta = jsonify({
