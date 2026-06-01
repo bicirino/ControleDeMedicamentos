@@ -281,115 +281,33 @@ Para usar a consulta de medicamentos com IA, você precisa de uma chave Groq (gr
 
 ## 🧪 Testes Automatizados
 
-### Por Que Testes?
+Os testes validam o fluxo principal (cadastro, listagem, marcar como tomado) e a integracao com Groq.
 
-Os testes garantem que a aplicação:
-- ✅ Funciona corretamente em todos os cenários
-- ✅ Integra com APIs sem quebrar
-- ✅ Segue padrões de qualidade
-- ✅ Pode ser alterada com segurança no futuro
-
-### Como Executar Testes
-
-#### 1. Todos os Testes (16 total)
+### Executar testes
 
 ```bash
-python -m pytest tests/ -v
-
-# Saída esperada:
-# ============================= test session starts =============================
-# collected 16 items
-# tests/test_api_integration.py::TestGroqAPI::test_buscar_medicamento_sucesso PASSED
-# tests/test_medicamentos.py::TestCadastrarMedicamento::test_cadastro_valido PASSED
-# ...
-# ============================= 16 passed in 0.59s ================================
+python -m pytest -q
 ```
 
-#### 2. Apenas Testes de Integração com IA (5 testes)
+### Testes por modulo
 
 ```bash
-python -m pytest tests/test_api_integration.py -v
-
-# Valida:
-# ✅ Busca com Groq AI (5 testes):
-#    - Busca bem-sucedida
-#    - Medicamento não encontrado
-#    - Sem API key configurada
-#    - Erro de conexão
-#    - Timeout
-```
-
-#### 3. Apenas Testes Unitários (11 testes)
-
-```bash
+# Testes de medicamentos (unitarios)
 python -m pytest tests/test_medicamentos.py -v
 
-# Valida:
-# ✅ Cadastro de medicamentos (3 testes)
-# ✅ Listagem (3 testes)
-# ✅ Marcar como tomado (3 testes)
-# ✅ Remoção (2 testes)
+# Testes de integracao Groq (mockados)
+python -m pytest tests/test_api_integration.py -v
 ```
 
-#### 4. Com Relatório de Cobertura
-
-```bash
-python -m pytest tests/ -v --cov=. --cov-report=html
-
-# Gera arquivo: htmlcov/index.html
-# Abre no navegador para ver cobertura detalhada
-```
-
-### Detalhes dos Testes
-
-#### 🧪 Testes Unitários (11)
-
-Testam funcionalidades individuais da aplicação:
-
-| Categoria | Testes | Descrição |
-|-----------|--------|-----------|
-| **Cadastro** | 3 | Dados válidos, nome vazio, horário inválido |
-| **Listagem Diária** | 3 | Sem medicamentos, pendentes, tomados |
-| **Marcar Tomado** | 3 | Válido, duplicado, ID inválido |
-| **Remoção** | 2 | Com confirmação, sem confirmação |
-
-#### 🌐 Testes de Integração (5) ⭐ NOVO
-
-Testam comunicação com BrasilAPI:
-
-| API | Testes | Descrição |
-|-----|--------|-----------|
-| **BrasilAPI** | 5 | Sucesso, não encontrado, timeout, conexão, erro HTTP |
-
-> **Nota:** Os testes de integração usam `unittest.mock` para simular requisições HTTP, então funcionam sem depender da API estar online.
+> Nota: os testes de integração usam mocks, então rodam sem depender da API estar online.
 
 ---
 
 
 ## 🔍 Linting e Qualidade de Código (Flake8)
 
-### Por Que Flake8?
-
-Garante que o código segue padrões Python reconhecidos internacionalmente (PEP 8).
-
-### Executar Flake8
-
 ```bash
-python -m flake8 medicamentos.py database.py api_integration.py app.py --max-line-length=120
-
-# Saída esperada (NENHUMA):
-# (sem erros ou warnings = ✅ sucesso)
-```
-
-### Status Atual
-
-✅ **Código 100% compatível com Flake8**
-
-```bash
-Status: PASS
-Warnings: 0
-Errors: 0
-Max line length: 79 caracteres ✅
+python -m flake8 app.py database.py medicamentos.py api_integration.py --max-line-length=120
 ```
 
 ---
@@ -444,40 +362,21 @@ Para histórico completo, veja [CHANGELOG.md](CHANGELOG.md).
 ---
 
 
-### Descrição das Dependências
-
-| Pacote | Versão | Razão |
-|--------|--------|-------|
-| **pytest** | >=9.0.2 | Framework de testes automatizados |
-| **flake8** | >=7.2.0 | Linter para validação de código Python |
-| **requests** | >=2.31.0 | Consumo de APIs HTTP (BrasilAPI, OpenWeather) |
-| **python-dotenv** | >=1.0.0 | Carregamento de variáveis de ambiente do arquivo .env |
-
----
-
 ## Dependências
 
-Todas as dependências estão explicitamente declaradas em `requirements.txt`:
+Todas as dependências estão em `requirements.txt`:
 
 ```
+flask>=3.0.0
 pytest>=9.0.2
 flake8>=7.2.0
 requests>=2.31.0
 python-dotenv>=1.0.0
+groq>=0.4.1
+psycopg[binary]>=3.2.2
 ```
 
-### Descrição das Dependências
-
-| Pacote | Versão | Razão |
-|--------|--------|-------|
-| **pytest** | >=9.0.2 | Framework de testes automatizados |
-| **flake8** | >=7.2.0 | Linter para validação de código Python |
-| **requests** | >=2.31.0 | Consumo de APIs HTTP (BrasilAPI, OpenWeather) |
-| **python-dotenv** | >=1.0.0 | Carregamento de variáveis de ambiente do arquivo .env |
-
----
-
-## �️ Banco de Dados
+## Banco de Dados
 
 ### Local (Desenvolvimento)
 - **SQLite** armazenado em `medicamentos.db`
@@ -487,7 +386,7 @@ python-dotenv>=1.0.0
 ### Produção (Nuvem)
 - **PostgreSQL** via [Neon](https://neon.tech/) (gratuito e recomendado)
 - Dados persistem na nuvem com backups automáticos
-- Configure via variável `DATABASE_URL` no Render.com
+- Configure via variável `DATABASE_URL`
 
 ---
 
