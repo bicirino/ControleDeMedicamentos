@@ -257,4 +257,3 @@ def _inicializar_sqlite() -> None:
 
     conexao.commit()
     conexao.close()
-
