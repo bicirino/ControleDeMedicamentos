@@ -12,6 +12,7 @@
     /* 60%: Texto */
     --text-primary: #1F2937;
     --text-secondary: #6B7280;
+    --text-secondary-strong: #4B5563;
     --text-tertiary: #9CA3AF;
     
     /* 30%: Cor Secundária - Azul Profundo (Confiança) */
@@ -74,21 +75,22 @@
         
         --text-primary: #F3F4F6;
         --text-secondary: #D1D5DB;
+        --text-secondary-strong: #E5E7EB;
         --text-tertiary: #9CA3AF;
-        
+
         --border-color: #4B5563;
         --border-subtle: #2D3748;
-        
+
         --color-primary: #3B82F6;
         --color-primary-light: #1E40AF;
         --color-primary-lighter: #0C1E3F;
-        
+
         --color-success: #10B981;
         --color-success-light: #065F46;
-        
+
         --color-warning: #F59E0B;
         --color-warning-light: #B45309;
-        
+
         --color-danger: #EF4444;
         --color-danger-light: #7F1D1D;
     }
@@ -103,21 +105,22 @@ html[data-theme="dark"] {
     
     --text-primary: #F3F4F6;
     --text-secondary: #D1D5DB;
+    --text-secondary-strong: #E5E7EB;
     --text-tertiary: #9CA3AF;
-    
+
     --border-color: #4B5563;
     --border-subtle: #2D3748;
-    
+
     --color-primary: #3B82F6;
     --color-primary-light: #1E40AF;
     --color-primary-lighter: #0C1E3F;
-    
+
     --color-success: #10B981;
     --color-success-light: #065F46;
-    
+
     --color-warning: #F59E0B;
     --color-warning-light: #B45309;
-    
+
     --color-danger: #EF4444;
     --color-danger-light: #7F1D1D;
 
@@ -130,9 +133,10 @@ html[data-theme="light"] {
     --bg-primary: #FFFFFF;
     --bg-secondary: #F0F1F3;
     --bg-tertiary: #E8EAED;
-    
+
     --text-primary: #1F2937;
     --text-secondary: #6B7280;
+    --text-secondary-strong: #4B5563;
     --text-tertiary: #9CA3AF;
     
     --border-color: #D4D7DB;
@@ -156,9 +160,10 @@ html[data-theme="dark"] {
     --bg-primary: #111827;
     --bg-secondary: #1F2937;
     --bg-tertiary: #374151;
-    
+
     --text-primary: #F3F4F6;
     --text-secondary: #D1D5DB;
+    --text-secondary-strong: #E5E7EB;
     --text-tertiary: #9CA3AF;
     
     --border-color: #4B5563;
@@ -190,7 +195,7 @@ html[data-theme="dark"] {
 
 html {
     scroll-behavior: smooth;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 body {
@@ -239,9 +244,9 @@ textarea:focus-visible {
 
 .container {
     width: 100%;
-    max-width: 1320px;
+    max-width: 1680px;
     margin: 0 auto;
-    padding: var(--space-xl) var(--space-lg);
+    padding: var(--space-lg);
 }
 
 /* ==============================
@@ -252,34 +257,42 @@ textarea:focus-visible {
     background: var(--header-glass-bg);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    padding: calc(var(--space-2xl) + 4px) var(--space-xl);
+    padding: var(--space-lg);
     border: 1px solid var(--header-glass-border);
     border-radius: var(--radius-xl);
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-xl);
     box-shadow: var(--shadow-lg);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    position: relative;
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+    align-items: center;
+    gap: var(--space-md);
 }
 
 .header-content {
+    grid-column: 2;
     text-align: center;
+    justify-self: center;
     max-width: 860px;
 }
 
-/* Theme Toggle Button (mover para esquerda) */
+/* Theme Toggle Button (esquerda) */
 .theme-toggle-left-container {
-    position: absolute;
-    top: var(--space-lg);
-    left: var(--space-lg);
+    grid-column: 1;
+    justify-self: start;
+}
+
+/* Ações do canto direito: perfil do usuário + menu */
+.header-actions {
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
 }
 
 /* Hamburger / menu (direita) */
 .hamburger-container {
-    position: absolute;
-    top: var(--space-lg);
-    right: var(--space-lg);
+    position: relative;
     display: flex;
     align-items: center;
 }
@@ -438,7 +451,7 @@ html[data-theme="dark"] .theme-toggle {
 
 .logo {
     font-family: var(--font-display);
-    font-size: 2.8rem;
+    font-size: 2.2rem;
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
     margin-bottom: var(--space-sm);
@@ -449,7 +462,7 @@ html[data-theme="dark"] .theme-toggle {
 .tagline {
     font-size: 1.125rem;
     font-weight: var(--font-weight-regular);
-    color: var(--text-secondary);
+    color: var(--text-secondary-strong);
     margin: 0;
     letter-spacing: 0.2px;
 }
@@ -461,15 +474,30 @@ html[data-theme="dark"] .theme-toggle {
 .user-info {
     display: flex;
     align-items: center;
-    gap: var(--space-md);
-    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.user-avatar {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    margin-top: var(--space-md);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, #1E40AF, #1D4ED8);
+    color: #FFFFFF;
+    font-weight: var(--font-weight-bold);
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+html[data-theme="dark"] .user-avatar {
+    background: linear-gradient(160deg, #1e3a8a, #3B82F6);
 }
 
 #userName {
     font-size: 1.1rem;
-    color: var(--text-secondary);
+    color: var(--text-secondary-strong);
     font-weight: var(--font-weight-medium);
 }
 
@@ -516,17 +544,17 @@ html[data-theme="dark"] .logout-btn:hover {
 
 .main-nav {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--space-md);
-    margin-bottom: var(--space-2xl);
+    margin-bottom: var(--space-xl);
 }
 
 .nav-btn {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    padding: var(--space-lg) var(--space-md);
+    justify-content: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md);
     font-size: 1rem;
     font-weight: var(--font-weight-semibold);
     border: 1px solid var(--border-color);
@@ -536,7 +564,38 @@ html[data-theme="dark"] .logout-btn:hover {
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: var(--shadow-sm);
-    min-height: 54px;
+    min-height: 56px;
+    text-align: left;
+}
+
+.nav-icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.nav-btn-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.nav-btn-title {
+    font-size: 1rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.nav-btn-subtitle {
+    font-size: 0.78rem;
+    font-weight: var(--font-weight-regular);
+    color: var(--text-secondary-strong);
 }
 
 .nav-btn:hover {
@@ -550,6 +609,14 @@ html[data-theme="dark"] .logout-btn:hover {
     color: #FFFFFF;
     border-color: #1E3A8A;
     box-shadow: var(--shadow-md);
+}
+
+.nav-btn.active .nav-btn-title {
+    color: #FFFFFF;
+}
+
+.nav-btn.active .nav-btn-subtitle {
+    color: rgba(255, 255, 255, 0.82);
 }
 
 html[data-theme="dark"] .nav-btn {
@@ -573,7 +640,7 @@ html[data-theme="dark"] .nav-btn.active {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 255, 0.96));
     border: 1px solid var(--border-color);
     border-radius: 22px;
-    padding: var(--space-xl);
+    padding: var(--space-lg);
     box-shadow: var(--shadow-lg);
     min-height: 500px;
 }
@@ -607,8 +674,8 @@ html[data-theme="dark"] .main-content {
    ============================== */
 
 .section-header {
-    margin-bottom: var(--space-xl);
-    padding-bottom: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
     border-bottom: 1px solid var(--border-color);
     position: relative;
 }
@@ -626,7 +693,7 @@ html[data-theme="dark"] .main-content {
 
 .section-header h2 {
     font-family: var(--font-display);
-    font-size: 2.2rem;
+    font-size: 1.8rem;
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
     margin-bottom: var(--space-md);
@@ -635,7 +702,7 @@ html[data-theme="dark"] .main-content {
 
 .date-display {
     font-size: 1.1rem;
-    color: var(--text-secondary);
+    color: var(--text-secondary-strong);
     font-weight: var(--font-weight-medium);
 }
 
@@ -1252,7 +1319,11 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
    ============================== */
 
 .no-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
+    gap: var(--space-md);
     padding: var(--space-2xl);
     background-color: var(--bg-secondary);
     border-radius: var(--radius-lg);
@@ -1260,9 +1331,48 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
 }
 
 .no-data p {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
     margin: 0;
+}
+
+.no-data p:not(.no-data-title):not(.no-data-subtitle) {
+    font-size: 1.1rem;
+    color: var(--text-secondary-strong);
+}
+
+.no-data-icon {
+    width: 72px;
+    height: 72px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+}
+
+.no-data-icon svg {
+    width: 38px;
+    height: 38px;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.no-data-title {
+    font-size: 1.15rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.no-data-subtitle {
+    font-size: 0.98rem;
+    color: var(--text-secondary-strong);
+    max-width: 420px;
+}
+
+.no-data-cta {
+    margin-top: var(--space-sm);
 }
 
 /* ==============================
@@ -1274,7 +1384,13 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
     border-radius: var(--radius-lg);
     padding: 0;
     max-width: 500px;
+    width: calc(100% - 2 * var(--space-lg));
     box-shadow: var(--shadow-xl);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
 }
 
 .modal[open] {
@@ -1284,11 +1400,11 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
 @keyframes modalSlideIn {
     from {
         opacity: 0;
-        transform: scale(0.95);
+        transform: translate(-50%, -50%) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: scale(1);
+        transform: translate(-50%, -50%) scale(1);
     }
 }
 
@@ -1375,21 +1491,9 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
     }
 
     .header {
-        padding: 58px var(--space-md) var(--space-lg);
-        align-items: center;
-    }
-
-    .theme-toggle-left-container,
-    .hamburger-container {
-        top: var(--space-md);
-    }
-
-    .theme-toggle-left-container {
-        left: var(--space-md);
-    }
-
-    .hamburger-container {
-        right: var(--space-md);
+        padding: var(--space-md);
+        gap: var(--space-sm);
+        grid-template-columns: auto 1fr auto;
     }
 
     .theme-toggle,
@@ -1405,8 +1509,11 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
     }
 
     .header-content {
-        width: 100%;
-        padding: 0 56px;
+        min-width: 0;
+    }
+
+    .header-actions {
+        gap: var(--space-sm);
     }
 
     .logo {
@@ -1439,10 +1546,27 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
     }
 
     .main-nav .nav-btn {
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.25rem;
         min-height: 58px;
         font-size: 0.84rem;
         padding: 0.55rem 0.4rem;
         border-radius: 12px;
+        text-align: center;
+    }
+
+    .main-nav .nav-icon {
+        width: 22px;
+        height: 22px;
+    }
+
+    .main-nav .nav-btn-text {
+        align-items: center;
+    }
+
+    .main-nav .nav-btn-subtitle {
+        display: none;
     }
 
     .container {
@@ -1517,11 +1641,8 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
     }
 
     .header {
-        padding: 54px 12px 16px;
-    }
-
-    .header-content {
-        padding: 0 48px;
+        padding: var(--space-sm) var(--space-sm);
+        gap: var(--space-xs);
     }
 
     .logo {
@@ -1533,7 +1654,7 @@ html[data-theme="dark"] .btn-marcar-tomado:active {
     }
 
     #userName {
-        font-size: 0.98rem;
+        display: none;
     }
 
     .section-header h2 {
