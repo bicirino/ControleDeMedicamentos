@@ -582,6 +582,9 @@ Este projeto está licenciado sob a **MIT License**. Consulte o arquivo [LICENSE
 - GitHub: [@bicirino](https://github.com/bicirino)
 - Projeto: [ControleDeMedicamentos](https://github.com/bicirino/ControleDeMedicamentos)
 
+## Colaboradores 
+**Gustavo Martins Cirino**
+**Matheus Lopes Cundari**
 
 
 
