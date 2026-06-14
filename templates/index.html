@@ -29,17 +29,21 @@
             <div class="header-content">
                 <h1 class="logo">Controle de Medicamentos</h1>
                 <p class="tagline">Sua rotina de saúde em dia!</p>
-                <div class="user-info" id="userInfo" style="display:none;">
-                    <span id="userName">Olá, Usuário!</span>
-                </div>
             </div>
 
-            <div class="hamburger-container">
-                <button id="hamburgerBtn" class="hamburger" aria-haspopup="true" aria-expanded="false" title="Abrir menu">
-                    <span class="hamburger-lines" aria-hidden="true"></span>
-                </button>
-                <div id="hamburgerMenu" class="hamburger-menu" hidden aria-hidden="true">
-                    <button class="hamburger-item logout-btn" onclick="logout()" title="Desconectar">Sair</button>
+            <div class="header-actions">
+                <div class="user-info" id="userInfo" style="display:none;">
+                    <span class="user-avatar" id="userAvatar" aria-hidden="true"></span>
+                    <span id="userName">Olá, Usuário!</span>
+                </div>
+
+                <div class="hamburger-container">
+                    <button id="hamburgerBtn" class="hamburger" aria-haspopup="true" aria-expanded="false" title="Abrir menu">
+                        <span class="hamburger-lines" aria-hidden="true"></span>
+                    </button>
+                    <div id="hamburgerMenu" class="hamburger-menu" hidden aria-hidden="true">
+                        <button class="hamburger-item logout-btn" onclick="logout()" title="Desconectar">Sair</button>
+                    </div>
                 </div>
             </div>
         </header>
@@ -47,16 +51,52 @@
         <!-- Main Navigation -->
         <nav class="main-nav" role="navigation" aria-label="Navegação Principal">
             <button class="nav-btn active" data-tab="dia" aria-selected="true">
-                📅 Hoje
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span class="nav-btn-text">
+                    <span class="nav-btn-title">Hoje</span>
+                    <span class="nav-btn-subtitle">Verificar doses</span>
+                </span>
             </button>
             <button class="nav-btn" data-tab="todos" aria-selected="false">
-                📋 Todos
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <span class="nav-btn-text">
+                    <span class="nav-btn-title">Todos</span>
+                    <span class="nav-btn-subtitle">Ver lista completa</span>
+                </span>
             </button>
             <button class="nav-btn" data-tab="cadastrar" aria-selected="false">
-                ➕ Novo
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <span class="nav-btn-text">
+                    <span class="nav-btn-title">Novo</span>
+                    <span class="nav-btn-subtitle">Cadastrar medicamento</span>
+                </span>
             </button>
             <button class="nav-btn" data-tab="consultar" aria-selected="false">
-                ℹ️ Consultar
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span class="nav-btn-text">
+                    <span class="nav-btn-title">Consultar</span>
+                    <span class="nav-btn-subtitle">Buscar informações</span>
+                </span>
             </button>
         </nav>
 
@@ -78,7 +118,23 @@
                 </div>
 
                 <div class="no-data" id="noDadosDia" style="display:none;">
-                    <p>📭 Nenhum medicamento cadastrado para hoje.</p>
+                    <div class="no-data-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <rect x="4" y="3" width="16" height="18" rx="2" ry="2"></rect>
+                            <line x1="12" y1="3" x2="12" y2="21"></line>
+                            <line x1="8" y1="8" x2="8" y2="8.01"></line>
+                            <line x1="16" y1="8" x2="16" y2="8.01"></line>
+                            <line x1="8" y1="13" x2="8" y2="13.01"></line>
+                            <line x1="16" y1="13" x2="16" y2="13.01"></line>
+                            <line x1="8" y1="18" x2="8" y2="18.01"></line>
+                            <line x1="16" y1="18" x2="16" y2="18.01"></line>
+                        </svg>
+                    </div>
+                    <p class="no-data-title">Nenhum medicamento cadastrado para hoje.</p>
+                    <p class="no-data-subtitle">Cadastre seu primeiro medicamento para começar a acompanhar sua rotina.</p>
+                    <button type="button" class="btn btn-primary no-data-cta" id="btnAdicionarPrimeiro" data-tab="cadastrar">
+                        + Adicionar Primeiro Medicamento
+                    </button>
                 </div>
             </section>
 

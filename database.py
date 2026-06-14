@@ -4,7 +4,7 @@ from datetime import datetime
 from contextlib import contextmanager
 
 # Detectar tipo de banco
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL") or None
 USE_POSTGRES = DATABASE_URL is not None
 
 if USE_POSTGRES:
