@@ -47,9 +47,13 @@ async function verificarAutenticacao() {
 function atualizarInfoUsuario(usuario) {
     const userInfo = document.getElementById('userInfo');
     const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
     if (userInfo && userName) {
         userName.textContent = `Olá, ${usuario.nome}!`;
         userInfo.style.display = 'flex';
+    }
+    if (userAvatar && usuario.nome) {
+        userAvatar.textContent = usuario.nome.trim().charAt(0).toUpperCase();
     }
 }
 
@@ -202,6 +206,13 @@ function configurarNavigacao() {
             mudarAba(tabName);
         });
     });
+
+    const btnAdicionarPrimeiro = document.getElementById('btnAdicionarPrimeiro');
+    if (btnAdicionarPrimeiro) {
+        btnAdicionarPrimeiro.addEventListener('click', () => {
+            mudarAba(btnAdicionarPrimeiro.getAttribute('data-tab'));
+        });
+    }
 }
 
 function mudarAba(tabName) {
@@ -274,7 +285,7 @@ async function carregarMedicamentosDoDia() {
         const medicamentos = dados.medicamentos;
 
         if (medicamentos.length === 0) {
-            noDados.style.display = 'block';
+            noDados.style.display = 'flex';
             return;
         }
 
@@ -380,7 +391,7 @@ async function carregarMedicamentosTodos() {
         const medicamentos = dados.medicamentos;
 
         if (medicamentos.length === 0) {
-            noDados.style.display = 'block';
+            noDados.style.display = 'flex';
             return;
         }
 

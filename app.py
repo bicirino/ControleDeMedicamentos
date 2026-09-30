@@ -198,15 +198,21 @@ def registrar():
             senha_hash = generate_password_hash(senha)
             if USE_POSTGRES:
                 cursor.execute(
-                    "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
-                    "VALUES (?, ?, ?, ?) RETURNING id",
+                    (
+                        "INSERT INTO usuarios "
+                        "(email, nome, senha_hash, criado_em) "
+                        "VALUES (?, ?, ?, ?) RETURNING id"
+                    ),
                     (email, nome, senha_hash, datetime.now().isoformat()),
                 )
                 novo_id = cursor.fetchone()["id"]
             else:
                 cursor.execute(
-                    "INSERT INTO usuarios (email, nome, senha_hash, criado_em) "
-                    "VALUES (?, ?, ?, ?)",
+                    (
+                        "INSERT INTO usuarios "
+                        "(email, nome, senha_hash, criado_em) "
+                        "VALUES (?, ?, ?, ?)"
+                    ),
                     (email, nome, senha_hash, datetime.now().isoformat()),
                 )
                 novo_id = cursor.lastrowid

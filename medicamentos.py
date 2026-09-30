@@ -52,7 +52,10 @@ def cadastrar_medicamento() -> None:
     with get_conexao() as conexao:
         cursor = conexao.cursor()
         cursor.execute(
-            "INSERT INTO medicamentos (nome, dosagem, horario) VALUES (?, ?, ?)",
+            (
+                "INSERT INTO medicamentos (nome, dosagem, horario) "
+                "VALUES (?, ?, ?)"
+            ),
             (nome, dosagem, horario),
         )
         conexao.commit()
@@ -77,7 +80,10 @@ def listar_medicamentos_do_dia() -> None:
             return
 
         cursor.execute(
-            "SELECT medicamento_id FROM registros_tomados WHERE data_tomado = ?",
+            (
+                "SELECT medicamento_id FROM registros_tomados "
+                "WHERE data_tomado = ?"
+            ),
             (hoje,),
         )
         ids_tomados = {row["medicamento_id"] for row in cursor.fetchall()}
@@ -106,7 +112,8 @@ def marcar_como_tomado() -> None:
         cursor = conexao.cursor()
 
         try:
-            med_id = int(input("🔢 Informe o ID do medicamento tomado: ").strip())
+            prompt = "🔢 Informe o ID do medicamento tomado: "
+            med_id = int(input(prompt).strip())
         except ValueError:
             print("⚠️  ID invalido. Digite apenas numeros.\n")
             return
@@ -127,7 +134,10 @@ def marcar_como_tomado() -> None:
             (med_id, hoje),
         )
         if cursor.fetchone():
-            msg = f"ℹ️  '{medicamento['nome']}' ja foi marcado como tomado hoje.\n"
+            msg = (
+                f"ℹ️  '{medicamento['nome']}' "
+                "ja foi marcado como tomado hoje.\n"
+            )
             print(msg)
             return
 
