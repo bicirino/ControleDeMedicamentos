@@ -55,7 +55,7 @@ DB_PATH=/var/data/medicamentos.db
 
 2. **Para `GROQ_API_KEY`:**
    - Obtenha uma chave gratuita em [console.groq.com](https://console.groq.com/)
-   - A aplicação usa o modelo `llama-3.1-8b-instant` para consultas de medicamentos
+   - Consultas usam `openai/gpt-oss-20b` por padrão (override opcional: `GROQ_MODEL`)
    - Copie sua chave API e cole no campo acima
 
 ### Etapa 5: Deploy

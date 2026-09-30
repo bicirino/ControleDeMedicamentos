@@ -18,6 +18,10 @@ class APIError(Exception):
     pass
 
 
+# Groq descontinuou llama-3.1-8b-instant (ago/2026); substituto oficial.
+DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b"
+
+
 def buscar_medicamento_groq(
     nome_medicamento: str
 ) -> Optional[Dict[str, Any]]:
@@ -42,6 +46,7 @@ def buscar_medicamento_groq(
             )
 
         client = Groq(api_key=api_key)
+        model = os.getenv("GROQ_MODEL") or DEFAULT_GROQ_MODEL
 
         prompt = (
             f"Forneça informações sobre o medicamento '{nome_medicamento}' "
@@ -55,7 +60,7 @@ def buscar_medicamento_groq(
         )
 
         message = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model=model,
             max_tokens=500,
             messages=[
                 {
