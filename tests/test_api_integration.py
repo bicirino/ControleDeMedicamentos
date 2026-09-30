@@ -17,8 +17,14 @@ class TestGroqAPI:
     @patch('api_integration.Groq')
     def test_buscar_medicamento_sucesso(self, mock_groq_class, mock_getenv):
         """Testa busca bem-sucedida de medicamento."""
-        # Mock das configurações
-        mock_getenv.return_value = "test_api_key"
+        def _getenv(chave, default=None):
+            if chave == "GROQ_API_KEY":
+                return "test_api_key"
+            if chave == "GROQ_MODEL":
+                return None
+            return default
+
+        mock_getenv.side_effect = _getenv
 
         # Mock da resposta do Groq (nova API)
         mock_client = MagicMock()
@@ -43,9 +49,14 @@ class TestGroqAPI:
         assert "informacoes" in resultado
         assert "Paracetamol" in resultado["informacoes"]
 
-        # Valida que Groq foi chamado
+        # Valida que Groq foi chamado com orçamento para a resposta visível
         mock_groq_class.assert_called_once_with(api_key="test_api_key")
         mock_client.chat.completions.create.assert_called_once()
+        pedido = mock_client.chat.completions.create.call_args.kwargs
+        assert pedido["model"] == "openai/gpt-oss-20b"
+        assert pedido["reasoning_effort"] == "low"
+        assert pedido["max_completion_tokens"] == 2048
+        assert "max_tokens" not in pedido
 
     @patch('api_integration.os.getenv')
     @patch('api_integration.Groq')

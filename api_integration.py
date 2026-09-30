@@ -49,28 +49,52 @@ def buscar_medicamento_groq(
         model = os.getenv("GROQ_MODEL") or DEFAULT_GROQ_MODEL
 
         prompt = (
-            f"Forneça informações sobre o medicamento '{nome_medicamento}' "
-            "em português, incluindo:\n"
-            "1. Nome do medicamento\n"
-            "2. Princípio ativo (ingrediente principal)\n"
-            "3. Usos comuns\n"
-            "4. Contraindicações principais\n\n"
-            "Responda de forma concisa. Se o medicamento não for "
-            "encontrado, responda com 'Medicamento não encontrado'."
+            f"Responda em português, de forma direta, sobre o medicamento "
+            f"'{nome_medicamento}'. Escreva somente estas quatro linhas, "
+            "sem introdução:\n"
+            "1. Nome: ...\n"
+            "2. Princípio ativo: ...\n"
+            "3. Usos comuns: ...\n"
+            "4. Contraindicações: ...\n"
+            "Se não reconhecer o medicamento, responda apenas: "
+            "Medicamento não encontrado."
         )
 
-        message = client.chat.completions.create(
-            model=model,
-            max_tokens=500,
-            messages=[
+        pedido = {
+            "model": model,
+            "max_completion_tokens": 2048,
+            "temperature": 0.2,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "Você resume medicamentos em português. "
+                        "Entregue só o texto final pedido, sem raciocínio."
+                    ),
+                },
                 {
                     "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
+                    "content": prompt,
+                },
+            ],
+        }
+        # gpt-oss gasta o limite de tokens no raciocínio interno.
+        # Com esforço alto e teto baixo, a resposta visível fica só no nome.
+        if "gpt-oss" in model:
+            pedido["reasoning_effort"] = "low"
 
-        resposta = message.choices[0].message.content
+        message = client.chat.completions.create(**pedido)
+
+        resposta = (message.choices[0].message.content or "").strip()
+        if not resposta:
+            raise APIError(
+                "A consulta não retornou texto. Tente novamente."
+            )
+        if getattr(message.choices[0], "finish_reason", None) == "length":
+            raise APIError(
+                "A resposta da IA foi cortada antes de terminar. "
+                "Tente novamente."
+            )
 
         if "não encontrado" in resposta.lower():
             return None
